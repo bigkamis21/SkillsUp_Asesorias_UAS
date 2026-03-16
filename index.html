@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SkillsUp</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // Configuración de colores institucionales UAS
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        uasAzul: '#003366', // Un azul marino serio
+                        uasDorado: '#FFCC00', // Un dorado vibrante
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Poppins', sans-serif; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-900">
+
+    <header class="bg-uasAzul text-white shadow-md">
+        <nav class="container mx-auto px-6 py-3 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center font-bold text-uasAzul">UAS</div>
+                <h1 class="text-xl font-semibold">SkillsUp - Asesorías UAS</h1>
+            </div>
+            <div class="flex items-center gap-4">
+                <a href="#" class="text-sm hover:text-uasDorado">Inicio</a>
+                <a href="#" class="text-sm hover:text-uasDorado">Mis Citas</a>
+                <a href="#" class="text-sm hover:text-uasDorado">Materiales</a>
+                <button class="bg-uasDorado text-uasAzul px-4 py-2 rounded-lg text-sm font-semibold hover:bg-yellow-400 transition">Iniciar Sesión</button>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto px-6 py-16">
+        <section class="text-center py-20 flex flex-col items-center">
+            <h2 class="text-5xl font-bold text-uasAzul mb-4">¿En qué materia necesitas ayuda hoy?</h2>
+            <p class="text-lg text-gray-600 mb-10 max-w-2xl">Encuentra asesores par, asesores disciplinares y material de apoyo de tus materias al instante.</p>
+            
+            <div class="relative w-full max-w-2xl">
+                <input type="text" placeholder="Escribe 'Cálculo I', 'Física', o el nombre de un asesor..." 
+                    class="w-full px-8 py-5 rounded-full border border-gray-200 shadow-lg text-lg focus:ring-2 focus:ring-uasDorado focus:border-uasDorado outline-none transition">
+                <button class="absolute right-4 top-4 bg-uasAzul text-white px-6 py-3 rounded-full hover:bg-blue-950 transition">
+                    Buscar
+                </button>
+            </div>
+        </section>
+
+        <section class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-10">
+            <div class="bg-white p-8 rounded-2xl shadow-lg border border-gray-100 text-center hover:shadow-2xl transition">
+                <div class="text-5xl text-uasDorado mb-5">👨‍🎓👩‍🎓</div>
+                <h3 class="text-xl font-semibold text-uasAzul mb-2">Asesores Par</h3>
+                <p class="text-gray-600 text-sm">Alumnos monitores listos para ayudarte a pasar esa materia difícil.</p>
+            </div>
+            <div class="bg-white p-8 rounded-2xl shadow-lg border border-gray-100 text-center hover:shadow-2xl transition">
+                <div class="text-5xl text-uasDorado mb-5">👨‍🏫</div>
+                <h3 class="text-xl font-semibold text-uasAzul mb-2">Asesores Disciplinares</h3>
+                <p class="text-gray-600 text-sm">Tutorías certeras directamente con maestros especializados.</p>
+            </div>
+            <div class="bg-white p-8 rounded-2xl shadow-lg border border-gray-100 text-center hover:shadow-2xl transition">
+                <div class="text-5xl text-uasDorado mb-5">📚</div>
+                <h3 class="text-xl font-semibold text-uasAzul mb-2">Biblioteca de Materiales</h3>
+                <p class="text-gray-600 text-sm">Descarga guías, ejercicios y videos compartidos por tus asesores.</p>
+            </div>
+        </section>
+
+        <section class="mt-24">
+            <div class="flex items-center justify-between mb-8">
+                <h3 class="text-3xl font-bold text-uasAzul">Asesores con mejor calificación</h3>
+                <a href="#" class="text-uasAzul font-semibold hover:text-uasDorado transition text-sm">Ver todos →</a>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="bg-white p-6 rounded-2xl shadow border border-gray-100 flex flex-col items-center text-center">
+                    <img src="https://api.dicebear.com/8.x/notionists/svg?seed=Juan" alt="Avatar" class="w-20 h-20 rounded-full bg-gray-100 mb-4">
+                    <span class="text-xs font-mono bg-green-100 text-green-800 px-2 py-0.5 rounded-full mb-2">Asesor Par</span>
+                    <h4 class="font-semibold text-uasAzul">Juan Pérez</h4>
+                    <p class="text-sm text-gray-500 mb-3">Facultad de Informática</p>
+                    <div class="flex items-center gap-1 text-uasDorado mb-4">
+                        <span>★</span><span>★</span><span>★</span><span>★</span><span class="text-gray-300">★</span>
+                        <span class="text-xs text-gray-400 ml-1">(4.2)</span>
+                    </div>
+                    <button class="w-full bg-gray-100 text-uasAzul py-2 rounded-lg text-sm font-semibold hover:bg-uasAzul hover:text-white transition">Solicitar</button>
+                </div>
+
+                <div class="bg-white p-6 rounded-2xl shadow border border-gray-100 flex flex-col items-center text-center">
+                    <img src="https://api.dicebear.com/8.x/notionists/svg?seed=Maria" alt="Avatar" class="w-20 h-20 rounded-full bg-gray-100 mb-4">
+                    <span class="text-xs font-mono bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full mb-2">Disciplinar</span>
+                    <h4 class="font-semibold text-uasAzul">Dra. María García</h4>
+                    <p class="text-sm text-gray-500 mb-3">Fisicomatemáticas</p>
+                    <div class="flex items-center gap-1 text-uasDorado mb-4">
+                        <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
+                        <span class="text-xs text-gray-400 ml-1">(5.0)</span>
+                    </div>
+                    <button class="w-full bg-gray-100 text-uasAzul py-2 rounded-lg text-sm font-semibold hover:bg-uasAzul hover:text-white transition">Agendar Cita</button>
+                </div>
+
+                <div class="bg-white p-6 rounded-2xl shadow border border-gray-100 flex flex-col items-center text-center">
+                    <img src="https://api.dicebear.com/8.x/notionists/svg?seed=Pedro" alt="Avatar" class="w-20 h-20 rounded-full bg-gray-100 mb-4">
+                    <span class="text-xs font-mono bg-green-100 text-green-800 px-2 py-0.5 rounded-full mb-2">Asesor Par</span>
+                    <h4 class="font-semibold text-uasAzul">Pedro Sánchez</h4>
+                    <p class="text-sm text-gray-500 mb-3">Facultad de Derecho</p>
+                    <div class="flex items-center gap-1 text-uasDorado mb-4">
+                        <span>★</span><span>★</span><span>★</span><span>★</span><span class="text-gray-300">★</span>
+                        <span class="text-xs text-gray-400 ml-1">(4.0)</span>
+                    </div>
+                    <button class="w-full bg-gray-100 text-uasAzul py-2 rounded-lg text-sm font-semibold hover:bg-uasAzul hover:text-white transition">Solicitar</button>
+                </div>
+                
+                <div class="bg-white p-6 rounded-2xl shadow border border-gray-100 flex flex-col items-center text-center hover:border-uasDorado transition cursor-pointer group">
+                    <div class="w-20 h-20 rounded-full bg-gray-50 mb-4 flex items-center justify-center border-2 border-dashed border-gray-200 group-hover:border-uasDorado">
+                        <span class="text-4xl text-gray-300 group-hover:text-uasDorado">+</span>
+                    </div>
+                    <h4 class="font-semibold text-gray-400 group-hover:text-uasAzul">¿Eres experto?</h4>
+                    <p class="text-sm text-gray-400 mb-3 group-hover:text-gray-600">Postúlate como asesor par aquí.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="mt-24 bg-uasAzul p-12 rounded-3xl text-white">
+            <div class="flex items-center justify-between mb-10">
+                <h3 class="text-3xl font-bold">Cursos de Regularización Próximos</h3>
+                <button class="bg-uasDorado text-uasAzul px-6 py-2.5 rounded-full text-sm font-semibold hover:bg-yellow-400 transition">Ver Calendario Completo</button>
+            </div>
+
+            <div class="space-y-4">
+                <div class="bg-white/10 p-5 rounded-xl flex items-center gap-6 hover:bg-white/20 transition cursor-pointer">
+                    <div class="bg-uasDorado text-uasAzul p-4 rounded-lg text-center font-bold">
+                        <div class="text-2xl">15</div>
+                        <div class="text-xs uppercase">Oct</div>
+                    </div>
+                    <div class="flex-grow">
+                        <h4 class="font-semibold text-lg">Taller Intensivo: Cálculo Diferencial (Límites)</h4>
+                        <p class="text-sm text-blue-200">Impartido por: Dra. María García • Facultad de Fisicomatemáticas</p>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-sm text-blue-100">16:00 - 18:00 hrs</div>
+                        <div class="text-xs bg-white/20 px-2 py-0.5 rounded">Cupo: 15/20</div>
+                    </div>
+                </div>
+
+                <div class="bg-white/10 p-5 rounded-xl flex items-center gap-6 hover:bg-white/20 transition cursor-pointer">
+                    <div class="bg-uasDorado text-uasAzul p-4 rounded-lg text-center font-bold">
+                        <div class="text-2xl">18</div>
+                        <div class="text-xs uppercase">Oct</div>
+                    </div>
+                    <div class="flex-grow">
+                        <h4 class="font-semibold text-lg">Introducción a la Programación en Python</h4>
+                        <p class="text-sm text-blue-200">Impartido por: Juan Pérez (Asesor Par) • Facultad de Informática</p>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-sm text-blue-100">10:00 - 12:00 hrs</div>
+                        <div class="text-xs bg-white/20 px-2 py-0.5 rounded">Cupo: 8/10</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-gray-100 mt-24 py-10 border-t border-gray-200">
+        <div class="container mx-auto px-6 text-center text-gray-500 text-sm">
+            <p>&copy; 2026 Universidad Autónoma de Sinaloa - Secretaría Académica Universitaria</p>
+            <p class="mt-1">Programa Institucional de Tutorías</p>
+        </div>
+    </footer>
+
+</body>
+</html>
