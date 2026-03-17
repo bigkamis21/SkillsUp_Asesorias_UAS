@@ -46,69 +46,64 @@ app.post('/api/registrar', (req, res) => {
     });
 });
 
-// --- RUTA PARA INICIAR SESIÓN ---
-app.post('/api/login', (req, res) => {
-    const { correo, password } = req.body;
-
-    // Validamos que no envíen campos vacíos
-    if (!correo || !password) {
-        return res.status(400).json({ error: 'Por favor ingresa tu correo y contraseña.' });
+// ==========================================
+// RUTA PARA REGISTRAR (Con Cuenta y Correo)
+// ==========================================
+app.post('/api/registrar', (req, res) => {
+    // Recibimos los 4 datos del frontend
+    const { nombre, numeroCuenta, correo, password } = req.body;
+    
+    // Validamos que no falte ninguno
+    if (!nombre || !numeroCuenta || !correo || !password) {
+        return res.status(400).json({ error: 'Todos los campos son obligatorios' });
     }
 
-    // Buscamos si existe un usuario con ese correo y esa contraseña
-    const query = 'SELECT * FROM usuarios WHERE correo = ? AND password = ?';
+    // Insertamos en la base de datos (Nota que agregamos numero_cuenta y correo)
+    const query = 'INSERT INTO usuarios (nombre, numero_cuenta, correo, password, rol) VALUES (?, ?, ?, ?, "alumno")';
     
-    connection.query(query, [correo, password], (err, results) => {
+    connection.query(query, [nombre, numeroCuenta, correo, password], (err, result) => {
+        if (err) {
+            console.error('Error al insertar en BD:', err);
+            // Si el correo o la cuenta ya existen, marca error
+            if (err.code === 'ER_DUP_ENTRY') {
+                return res.status(400).json({ error: 'Ese número de cuenta o correo ya está registrado.' });
+            }
+            return res.status(500).json({ error: 'Hubo un error al guardar tu registro.' });
+        }
+        res.status(200).json({ mensaje: '¡Registro exitoso! Ya eres parte de SkillsUp.' });
+    });
+});
+
+// ==========================================
+// RUTA PARA EL LOGIN (Híbrido)
+// ==========================================
+app.post('/api/login', (req, res) => {
+    // Recibimos el "identificador" (que puede ser correo o cuenta) y la contraseña
+    const { identificador, password } = req.body;
+
+    if (!identificador || !password) {
+        return res.status(400).json({ error: 'Ingresa tu correo o número de cuenta y tu contraseña.' });
+    }
+
+    // Buscamos si el identificador hace "match" con un correo OR con una cuenta
+    const query = 'SELECT * FROM usuarios WHERE (correo = ? OR numero_cuenta = ?) AND password = ?';
+    
+    // Le pasamos el identificador dos veces para que busque en ambas columnas
+    connection.query(query, [identificador, identificador, password], (err, results) => {
         if (err) {
             console.error('Error al consultar la BD:', err);
             return res.status(500).json({ error: 'Error interno del servidor.' });
         }
 
-        // Si "results" tiene al menos un registro, ¡el usuario existe!
         if (results.length > 0) {
             const usuario = results[0];
             res.status(200).json({ 
                 mensaje: `¡Bienvenido(a) de nuevo, ${usuario.nombre}!`,
-                rol: usuario.rol // Mandamos el rol por si es admin, asesor o alumno
+                rol: usuario.rol 
             });
         } else {
-            // Si viene vacío, se equivocó en algo
-            res.status(401).json({ error: 'Correo o contraseña incorrectos. Intenta de nuevo.' });
+            res.status(401).json({ error: 'Datos incorrectos. Intenta de nuevo.' });
         }
-    });
-});
-
-// IMPORTANTE: Pon esto arriba (después de definir "app = express()")
-// Esto permite que el servidor lea los datos JSON que le manda la página
-app.use(express.json());
-
-
-// LA RUTA DEL REGISTRO
-app.post('/api/registrar', (req, res) => {
-    // 1. Recibimos los datos
-    const { nombre, correo, password } = req.body;
-    
-    // 2. Validamos que no estén vacíos
-    if (!nombre || !correo || !password) {
-        return res.status(400).json({ error: 'Todos los campos son obligatorios' });
-    }
-
-    // 3. Preparamos la instrucción SQL (rol 'alumno' por defecto)
-    const query = 'INSERT INTO usuarios (nombre, correo, password, rol) VALUES (?, ?, ?, "alumno")';
-    
-    // 4. Lo guardamos en Azure MySQL
-    connection.query(query, [nombre, correo, password], (err, result) => {
-        if (err) {
-            console.error('Error al insertar en BD:', err);
-            // Si el error es por correo duplicado, mandamos un aviso amigable
-            if (err.code === 'ER_DUP_ENTRY') {
-                return res.status(400).json({ error: 'Ese correo institucional ya está registrado.' });
-            }
-            return res.status(500).json({ error: 'Hubo un error al guardar tu registro.' });
-        }
-        
-        // 5. ¡Éxito!
-        res.status(200).json({ mensaje: '¡Registro exitoso! Ya eres parte de SkillsUp.' });
     });
 });
 
