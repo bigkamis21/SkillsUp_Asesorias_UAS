@@ -167,6 +167,52 @@ app.post('/api/cambiar-rol', (req, res) => {
         res.status(200).json({ mensaje: '¡Rol actualizado correctamente!' });
     });
 });
+// ==========================================
+// RUTAS PARA SOLICITUDES DE ASESOR
+// ==========================================
+
+// 1. Obtener la lista de materias (Para que el alumno elija)
+app.get('/api/materias', (req, res) => {
+    connection.query('SELECT * FROM materias', (err, results) => {
+        if (err) return res.status(500).json({ error: 'Error al cargar materias' });
+        res.status(200).json(results);
+    });
+});
+
+// 2. El alumno envía su solicitud
+app.post('/api/solicitar-asesor', (req, res) => {
+    const { numeroCuenta, materiaId, motivo } = req.body;
+    
+    // Verificamos si ya tiene una solicitud pendiente para no duplicar
+    const checkQuery = 'SELECT * FROM solicitudes_asesor WHERE numero_cuenta = ? AND estado = "pendiente"';
+    connection.query(checkQuery, [numeroCuenta], (err, results) => {
+        if (results.length > 0) {
+            return res.status(400).json({ error: 'Ya tienes una solicitud en revisión.' });
+        }
+
+        const insertQuery = 'INSERT INTO solicitudes_asesor (numero_cuenta, materia_id, motivo) VALUES (?, ?, ?)';
+        connection.query(insertQuery, [numeroCuenta, materiaId, motivo], (err) => {
+            if (err) return res.status(500).json({ error: 'Error al enviar la solicitud' });
+            res.status(200).json({ mensaje: '¡Solicitud enviada con éxito! Espera la respuesta del administrador.' });
+        });
+    });
+});
+
+// 3. El Admin aprueba la solicitud
+app.post('/api/aprobar-asesor', (req, res) => {
+    const { solicitudId, numeroCuenta } = req.body;
+
+    // A. Cambiamos el estado de la solicitud a "aprobada"
+    connection.query('UPDATE solicitudes_asesor SET estado = "aprobada" WHERE id = ?', [solicitudId], (err) => {
+        if (err) return res.status(500).json({ error: 'Error al actualizar solicitud' });
+
+        // B. Ascendemos al alumno a "asesor_par"
+        connection.query('UPDATE usuarios SET rol = "asesor_par" WHERE numero_cuenta = ?', [numeroCuenta], (err2) => {
+            if (err2) return res.status(500).json({ error: 'Error al cambiar el rol' });
+            res.status(200).json({ mensaje: 'Alumno aprobado como Asesor Par.' });
+        });
+    });
+});
 
 // 4. Puerto para Azure
 const PORT = process.env.PORT || 8080;

@@ -14,7 +14,7 @@
     <aside class="w-64 bg-blue-900 text-white hidden md:flex flex-col shadow-xl">
         <div class="p-6 flex items-center gap-3 border-b border-blue-800">
             <img src="../img/logo1.png" alt="UAS" class="h-10 bg-white rounded-full p-1">
-            <span class="text-xl font-bold tracking-wider">SkillsUp</span>
+            <span class="text-xl font-bold tracking-wider" href="index.html">SkillsUp</span>
         </div>
         
         <nav class="flex-grow p-4 space-y-2 mt-4">
@@ -98,6 +98,17 @@
                     </button>
                 </div>
 
+                <div class="bg-white p-6 rounded-xl shadow-sm border flex flex-col border-t-4 border-purple-500">
+                    <div class="flex justify-between items-start mb-4">
+                        <h3 class="text-xl font-bold text-gray-800">¿Quieres ser Asesor?</h3>
+                        <i class="fas fa-chalkboard-teacher text-purple-500 text-2xl"></i>
+                    </div>
+                    <p class="text-gray-600 mb-6">Comparte tus conocimientos con otros águilas y libera horas de servicio o prácticas.</p>
+                    <button id="btnAbrirPostulacion" class="mt-auto w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 rounded-lg transition shadow-md">
+                        Postularme ahora
+                    </button>
+                </div>
+
             </div>
 
             <div class="bg-white rounded-xl shadow-sm border overflow-hidden">
@@ -125,6 +136,35 @@
         </div>
     </main>
 
+<div id="modalPostulacion" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white p-8 rounded-xl shadow-2xl max-w-md w-full relative">
+        <button id="btnCerrarModal" class="absolute top-4 right-4 text-gray-500 hover:text-red-500 text-xl">
+            <i class="fas fa-times"></i>
+        </button>
+        
+        <h2 class="text-2xl font-bold text-blue-900 mb-2">Postulación para Asesor</h2>
+        <p class="text-sm text-gray-600 mb-6">Selecciona la materia que dominas y cuéntanos por qué serías un buen asesor.</p>
+        
+        <form id="formPostulacion" class="space-y-4">
+            <div>
+                <label class="block text-sm font-bold text-gray-700 mb-1">Materia a impartir</label>
+                <select id="selectMateria" class="w-full border rounded-lg p-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-purple-500" required>
+                    <option value="">Cargando materias...</option>
+                </select>
+            </div>
+            
+            <div>
+                <label class="block text-sm font-bold text-gray-700 mb-1">Motivo / Experiencia</label>
+                <textarea id="textoMotivo" rows="3" class="w-full border rounded-lg p-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Ej: Saqué 10 en esta materia y me gusta explicar..." required></textarea>
+            </div>
+            
+            <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 rounded-lg transition">
+                Enviar Solicitud
+            </button>
+        </form>
+    </div>
+</div>
+
     <script>
         document.getElementById('btnCerrarSesion').addEventListener('click', () => {
             window.location.href = '../index.html';
@@ -147,6 +187,65 @@
             localStorage.removeItem('nombreUsuario');
             localStorage.removeItem('cuentaPendiente');
             window.location.href = '../index.html';
+        });
+
+            // --- LÓGICA DE POSTULACIÓN PARA ASESOR ---
+        const modalPostulacion = document.getElementById('modalPostulacion');
+        const btnAbrirPostulacion = document.getElementById('btnAbrirPostulacion');
+        const btnCerrarModal = document.getElementById('btnCerrarModal');
+        const selectMateria = document.getElementById('selectMateria');
+        const formPostulacion = document.getElementById('formPostulacion');
+
+        // 1. Abrir modal y cargar materias
+        btnAbrirPostulacion.addEventListener('click', async () => {
+            modalPostulacion.classList.remove('hidden'); // Mostramos la ventana
+            
+            // Pedimos las materias al servidor (JavaScript)
+            try {
+                const res = await fetch('/api/materias');
+                const materias = await res.json();
+                
+                selectMateria.innerHTML = '<option value="">Selecciona una materia...</option>';
+                materias.forEach(mat => {
+                    selectMateria.innerHTML += `<option value="${mat.id}">${mat.nombre}</option>`;
+                });
+            } catch (error) {
+                console.error("Error cargando materias:", error);
+            }
+        });
+
+        // 2. Cerrar modal
+        btnCerrarModal.addEventListener('click', () => {
+            modalPostulacion.classList.add('hidden');
+        });
+
+        // 3. Enviar formulario
+        formPostulacion.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const materiaId = selectMateria.value;
+            const motivo = document.getElementById('textoMotivo').value;
+            const numeroCuenta = localStorage.getItem('cuentaLogueada'); // Sacamos tu cuenta de la mochila
+
+            try {
+                const res = await fetch('/api/solicitar-asesor', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ numeroCuenta, materiaId, motivo })
+                });
+                
+                const datos = await res.json();
+                
+                if (res.ok) {
+                    alert(datos.mensaje);
+                    modalPostulacion.classList.add('hidden');
+                    formPostulacion.reset();
+                } else {
+                    alert(datos.error);
+                }
+            } catch (error) {
+                alert("Error de conexión al enviar la solicitud.");
+            }
         });
 
     </script>

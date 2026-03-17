@@ -112,14 +112,18 @@ if (formLogin) {
 
                 localStorage.setItem('nombreUsuario', datos.nombre);
                 localStorage.setItem('cuentaLogueada', identificador);
-                
+                localStorage.setItem('rolUsuario', datos.rol); // Guardamos su rol en la mochila
+
                 alert(datos.mensaje);
-                // Redirige al panel del alumno
                 if (datos.rol === 'admin') {
-                    window.location.href = 'admin.html'; // Lo mandamos a la central
-                } else {
-                    window.location.href = 'dashboard.html'; // Lo mandamos a la vista normal
-                } 
+                window.location.href = 'admin.html'; // Lo mandamos a la central
+                } else if (datos.rol === 'asesor_par' || datos.rol === 'asesor_disciplinar') {
+                window.location.href = 'asesor.html'; // Lo mandamos al panel de asesores
+
+            } else {
+            window.location.href = 'dashboard.html'; // Los alumnos van a la vista normal
+            }
+            
             } else {
                 alert(datos.error); 
             }
