@@ -109,7 +109,8 @@ if (formLogin) {
             const datos = await respuesta.json();
 
             if (respuesta.ok) {
-                alert(datos.mensaje); 
+                
+                localStorage.setItem('nombreUsuario', datos.nombre); 
                 // Redirige al panel del alumno
                 window.location.href = 'dashboard.html'; 
             } else {

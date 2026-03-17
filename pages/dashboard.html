@@ -3,43 +3,121 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mi Panel - SkillsUp</title>
+    <title>Panel de Control - SkillsUp UAS</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
-<body class="bg-gray-100 flex flex-col min-h-screen">
-    
-    <nav class="bg-blue-900 text-white shadow-md py-4 px-6 flex justify-between items-center">
-        <div class="flex items-center gap-3">
-            <img src="../img/logo1.png" alt="Logo SkillsUp" class="h-10 bg-white rounded-full p-1">
-            <h1 class="text-xl font-bold hidden sm:block">SkillsUp</h1>
-        </div>
-        <div class="flex items-center space-x-4">
-            <a href="#" class="hover:text-yellow-400 transition text-sm font-semibold">Mis Asesorías</a>
-            <button id="btnCerrarSesion" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-bold transition">Cerrar Sesión</button>
-        </div>
-    </nav>
+<body class="bg-slate-50 flex min-h-screen">
 
-    <main class="flex-grow container mx-auto px-4 py-10 max-w-5xl">
-        
-        <div class="bg-white p-8 rounded-lg shadow-md border-t-4 border-yellow-400 mb-8">
-            <h2 class="text-3xl font-bold text-blue-900 mb-2">¡Bienvenido a tu panel, águila! 🦅</h2>
-            <p class="text-gray-600">Desde aquí podrás solicitar asesorías, ver tus materias y contactar a asesores disciplinares o pares.</p>
+    <aside class="w-64 bg-blue-900 text-white hidden md:flex flex-col shadow-xl">
+        <div class="p-6 flex items-center gap-3 border-b border-blue-800">
+            <img src="../img/logo.png" alt="UAS" class="h-10 bg-white rounded-full p-1">
+            <span class="text-xl font-bold tracking-wider">SkillsUp</span>
         </div>
         
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            
-            <div class="bg-white border p-6 rounded-lg shadow-sm hover:shadow-md transition">
-                <div class="text-4xl mb-4">📅</div>
-                <h3 class="text-xl font-bold text-blue-800 mb-2">Próximas Citas</h3>
-                <p class="text-gray-600 mb-4">Aún no tienes asesorías programadas para esta semana.</p>
-                <button class="w-full bg-yellow-400 text-blue-900 font-bold py-2 px-4 rounded-lg hover:bg-yellow-500 transition">Agendar Asesoría</button>
+        <nav class="flex-grow p-4 space-y-2 mt-4">
+            <a href="#" class="flex items-center gap-3 p-3 bg-blue-800 rounded-lg text-yellow-400">
+                <i class="fas fa-home"></i> Inicio
+            </a>
+            <a href="#" class="flex items-center gap-3 p-3 hover:bg-blue-800 rounded-lg transition">
+                <i class="fas fa-calendar-alt"></i> Mis Citas
+            </a>
+            <a href="#" class="flex items-center gap-3 p-3 hover:bg-blue-800 rounded-lg transition">
+                <i class="fas fa-book"></i> Material de Apoyo
+            </a>
+            <a href="#" class="flex items-center gap-3 p-3 hover:bg-blue-800 rounded-lg transition">
+                <i class="fas fa-user-friends"></i> Buscar Asesores
+            </a>
+        </nav>
+
+        <div class="p-4 border-t border-blue-800">
+            <button id="btnCerrarSesion" class="w-full flex items-center justify-center gap-2 bg-red-500 hover:bg-red-600 p-3 rounded-lg font-bold transition">
+                <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+            </button>
+        </div>
+    </aside>
+
+    <main class="flex-grow flex flex-col">
+        
+        <header class="bg-white shadow-sm p-4 flex justify-between items-center px-8">
+            <h2 class="text-gray-500 font-medium">Panel del Estudiante</h2>
+            <div class="flex items-center gap-4">
+                <span id="nombreHeader" class="text-sm font-semibold text-gray-700">Cargando...</span>
+                <div id="avatar" class="w-10 h-10 bg-yellow-400 rounded-full flex items-center justify-center font-bold text-blue-900 uppercase">
+                    U
+                </div>
             </div>
+        </header>
+
+        <div class="p-8 space-y-8">
             
-            <div class="bg-white border p-6 rounded-lg shadow-sm hover:shadow-md transition">
-                <div class="text-4xl mb-4">📚</div>
-                <h3 class="text-xl font-bold text-blue-800 mb-2">Cursos de Regularización</h3>
-                <p class="text-gray-600 mb-4">Revisa los cursos intensivos disponibles para salvar tus materias.</p>
-                <button class="w-full bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 transition">Ver Cursos</button>
+            <section class="bg-gradient-to-r from-blue-800 to-blue-600 p-8 rounded-2xl text-white shadow-lg relative overflow-hidden">
+                <div class="relative z-10">
+                <h1 class="text-3xl font-bold mb-2">¡Hola de nuevo, <span id="nombreBienvenida">Águila</span>! 🦅</h1>                    <p class="opacity-90 max-w-md">Es un buen día para reforzar tus conocimientos. Tienes 2 asesorías pendientes para esta semana.</p>
+                </div>
+                <i class="fas fa-graduation-cap absolute right-8 bottom-[-20px] text-9xl opacity-10"></i>
+            </section>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-blue-500 flex items-center gap-4">
+                    <div class="bg-blue-100 p-4 rounded-lg text-blue-600"><i class="fas fa-clock fa-2x"></i></div>
+                    <div><p class="text-gray-500 text-sm">Horas Cumplidas</p><p class="text-2xl font-bold">12 hrs</p></div>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-yellow-500 flex items-center gap-4">
+                    <div class="bg-yellow-100 p-4 rounded-lg text-yellow-600"><i class="fas fa-check-circle fa-2x"></i></div>
+                    <div><p class="text-gray-500 text-sm">Asesorías Tomadas</p><p class="text-2xl font-bold">4</p></div>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-green-500 flex items-center gap-4">
+                    <div class="bg-green-100 p-4 rounded-lg text-green-600"><i class="fas fa-star fa-2x"></i></div>
+                    <div><p class="text-gray-500 text-sm">Promedio General</p><p class="text-2xl font-bold">9.2</p></div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                
+                <div class="bg-white p-6 rounded-xl shadow-sm border flex flex-col">
+                    <div class="flex justify-between items-start mb-4">
+                        <h3 class="text-xl font-bold text-gray-800">Próximas Citas</h3>
+                        <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded font-bold">EN VIVO</span>
+                    </div>
+                    <p class="text-gray-600 mb-6 italic">"Programación Web - Mañana a las 10:00 AM"</p>
+                    <button class="mt-auto w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition shadow-md">
+                        Ver detalles de la cita
+                    </button>
+                </div>
+
+                <div class="bg-white p-6 rounded-xl shadow-sm border flex flex-col">
+                    <div class="flex justify-between items-start mb-4">
+                        <h3 class="text-xl font-bold text-gray-800">Cursos Disponibles</h3>
+                    </div>
+                    <p class="text-gray-600 mb-6">Inscríbete a los cursos de regularización para el periodo de extraordinarios.</p>
+                    <button class="mt-auto w-full bg-yellow-400 hover:bg-yellow-500 text-blue-900 font-bold py-3 rounded-lg transition shadow-md">
+                        Explorar Catálogo
+                    </button>
+                </div>
+
+            </div>
+
+            <div class="bg-white rounded-xl shadow-sm border overflow-hidden">
+                <div class="p-4 border-b bg-gray-50">
+                    <h3 class="font-bold text-gray-700">Notificaciones Recientes</h3>
+                </div>
+                <div class="divide-y">
+                    <div class="p-4 flex gap-4 hover:bg-gray-50 transition">
+                        <i class="fas fa-bell text-blue-500 mt-1"></i>
+                        <div>
+                            <p class="text-sm font-bold">Asesoría Confirmada</p>
+                            <p class="text-xs text-gray-500">El asesor Juan Pérez aceptó tu solicitud para Álgebra.</p>
+                        </div>
+                    </div>
+                    <div class="p-4 flex gap-4 hover:bg-gray-50 transition">
+                        <i class="fas fa-file-alt text-yellow-500 mt-1"></i>
+                        <div>
+                            <p class="text-sm font-bold">Material Nuevo</p>
+                            <p class="text-xs text-gray-500">Se ha subido una guía de estudio para Redes de Computadoras.</p>
+                        </div>
+                    </div>
+                </div>
             </div>
 
         </div>
@@ -47,9 +125,30 @@
 
     <script>
         document.getElementById('btnCerrarSesion').addEventListener('click', () => {
-            // Te regresa a la página principal pública
             window.location.href = '../index.html';
         });
+
+        // Al cargar la página, jalamos el nombre de la "mochila"
+        const nombreReal = localStorage.getItem('nombreUsuario') || 'Usuario';
+
+        // Lo ponemos en el Header
+        document.getElementById('nombreHeader').innerText = nombreReal;
+
+        // Lo ponemos en el saludo grande
+        document.getElementById('nombreBienvenida').innerText = nombreReal;
+
+        // Ponemos la inicial en el avatar
+        document.getElementById('avatar').innerText = nombreReal.charAt(0).toUpperCase();
+
+        // Botón cerrar sesión (limpiamos la memoria por seguridad)
+        document.getElementById('btnCerrarSesion').addEventListener('click', () => {
+            localStorage.removeItem('nombreUsuario');
+            localStorage.removeItem('cuentaPendiente');
+            window.location.href = '../index.html';
+        });
+        
     </script>
+
+
 </body>
 </html>

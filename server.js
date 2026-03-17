@@ -125,7 +125,8 @@ app.post('/api/login', (req, res) => {
             const usuario = results[0];
             res.status(200).json({ 
                 mensaje: `¡Bienvenido(a) de nuevo, ${usuario.nombre}!`,
-                rol: usuario.rol 
+                rol: usuario.rol, 
+                nombre: usuario.nombre
             });
         } else {
             res.status(401).json({ error: 'Datos incorrectos. Intenta de nuevo.' });
