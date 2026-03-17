@@ -68,8 +68,8 @@ if (formRegistro) {
                 // 1. Guardamos el número de cuenta en la "mochila" del navegador
                 localStorage.setItem('cuentaPendiente', numeroCuenta);
                 
-                alert(datos.mensaje); 
-
+                alert('¡Registro casi listo! Revisa tu correo.')
+                
                 // 2. Mandamos al usuario a la página donde pondrá su código
                 window.location.href = 'verificar.html'; 
                 

@@ -43,26 +43,50 @@ app.get('/', (req, res) => {
 // ==========================================
 // RUTA PARA REGISTRAR (Con Cuenta y Correo)
 // ==========================================
-app.post('/api/registrar', (req, res) => {
+// RUTA DE REGISTRO PRO
+app.post('/api/registrar', async (req, res) => {
     const { nombre, numeroCuenta, correo, password } = req.body;
+    
+    // 1. Validación de seguridad
+    if (!nombre || !numeroCuenta || !correo || !password) {
+        return res.status(400).json({ error: 'Faltan campos obligatorios.' });
+    }
+
     const codigo = Math.floor(100000 + Math.random() * 900000).toString();
 
-    // Guardamos verificado = 0 por defecto
+    // 2. Insertamos en la BD primero
     const query = 'INSERT INTO usuarios (nombre, numero_cuenta, correo, password, rol, codigo_verificacion, verificado) VALUES (?, ?, ?, ?, "alumno", ?, 0)';
     
-    connection.query(query, [nombre, numeroCuenta, correo, password, codigo], (err) => {
-        if (err) return res.status(400).json({ error: 'Error al registrar' });
+    connection.query(query, [nombre, numeroCuenta, correo, password, codigo], async (err, result) => {
+        if (err) {
+            console.error("Error BD:", err);
+            return res.status(400).json({ error: 'El número de cuenta o correo ya existen.' });
+        }
 
-        // Enviar Correo
-        transporter.sendMail({
-            from: '"SkillsUp UAS" <skillsup.asesoria@gmail.com>',
-            to: correo,
-            subject: 'Tu código de activación 🦅',
-            text: `¡Hola ${nombre}! Tu código es: ${codigo}`
-        }, (error) => {
-            if (error) console.log("Error de correo:", error);
-            res.status(200).json({ mensaje: 'Código enviado' });
-        });
+        // 3. Intentamos enviar el correo
+        try {
+            await transporter.sendMail({
+                from: '"SkillsUp UAS" <skillsup.asesoria@gmail.com>',
+                to: correo,
+                subject: 'Tu código de activación 🦅',
+                html: `
+                    <div style="font-family: sans-serif; border: 1px solid #eee; padding: 20px; border-radius: 10px;">
+                        <h2 style="color: #1e3a8a;">¡Hola, ${nombre}!</h2>
+                        <p>Tu código de seguridad para SkillsUp es:</p>
+                        <h1 style="background: #f3f4f6; display: inline-block; padding: 10px 20px; border-radius: 5px; color: #1e40af;">${codigo}</h1>
+                        <p style="font-size: 0.8rem; color: #666;">Si no solicitaste esto, ignora este correo.</p>
+                    </div>
+                `
+            });
+            
+            // SI EL CORREO SALE BIEN:
+            res.status(200).json({ mensaje: 'Código enviado con éxito.' });
+
+        } catch (mailError) {
+            console.error("Error de Gmail:", mailError);
+            // SI EL CORREO FALLA: Avisamos al usuario pero NO bloqueamos la pantalla
+            res.status(500).json({ error: 'Usuario creado, pero hubo un error al enviar el correo. Revisa tu configuración de Gmail.' });
+        }
     });
 });
 
