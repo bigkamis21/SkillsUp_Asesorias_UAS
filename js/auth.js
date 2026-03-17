@@ -111,6 +111,7 @@ if (formLogin) {
             if (respuesta.ok) {
                 
                 localStorage.setItem('nombreUsuario', datos.nombre); 
+                alert(datos.mensaje);
                 // Redirige al panel del alumno
                 window.location.href = 'dashboard.html'; 
             } else {
