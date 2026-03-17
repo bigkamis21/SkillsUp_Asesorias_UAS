@@ -59,7 +59,7 @@ app.post('/api/registrar', (req, res) => {
     }
 
     // Insertamos en la base de datos (Nota que agregamos numero_cuenta y correo)
-    const query = 'INSERT INTO usuarios (nombre, numero_cuenta, correo, password, rol) VALUES (?, ?, ?, ?, "alumno")';
+    const query = 'INSERT INTO usuarios (nombre, numeroCuenta, correo, password, rol) VALUES (?, ?, ?, ?, "alumno")';
     
     connection.query(query, [nombre, numeroCuenta, correo, password], (err, result) => {
         if (err) {
@@ -86,7 +86,7 @@ app.post('/api/login', (req, res) => {
     }
 
     // Buscamos si el identificador hace "match" con un correo OR con una cuenta
-    const query = 'SELECT * FROM usuarios WHERE (correo = ? OR numero_cuenta = ?) AND password = ?';
+    const query = 'SELECT * FROM usuarios WHERE (correo = ? OR numeroCuenta = ?) AND password = ?';
     
     // Le pasamos el identificador dos veces para que busque en ambas columnas
     connection.query(query, [identificador, identificador, password], (err, results) => {
