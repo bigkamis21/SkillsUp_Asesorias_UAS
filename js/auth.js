@@ -68,7 +68,7 @@ if (formRegistro) {
             if (respuesta.ok) {
                 alert(datos.mensaje); 
                 formRegistro.reset(); 
-                window.location.href = '../index.html'; 
+                window.location.href = 'dashboard.html';
             } else {
                 alert(datos.error); 
             }
