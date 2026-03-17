@@ -146,16 +146,45 @@
         <p class="text-sm text-gray-600 mb-6">Selecciona la materia que dominas y cuéntanos por qué serías un buen asesor.</p>
         
         <form id="formPostulacion" class="space-y-4">
+            
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">Tu Carrera</label>
+                    <select id="selectCarrera" class="w-full border rounded-lg p-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-purple-500" required>
+                        <option value="">Selecciona...</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">Semestre de la Materia</label>
+                    <select id="selectSemestre" class="w-full border rounded-lg p-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-purple-500" disabled required>
+                        <option value="">Primero elige carrera</option>
+                        <option value="1">1er Semestre</option>
+                        <option value="2">2do Semestre</option>
+                        <option value="3">3er Semestre</option>
+                        <option value="4">4to Semestre</option>
+                        <option value="5">5to Semestre</option>
+                        <option value="6">6to Semestre</option>
+                        <option value="7">7mo Semestre</option>
+                        <option value="8">8vo Semestre</option>
+                    </select>
+                </div>
+            </div>
+
             <div>
                 <label class="block text-sm font-bold text-gray-700 mb-1">Materia a impartir</label>
-                <select id="selectMateria" class="w-full border rounded-lg p-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-purple-500" required>
-                    <option value="">Cargando materias...</option>
+                <select id="selectMateria" class="w-full border rounded-lg p-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-purple-500" disabled required>
+                    <option value="">Primero elige semestre</option>
                 </select>
             </div>
             
             <div>
-                <label class="block text-sm font-bold text-gray-700 mb-1">Motivo / Experiencia</label>
-                <textarea id="textoMotivo" rows="3" class="w-full border rounded-lg p-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Ej: Saqué 10 en esta materia y me gusta explicar..." required></textarea>
+                <label class="block text-sm font-bold text-gray-700 mb-1">Enlace a tu Kardex (Drive/OneDrive)</label>
+                <input type="url" id="linkKardex" class="w-full border rounded-lg p-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="https://drive.google.com/..." required>
+            </div>
+            
+            <div>
+                <label class="block text-sm font-bold text-gray-700 mb-1">Experiencia</label>
+                <textarea id="textoMotivo" rows="2" class="w-full border rounded-lg p-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Ej: Saqué 10 en la materia..." required></textarea>
             </div>
             
             <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 rounded-lg transition">
@@ -196,21 +225,53 @@
         const selectMateria = document.getElementById('selectMateria');
         const formPostulacion = document.getElementById('formPostulacion');
 
-        // 1. Abrir modal y cargar materias
+        const selectCarrera = document.getElementById('selectCarrera');
+        const selectSemestre = document.getElementById('selectSemestre');
+
+        // 1. Abrir modal y cargar SOLO las carreras iniciales
         btnAbrirPostulacion.addEventListener('click', async () => {
-            modalPostulacion.classList.remove('hidden'); // Mostramos la ventana
+            modalPostulacion.classList.remove('hidden'); 
             
-            // Pedimos las materias al servidor (JavaScript)
             try {
-                const res = await fetch('/api/materias');
-                const materias = await res.json();
+                const res = await fetch('/api/carreras');
+                const carreras = await res.json();
                 
-                selectMateria.innerHTML = '<option value="">Selecciona una materia...</option>';
-                materias.forEach(mat => {
-                    selectMateria.innerHTML += `<option value="${mat.id}">${mat.nombre}</option>`;
+                selectCarrera.innerHTML = '<option value="">Selecciona...</option>';
+                carreras.forEach(car => {
+                    selectCarrera.innerHTML += `<option value="${car.id}">${car.nombre}</option>`;
                 });
-            } catch (error) {
-                console.error("Error cargando materias:", error);
+            } catch (error) { console.error("Error:", error); }
+        });
+
+        // 2. Cuando elige Carrera, activamos el Semestre
+        selectCarrera.addEventListener('change', () => {
+            if (selectCarrera.value !== "") {
+                selectSemestre.disabled = false;
+                selectSemestre.value = ""; // Reseteamos el semestre
+                selectMateria.innerHTML = '<option value="">Primero elige semestre</option>';
+                selectMateria.disabled = true;
+            } else {
+                selectSemestre.disabled = true;
+            }
+        });
+
+        // 3. Cuando elige Semestre, buscamos las materias de ese semestre exacto
+        selectSemestre.addEventListener('change', async () => {
+            const carreraId = selectCarrera.value;
+            const semestre = selectSemestre.value;
+
+            if (semestre !== "") {
+                try {
+                    selectMateria.innerHTML = '<option value="">Cargando...</option>';
+                    const res = await fetch(`/api/materias/${carreraId}/${semestre}`);
+                    const materias = await res.json();
+                    
+                    selectMateria.innerHTML = '<option value="">Selecciona una materia...</option>';
+                    materias.forEach(mat => {
+                        selectMateria.innerHTML += `<option value="${mat.id}">${mat.nombre}</option>`;
+                    });
+                    selectMateria.disabled = false;
+                } catch (error) { console.error("Error:", error); }
             }
         });
 

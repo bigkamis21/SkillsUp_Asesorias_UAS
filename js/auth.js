@@ -67,21 +67,56 @@ if (formRegistro) {
             const datos = await respuesta.json();
 
             if (respuesta.ok) {
-                // --- LAS DOS LÍNEAS MÁGICAS ---
-                // 1. Guardamos el número de cuenta en la "mochila" del navegador
-                localStorage.setItem('cuentaPendiente', numeroCuenta);
-                
-                alert('¡Registro casi listo! Revisa tu correo.')
-
-                // 2. Mandamos al usuario a la página donde pondrá su código
-                window.location.href = 'verificar.html'; 
-                
-            } else {
-                alert(datos.error); 
-            }
+            // Guardamos la cuenta en la mochila temporalmente para verificarla
+            localStorage.setItem('cuentaPendiente', numeroCuenta);
+            
+            // Destapamos el cuadrito (modal) para que meta los 6 dígitos
+            document.getElementById('modalVerificacion').classList.remove('hidden');
+            
+        } else {
+            alert(datos.error); 
+        }
         } catch (error) {
             console.error("Error:", error);
             alert("Error de conexión con el servidor.");
+        }
+    });
+}
+
+// ==========================================
+// LÓGICA DEL MODAL DE VERIFICACIÓN
+// ==========================================
+const btnVerificarCodigo = document.getElementById('btnVerificarCodigo');
+
+if (btnVerificarCodigo) {
+    btnVerificarCodigo.addEventListener('click', async () => {
+        const codigo = document.getElementById('codigoInput').value;
+        const numeroCuenta = localStorage.getItem('cuentaPendiente');
+
+        if (!codigo || codigo.length < 6) {
+            alert("Por favor ingresa los 6 dígitos.");
+            return;
+        }
+
+        try {
+            const res = await fetch('/api/verificar', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ numeroCuenta, codigo })
+            });
+
+            const datos = await res.json();
+            
+            if (res.ok) {
+                alert('¡Cuenta activada con éxito! Ya puedes iniciar sesión de forma segura.');
+                // Solo hasta que verifica correctamente, lo mandamos al Login
+                window.location.href = 'login.html';
+            } else {
+                alert(datos.error); // "Código incorrecto", etc.
+            }
+        } catch (error) {
+            console.error("Error:", error);
+            alert('Hubo un error al verificar el código.');
         }
     });
 }
@@ -123,7 +158,7 @@ if (formLogin) {
             } else {
             window.location.href = 'dashboard.html'; // Los alumnos van a la vista normal
             }
-            
+
             } else {
                 alert(datos.error); 
             }

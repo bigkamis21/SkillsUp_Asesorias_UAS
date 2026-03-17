@@ -171,9 +171,19 @@ app.post('/api/cambiar-rol', (req, res) => {
 // RUTAS PARA SOLICITUDES DE ASESOR
 // ==========================================
 
-// 1. Obtener la lista de materias (Para que el alumno elija)
-app.get('/api/materias', (req, res) => {
-    connection.query('SELECT * FROM materias', (err, results) => {
+// 1. Obtener todas las carreras
+app.get('/api/carreras', (req, res) => {
+    connection.query('SELECT * FROM carreras', (err, results) => {
+        if (err) return res.status(500).json({ error: 'Error al cargar carreras' });
+        res.status(200).json(results);
+    });
+});
+
+// 2. Obtener materias filtradas por carrera y semestre
+app.get('/api/materias/:carreraId/:semestre', (req, res) => {
+    const { carreraId, semestre } = req.params;
+    const query = 'SELECT * FROM materias WHERE carrera_id = ? AND semestre = ?';
+    connection.query(query, [carreraId, semestre], (err, results) => {
         if (err) return res.status(500).json({ error: 'Error al cargar materias' });
         res.status(200).json(results);
     });
