@@ -55,7 +55,7 @@ app.post('/api/registrar', (req, res) => {
 
         // Enviar Correo
         transporter.sendMail({
-            from: '"SkillsUp UAS" <tu_correo@gmail.com>',
+            from: '"SkillsUp UAS" <big.western.beacon@gmail.com>',
             to: correo,
             subject: 'Tu código de activación 🦅',
             text: `¡Hola ${nombre}! Tu código es: ${codigo}`
