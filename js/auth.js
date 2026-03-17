@@ -39,6 +39,9 @@ if (btnVerLoginPassword && inputLoginPassword) {
 // ==========================================
 // 2. LÓGICA DE REGISTRO (Actualizada para Verificación)
 // ==========================================
+
+const formRegistro = document.getElementById('registroForm');
+
 if (formRegistro) {
     formRegistro.addEventListener('submit', async (e) => {
         e.preventDefault(); 
@@ -69,7 +72,7 @@ if (formRegistro) {
                 localStorage.setItem('cuentaPendiente', numeroCuenta);
                 
                 alert('¡Registro casi listo! Revisa tu correo.')
-                
+
                 // 2. Mandamos al usuario a la página donde pondrá su código
                 window.location.href = 'verificar.html'; 
                 
