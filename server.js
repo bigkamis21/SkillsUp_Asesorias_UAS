@@ -46,6 +46,38 @@ app.post('/api/registrar', (req, res) => {
     });
 });
 
+// --- RUTA PARA INICIAR SESIÓN ---
+app.post('/api/login', (req, res) => {
+    const { correo, password } = req.body;
+
+    // Validamos que no envíen campos vacíos
+    if (!correo || !password) {
+        return res.status(400).json({ error: 'Por favor ingresa tu correo y contraseña.' });
+    }
+
+    // Buscamos si existe un usuario con ese correo y esa contraseña
+    const query = 'SELECT * FROM usuarios WHERE correo = ? AND password = ?';
+    
+    connection.query(query, [correo, password], (err, results) => {
+        if (err) {
+            console.error('Error al consultar la BD:', err);
+            return res.status(500).json({ error: 'Error interno del servidor.' });
+        }
+
+        // Si "results" tiene al menos un registro, ¡el usuario existe!
+        if (results.length > 0) {
+            const usuario = results[0];
+            res.status(200).json({ 
+                mensaje: `¡Bienvenido(a) de nuevo, ${usuario.nombre}!`,
+                rol: usuario.rol // Mandamos el rol por si es admin, asesor o alumno
+            });
+        } else {
+            // Si viene vacío, se equivocó en algo
+            res.status(401).json({ error: 'Correo o contraseña incorrectos. Intenta de nuevo.' });
+        }
+    });
+});
+
 // IMPORTANTE: Pon esto arriba (después de definir "app = express()")
 // Esto permite que el servidor lea los datos JSON que le manda la página
 app.use(express.json());
