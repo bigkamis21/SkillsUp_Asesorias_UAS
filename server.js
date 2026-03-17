@@ -10,7 +10,7 @@ const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
         user: 'skillsup.asesoria@gmail.com', // Tu correo de pruebas
-        pass: 'cbkg ifpb nkrj vurk' // La llave de 16 letras de Google
+        pass: 'cbkgifpbnkrjvurk' // La llave de 16 letras de Google
     }
 });
 
