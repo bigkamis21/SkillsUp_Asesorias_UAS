@@ -37,10 +37,8 @@ if (btnVerLoginPassword && inputLoginPassword) {
 }
 
 // ==========================================
-// 2. LÓGICA DE REGISTRO (Cuenta + Correo)
+// 2. LÓGICA DE REGISTRO (Actualizada para Verificación)
 // ==========================================
-const formRegistro = document.getElementById('registroForm');
-
 if (formRegistro) {
     formRegistro.addEventListener('submit', async (e) => {
         e.preventDefault(); 
@@ -52,7 +50,7 @@ if (formRegistro) {
         const confirmPassword = document.getElementById('confirmPassword').value;
 
         if (password !== confirmPassword) {
-            alert('Las contraseñas no coinciden. Por favor, revísalas.');
+            alert('Las contraseñas no coinciden.');
             return; 
         }
 
@@ -66,9 +64,15 @@ if (formRegistro) {
             const datos = await respuesta.json();
 
             if (respuesta.ok) {
+                // --- LAS DOS LÍNEAS MÁGICAS ---
+                // 1. Guardamos el número de cuenta en la "mochila" del navegador
+                localStorage.setItem('cuentaPendiente', numeroCuenta);
+                
                 alert(datos.mensaje); 
-                formRegistro.reset(); 
-                window.location.href = 'dashboard.html';
+
+                // 2. Mandamos al usuario a la página donde pondrá su código
+                window.location.href = 'verificar.html'; 
+                
             } else {
                 alert(datos.error); 
             }

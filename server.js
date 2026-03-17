@@ -9,8 +9,8 @@ const nodemailer = require('nodemailer');
 const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
-        user: 'big.western.beacon@gmail.com', // Tu correo de pruebas
-        pass: 'tqvw hpvs aydx oars' // La llave de 16 letras de Google
+        user: 'skillsup.asesoria@gmail.com', // Tu correo de pruebas
+        pass: 'cbkg ifpb nkrj vurk' // La llave de 16 letras de Google
     }
 });
 
@@ -55,7 +55,7 @@ app.post('/api/registrar', (req, res) => {
 
         // Enviar Correo
         transporter.sendMail({
-            from: '"SkillsUp UAS" <big.western.beacon@gmail.com>',
+            from: '"SkillsUp UAS" <skillsup.asesoria@gmail.com>',
             to: correo,
             subject: 'Tu código de activación 🦅',
             text: `¡Hola ${nombre}! Tu código es: ${codigo}`
