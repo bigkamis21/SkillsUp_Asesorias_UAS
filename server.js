@@ -3,6 +3,17 @@ const mysql = require('mysql2');
 const app = express();
 const path = require('path');
 
+const nodemailer = require('nodemailer');
+
+// Configuramos el transportador (quien envía el correo)
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: 'big.western.beacon@gmail.com', // Tu correo de pruebas
+        pass: 'tqvw hpvs aydx oars' // La llave de 16 letras de Google
+    }
+});
+
 // 1. Middleware: Debe ir arriba para entender los datos que manda el HTML
 app.use(express.json());
 app.use(express.static(path.join(__dirname, '.')));
@@ -33,26 +44,38 @@ app.get('/', (req, res) => {
 // RUTA PARA REGISTRAR (Con Cuenta y Correo)
 // ==========================================
 app.post('/api/registrar', (req, res) => {
-    // Aquí recibimos la variable JS en camelCase: numeroCuenta
     const { nombre, numeroCuenta, correo, password } = req.body;
-    
-    if (!nombre || !numeroCuenta || !correo || !password) {
-        return res.status(400).json({ error: 'Todos los campos son obligatorios' });
-    }
+    const codigo = Math.floor(100000 + Math.random() * 900000).toString();
 
-    // En el query SQL usamos el nombre exacto de la columna: numero_cuenta
-    const query = 'INSERT INTO usuarios (nombre, numero_cuenta, correo, password, rol) VALUES (?, ?, ?, ?, "alumno")';
+    // Guardamos verificado = 0 por defecto
+    const query = 'INSERT INTO usuarios (nombre, numero_cuenta, correo, password, rol, codigo_verificacion, verificado) VALUES (?, ?, ?, ?, "alumno", ?, 0)';
     
-    // Aquí le pasamos la variable JS: numeroCuenta
-    connection.query(query, [nombre, numeroCuenta, correo, password], (err, result) => {
-        if (err) {
-            console.error('Error al insertar en BD:', err);
-            if (err.code === 'ER_DUP_ENTRY') {
-                return res.status(400).json({ error: 'Ese número de cuenta o correo ya está registrado.' });
-            }
-            return res.status(500).json({ error: 'Hubo un error al guardar tu registro.' });
+    connection.query(query, [nombre, numeroCuenta, correo, password, codigo], (err) => {
+        if (err) return res.status(400).json({ error: 'Error al registrar' });
+
+        // Enviar Correo
+        transporter.sendMail({
+            from: '"SkillsUp UAS" <tu_correo@gmail.com>',
+            to: correo,
+            subject: 'Tu código de activación 🦅',
+            text: `¡Hola ${nombre}! Tu código es: ${codigo}`
+        }, (error) => {
+            if (error) console.log("Error de correo:", error);
+            res.status(200).json({ mensaje: 'Código enviado' });
+        });
+    });
+});
+
+app.post('/api/verificar', (req, res) => {
+    const { numeroCuenta, codigo } = req.body;
+    const query = 'UPDATE usuarios SET verificado = 1 WHERE numero_cuenta = ? AND codigo_verificacion = ?';
+    
+    connection.query(query, [numeroCuenta, codigo], (err, result) => {
+        if (result.affectedRows > 0) {
+            res.status(200).json({ mensaje: 'Activado' });
+        } else {
+            res.status(400).json({ error: 'Código incorrecto o usuario no existe' });
         }
-        res.status(200).json({ mensaje: '¡Registro exitoso! Ya eres parte de SkillsUp.' });
     });
 });
 
@@ -66,8 +89,8 @@ app.post('/api/login', (req, res) => {
         return res.status(400).json({ error: 'Ingresa tu correo o número de cuenta y tu contraseña.' });
     }
 
-    const query = 'SELECT * FROM usuarios WHERE (correo = ? OR numero_cuenta = ?) AND password = ?';
-    
+    // Busca esta línea en tu login y agrégale el "AND verificado = 1"
+    const query = 'SELECT * FROM usuarios WHERE (correo = ? OR numero_cuenta = ?) AND password = ? AND verificado = 1';    
     connection.query(query, [identificador, identificador, password], (err, results) => {
         if (err) {
             console.error('Error al consultar la BD:', err);
