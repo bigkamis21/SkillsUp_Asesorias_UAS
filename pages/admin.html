@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Administración - SkillsUp</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="bg-slate-100 min-h-screen font-sans">
+
+    <nav class="bg-gray-900 text-white shadow-md py-4 px-6 flex justify-between items-center">
+        <div class="flex items-center gap-3">
+            <i class="fas fa-shield-alt text-yellow-400 text-2xl"></i>
+            <h1 class="text-xl font-bold">SkillsUp | Centro de Administración</h1>
+        </div>
+        <button id="btnSalirAdmin" class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg text-sm font-bold transition">Salir</button>
+    </nav>
+
+    <main class="p-8 max-w-7xl mx-auto">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6">Gestión de Usuarios y Asesores</h2>
+        
+        <div class="bg-white rounded-xl shadow-md overflow-hidden">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-gray-800 text-white">
+                        <th class="p-4">Nombre</th>
+                        <th class="p-4">No. Cuenta</th>
+                        <th class="p-4">Correo</th>
+                        <th class="p-4">Estado</th>
+                        <th class="p-4">Rol Actual / Cambiar Rol</th>
+                    </tr>
+                </thead>
+                <tbody id="tablaUsuarios" class="divide-y divide-gray-200">
+                    <tr><td colspan="5" class="p-4 text-center text-gray-500">Cargando usuarios...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <script>
+        // Función para cargar los usuarios al abrir la página
+        async function cargarUsuarios() {
+            try {
+                const res = await fetch('/api/usuarios');
+                const usuarios = await res.json();
+                const tbody = document.getElementById('tablaUsuarios');
+                tbody.innerHTML = ''; // Limpiamos la tabla
+
+                usuarios.forEach(user => {
+                    // Si verificado es 1 es Activo, si es 0 es Pendiente
+                    const estadoHtml = user.verificado 
+                        ? '<span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-bold">Activo</span>'
+                        : '<span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-xs font-bold">Pendiente</span>';
+
+                    const tr = document.createElement('tr');
+                    tr.classList.add('hover:bg-gray-50');
+                    tr.innerHTML = `
+                        <td class="p-4 font-semibold text-gray-700">${user.nombre}</td>
+                        <td class="p-4 text-gray-600">${user.numero_cuenta}</td>
+                        <td class="p-4 text-gray-600">${user.correo}</td>
+                        <td class="p-4">${estadoHtml}</td>
+                        <td class="p-4 flex gap-2">
+                            <select id="select-${user.numero_cuenta}" class="border rounded p-1 text-sm text-gray-700">
+                                <option value="alumno" ${user.rol === 'alumno' ? 'selected' : ''}>Alumno</option>
+                                <option value="asesor_par" ${user.rol === 'asesor_par' ? 'selected' : ''}>Asesor Par</option>
+                                <option value="asesor_disciplinar" ${user.rol === 'asesor_disciplinar' ? 'selected' : ''}>Asesor Disciplinar</option>
+                                <option value="admin" ${user.rol === 'admin' ? 'selected' : ''}>Administrador</option>
+                            </select>
+                            <button onclick="cambiarRol('${user.numero_cuenta}')" class="bg-blue-600 text-white px-3 py-1 rounded text-sm font-bold hover:bg-blue-700">Guardar</button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch (error) {
+                console.error("Error al cargar:", error);
+            }
+        }
+
+        // Función para el botón "Guardar" de la tabla
+        async function cambiarRol(numeroCuenta) {
+            const nuevoRol = document.getElementById(`select-${numeroCuenta}`).value;
+            
+            try {
+                const res = await fetch('/api/cambiar-rol', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ numeroCuenta, nuevoRol })
+                });
+                
+                if (res.ok) {
+                    alert('Rol actualizado con éxito');
+                } else {
+                    alert('Error al actualizar el rol');
+                }
+            } catch (error) {
+                alert('Fallo de conexión.');
+            }
+        }
+
+        // Botón salir
+        document.getElementById('btnSalirAdmin').addEventListener('click', () => {
+            localStorage.clear();
+            window.location.href = '../index.html';
+        });
+
+        // Ejecutar al iniciar
+        cargarUsuarios();
+    </script>
+</body>
+</html>

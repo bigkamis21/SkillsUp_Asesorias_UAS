@@ -113,7 +113,11 @@ if (formLogin) {
                 localStorage.setItem('nombreUsuario', datos.nombre); 
                 alert(datos.mensaje);
                 // Redirige al panel del alumno
-                window.location.href = 'dashboard.html'; 
+                if (datos.rol === 'admin') {
+                    window.location.href = 'admin.html'; // Lo mandamos a la central
+                } else {
+                    window.location.href = 'dashboard.html'; // Lo mandamos a la vista normal
+                } 
             } else {
                 alert(datos.error); 
             }

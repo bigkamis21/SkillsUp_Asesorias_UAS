@@ -134,6 +134,40 @@ app.post('/api/login', (req, res) => {
     });
 });
 
+
+// ==========================================
+// RUTAS DE ADMINISTRADOR
+// ==========================================
+
+// 1. Obtener la lista de todos los usuarios
+app.get('/api/usuarios', (req, res) => {
+    // No traemos las contraseñas por seguridad
+    const query = 'SELECT nombre, numero_cuenta, correo, rol, verificado FROM usuarios';
+    
+    connection.query(query, (err, results) => {
+        if (err) {
+            console.error('Error al obtener usuarios:', err);
+            return res.status(500).json({ error: 'Error interno del servidor.' });
+        }
+        res.status(200).json(results);
+    });
+});
+
+// 2. Cambiar el rol de un usuario
+app.post('/api/cambiar-rol', (req, res) => {
+    const { numeroCuenta, nuevoRol } = req.body;
+
+    const query = 'UPDATE usuarios SET rol = ? WHERE numero_cuenta = ?';
+    
+    connection.query(query, [nuevoRol, numeroCuenta], (err, result) => {
+        if (err) {
+            console.error('Error al actualizar rol:', err);
+            return res.status(500).json({ error: 'No se pudo actualizar el rol.' });
+        }
+        res.status(200).json({ mensaje: '¡Rol actualizado correctamente!' });
+    });
+});
+
 // 4. Puerto para Azure
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
