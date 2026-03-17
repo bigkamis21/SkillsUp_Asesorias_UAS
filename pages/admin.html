@@ -48,30 +48,35 @@
                 tbody.innerHTML = ''; // Limpiamos la tabla
 
                 usuarios.forEach(user => {
-                    // Si verificado es 1 es Activo, si es 0 es Pendiente
-                    const estadoHtml = user.verificado 
-                        ? '<span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-bold">Activo</span>'
-                        : '<span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-xs font-bold">Pendiente</span>';
+            // Obtenemos tu propio número de cuenta de la memoria
+            const miCuenta = localStorage.getItem('cuentaLogueada');
+            
+            // ¿Es esta fila MI propia cuenta?
+            const esMiCuenta = (user.numero_cuenta === miCuenta);
 
-                    const tr = document.createElement('tr');
-                    tr.classList.add('hover:bg-gray-50');
-                    tr.innerHTML = `
-                        <td class="p-4 font-semibold text-gray-700">${user.nombre}</td>
-                        <td class="p-4 text-gray-600">${user.numero_cuenta}</td>
-                        <td class="p-4 text-gray-600">${user.correo}</td>
-                        <td class="p-4">${estadoHtml}</td>
-                        <td class="p-4 flex gap-2">
-                            <select id="select-${user.numero_cuenta}" class="border rounded p-1 text-sm text-gray-700">
-                                <option value="alumno" ${user.rol === 'alumno' ? 'selected' : ''}>Alumno</option>
-                                <option value="asesor_par" ${user.rol === 'asesor_par' ? 'selected' : ''}>Asesor Par</option>
-                                <option value="asesor_disciplinar" ${user.rol === 'asesor_disciplinar' ? 'selected' : ''}>Asesor Disciplinar</option>
-                                <option value="admin" ${user.rol === 'admin' ? 'selected' : ''}>Administrador</option>
-                            </select>
-                            <button onclick="cambiarRol('${user.numero_cuenta}')" class="bg-blue-600 text-white px-3 py-1 rounded text-sm font-bold hover:bg-blue-700">Guardar</button>
-                        </td>
-                    `;
-                    tbody.appendChild(tr);
-                });
+            const tr = document.createElement('tr');
+            tr.classList.add('hover:bg-gray-50');
+            tr.innerHTML = `
+                <td class="p-4 font-semibold text-gray-700">${user.nombre} ${esMiCuenta ? '<span class="text-blue-500 text-xs">(Tú)</span>' : ''}</td>
+                <td class="p-4 text-gray-600">${user.numero_cuenta}</td>
+                <td class="p-4 text-gray-600">${user.correo}</td>
+                <td class="p-4">${estadoHtml}</td>
+                <td class="p-4 flex gap-2">
+                    <select id="select-${user.numero_cuenta}" ${esMiCuenta ? 'disabled' : ''} class="border rounded p-1 text-sm text-gray-700 bg-white">
+                        <option value="alumno" ${user.rol === 'alumno' ? 'selected' : ''}>Alumno</option>
+                        <option value="asesor_par" ${user.rol === 'asesor_par' ? 'selected' : ''}>Asesor Par</option>
+                        <option value="asesor_disciplinar" ${user.rol === 'asesor_disciplinar' ? 'selected' : ''}>Asesor Disciplinar</option>
+                        <option value="admin" ${user.rol === 'admin' ? 'selected' : ''}>Administrador</option>
+                    </select>
+                    
+                    ${esMiCuenta 
+                        ? '<span class="text-xs text-gray-400 self-center">No puedes auto-editarte</span>' 
+                        : `<button onclick="cambiarRol('${user.numero_cuenta}')" class="bg-blue-600 text-white px-3 py-1 rounded text-sm font-bold hover:bg-blue-700">Guardar</button>`
+                    }
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
             } catch (error) {
                 console.error("Error al cargar:", error);
             }

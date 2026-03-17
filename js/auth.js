@@ -109,8 +109,10 @@ if (formLogin) {
             const datos = await respuesta.json();
 
             if (respuesta.ok) {
+
+                localStorage.setItem('nombreUsuario', datos.nombre);
+                localStorage.setItem('cuentaLogueada', identificador);
                 
-                localStorage.setItem('nombreUsuario', datos.nombre); 
                 alert(datos.mensaje);
                 // Redirige al panel del alumno
                 if (datos.rol === 'admin') {
