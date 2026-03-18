@@ -19,8 +19,20 @@
         <button id="btnSalirAdmin" class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg text-sm font-bold transition">Salir</button>
     </nav>
 
+
     <main class="p-8 max-w-7xl mx-auto">
-        <h2 class="text-2xl font-bold text-gray-800 mb-6">Gestión de Usuarios y Asesores</h2>
+
+        <h2 class="text-2xl font-bold text-gray-800 mb-4 mt-8">Solicitudes para Asesor Par</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12" id="contenedorSolicitudes">
+            <p class="text-gray-500 italic col-span-full">No hay solicitudes pendientes en este momento.</p>
+        </div>
+
+        <div class="flex justify-between items-center mb-6 mt-12 border-t pt-8">
+            <h2 class="text-2xl font-bold text-gray-800">Directorio de Usuarios</h2>
+            <button id="btnAbrirModalProfe" class="bg-blue-900 hover:bg-blue-800 text-white font-bold py-2 px-4 rounded-lg shadow-md transition flex items-center gap-2">
+                <i class="fas fa-user-tie"></i> Alta de Profesor
+            </button>
+        </div>
         
         <div class="bg-white rounded-xl shadow-md overflow-hidden">
             <table class="w-full text-left border-collapse">
@@ -40,6 +52,40 @@
         </div>
     </main>
 
+    <div id="modalProfesor" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 backdrop-blur-sm">
+            <div class="bg-white p-8 rounded-xl shadow-2xl max-w-md w-full relative">
+                <button id="btnCerrarModalProfe" class="absolute top-4 right-4 text-gray-500 hover:text-red-500 text-xl">
+                    <i class="fas fa-times"></i>
+                </button>
+                
+                <h2 class="text-2xl font-bold text-blue-900 mb-2">Registrar Asesor Disciplinar</h2>
+                <p class="text-sm text-gray-600 mb-6">El profesor quedará activado inmediatamente y podrá iniciar sesión.</p>
+                
+                <form id="formProfesor" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-1">Nombre Completo</label>
+                        <input type="text" id="profeNombre" class="w-full border rounded-lg p-2 bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:outline-none" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-1">Número de Empleado</label>
+                        <input type="text" id="profeNum" class="w-full border rounded-lg p-2 bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:outline-none" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-1">Correo Institucional</label>
+                        <input type="email" id="profeCorreo" class="w-full border rounded-lg p-2 bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:outline-none" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-1">Contraseña Temporal</label>
+                        <input type="password" id="profePass" class="w-full border rounded-lg p-2 bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:outline-none" required>
+                    </div>
+                    
+                    <button type="submit" class="w-full bg-blue-900 hover:bg-blue-800 text-white font-bold py-3 rounded-lg transition mt-4">
+                        Guardar y Activar Profesor
+                    </button>
+                </form>
+            </div>
+    </div>
+  
     <script>
         // Función para cargar los usuarios al abrir la página
         async function cargarUsuarios() {
@@ -114,6 +160,111 @@
             }
         }
 
+        // Función para cargar solicitudes pendientes
+        async function cargarSolicitudes() {
+            try {
+                const res = await fetch('/api/solicitudes-pendientes');
+                const solicitudes = await res.json();
+                const contenedor = document.getElementById('contenedorSolicitudes');
+                
+                if (solicitudes.length > 0) {
+                    contenedor.innerHTML = ''; // Limpiamos el mensaje de "no hay solicitudes"
+                    
+                    solicitudes.forEach(sol => {
+                        contenedor.innerHTML += `
+                            <div class="bg-white p-6 rounded-xl shadow-md border-t-4 border-yellow-400">
+                                <h3 class="font-bold text-lg text-blue-900">${sol.alumno}</h3>
+                                <p class="text-sm text-gray-500 mb-2">Cuenta: ${sol.numero_cuenta}</p>
+                                <p class="font-semibold text-purple-700 mb-2"><i class="fas fa-book mr-2"></i>${sol.materia}</p>
+                                <p class="text-sm text-gray-700 bg-gray-50 p-2 rounded mb-4 italic">"${sol.motivo}"</p>
+                                
+                                <div class="flex gap-2 mb-4">
+                                    <a href="${sol.kardex_url}" target="_blank" class="flex-1 text-center bg-gray-200 hover:bg-gray-300 text-gray-800 text-xs font-bold py-2 rounded transition">
+                                        <i class="fas fa-external-link-alt mr-1"></i> Ver Kardex
+                                    </a>
+                                </div>
+                                
+                                <div class="flex gap-2">
+                                    <button onclick="aprobarSolicitud(${sol.solicitud_id}, '${sol.numero_cuenta}')" class="flex-1 bg-green-500 hover:bg-green-600 text-white font-bold py-2 rounded transition shadow-sm">Aprobar</button>
+                                    <button class="flex-1 bg-red-500 hover:bg-red-600 text-white font-bold py-2 rounded transition shadow-sm">Rechazar</button>
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+            } catch (error) {
+                console.error("Error cargando solicitudes:", error);
+            }
+        }
+
+        // Función para aprobar
+        async function aprobarSolicitud(solicitudId, numeroCuenta) {
+            if(confirm("¿Estás seguro de aprobar a este alumno como Asesor Par?")) {
+                try {
+                    const res = await fetch('/api/aprobar-asesor', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ solicitudId, numeroCuenta })
+                    });
+                    
+                    if (res.ok) {
+                        alert("¡Alumno aprobado exitosamente!");
+                        cargarSolicitudes(); // Recargamos las tarjetas
+                        cargarUsuarios(); // Recargamos la tabla de abajo para que ya salga como asesor
+                    } else {
+                        alert("Error al aprobar.");
+                    }
+                } catch (error) {
+                    alert("Fallo de conexión.");
+                }
+            }
+        }
+
+        // ==========================================
+        // LÓGICA PARA ALTA DE PROFESORES
+        // ==========================================
+        const modalProfesor = document.getElementById('modalProfesor');
+        const btnAbrirModalProfe = document.getElementById('btnAbrirModalProfe');
+        const btnCerrarModalProfe = document.getElementById('btnCerrarModalProfe');
+        const formProfesor = document.getElementById('formProfesor');
+
+        btnAbrirModalProfe.addEventListener('click', () => {
+            modalProfesor.classList.remove('hidden');
+        });
+
+        btnCerrarModalProfe.addEventListener('click', () => {
+            modalProfesor.classList.add('hidden');
+        });
+
+        formProfesor.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const nombre = document.getElementById('profeNombre').value;
+            const numeroEmpleado = document.getElementById('profeNum').value;
+            const correo = document.getElementById('profeCorreo').value;
+            const password = document.getElementById('profePass').value;
+
+            try {
+                const res = await fetch('/api/alta-profesor', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ nombre, numeroEmpleado, correo, password })
+                });
+                
+                const datos = await res.json();
+                
+                if (res.ok) {
+                    alert(datos.mensaje);
+                    modalProfesor.classList.add('hidden');
+                    formProfesor.reset();
+                    cargarUsuarios(); // Recargamos la tabla de abajo al instante
+                } else {
+                    alert(datos.error);
+                }
+            } catch (error) {
+                alert("Error de conexión al registrar profesor.");
+            }
+        });
+        
         // Botón salir
         document.getElementById('btnSalirAdmin').addEventListener('click', () => {
             localStorage.clear();
@@ -122,6 +273,7 @@
 
         // Ejecutar al iniciar
         cargarUsuarios();
+        cargarSolicitudes();
     </script>
 </body>
 </html>

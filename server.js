@@ -167,6 +167,25 @@ app.post('/api/cambiar-rol', (req, res) => {
         res.status(200).json({ mensaje: '¡Rol actualizado correctamente!' });
     });
 });
+
+// Obtener solicitudes pendientes para el Admin
+app.get('/api/solicitudes-pendientes', (req, res) => {
+    const query = `
+        SELECT s.id AS solicitud_id, u.nombre AS alumno, u.numero_cuenta, u.kardex_url, m.nombre AS materia, s.motivo
+        FROM solicitudes_asesor s
+        JOIN usuarios u ON s.numero_cuenta = u.numero_cuenta
+        JOIN materias m ON s.materia_id = m.id
+        WHERE s.estado = 'pendiente'
+    `;
+    connection.query(query, (err, results) => {
+        if (err) {
+            console.error('Error al obtener solicitudes:', err);
+            return res.status(500).json({ error: 'Error al cargar solicitudes.' });
+        }
+        res.status(200).json(results);
+    });
+});
+
 // ==========================================
 // RUTAS PARA SOLICITUDES DE ASESOR
 // ==========================================
@@ -221,6 +240,25 @@ app.post('/api/aprobar-asesor', (req, res) => {
             if (err2) return res.status(500).json({ error: 'Error al cambiar el rol' });
             res.status(200).json({ mensaje: 'Alumno aprobado como Asesor Par.' });
         });
+    });
+});
+
+// Ruta exclusiva para que el Admin dé de alta a un profesor
+app.post('/api/alta-profesor', (req, res) => {
+    const { nombre, numeroEmpleado, correo, password } = req.body;
+
+    // NOTA: Si en tu ruta de registro normal estás encriptando la contraseña con bcrypt, 
+    // deberías hacerlo aquí también. Si la estás guardando en texto plano, déjalo así.
+    
+    // Insertamos directamente con el rol "asesor_disciplinar" y verificado = 1 (Activo)
+    const query = 'INSERT INTO usuarios (nombre, numero_cuenta, correo, password, rol, verificado) VALUES (?, ?, ?, ?, "asesor_disciplinar", 1)';
+    
+    connection.query(query, [nombre, numeroEmpleado, correo, password], (err, result) => {
+        if (err) {
+            console.error('Error al registrar profesor:', err);
+            return res.status(500).json({ error: 'El número de empleado o correo ya están registrados.' });
+        }
+        res.status(200).json({ mensaje: '¡Profesor registrado y activado con éxito!' });
     });
 });
 
