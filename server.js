@@ -208,21 +208,26 @@ app.get('/api/materias/:carreraId/:semestre', (req, res) => {
     });
 });
 
-// 2. El alumno envía su solicitud
 app.post('/api/solicitar-asesor', (req, res) => {
-    const { numeroCuenta, materiaId, motivo } = req.body;
+    // 1. Nos aseguramos de recibir kardexUrl del frontend
+    const { numeroCuenta, materiaId, motivo, kardexUrl } = req.body;
     
-    // Verificamos si ya tiene una solicitud pendiente para no duplicar
     const checkQuery = 'SELECT * FROM solicitudes_asesor WHERE numero_cuenta = ? AND estado = "pendiente"';
     connection.query(checkQuery, [numeroCuenta], (err, results) => {
         if (results.length > 0) {
             return res.status(400).json({ error: 'Ya tienes una solicitud en revisión.' });
         }
 
-        const insertQuery = 'INSERT INTO solicitudes_asesor (numero_cuenta, materia_id, motivo) VALUES (?, ?, ?)';
-        connection.query(insertQuery, [numeroCuenta, materiaId, motivo], (err) => {
-            if (err) return res.status(500).json({ error: 'Error al enviar la solicitud' });
-            res.status(200).json({ mensaje: '¡Solicitud enviada con éxito! Espera la respuesta del administrador.' });
+        // 2. PRIMERO ACTUALIZAMOS EL KARDEX EN LA TABLA USUARIOS
+        connection.query('UPDATE usuarios SET kardex_url = ? WHERE numero_cuenta = ?', [kardexUrl, numeroCuenta], (errKardex) => {
+            if (errKardex) console.error('Error al guardar kardex:', errKardex);
+
+            // 3. LUEGO CREAMOS LA SOLICITUD
+            const insertQuery = 'INSERT INTO solicitudes_asesor (numero_cuenta, materia_id, motivo) VALUES (?, ?, ?)';
+            connection.query(insertQuery, [numeroCuenta, materiaId, motivo], (err) => {
+                if (err) return res.status(500).json({ error: 'Error al enviar la solicitud' });
+                res.status(200).json({ mensaje: '¡Solicitud enviada! El administrador revisará tu Kardex pronto.' });
+            });
         });
     });
 });
