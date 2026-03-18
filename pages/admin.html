@@ -74,9 +74,15 @@
                         <label class="block text-sm font-bold text-gray-700 mb-1">Correo Institucional</label>
                         <input type="email" id="profeCorreo" class="w-full border rounded-lg p-2 bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:outline-none" required>
                     </div>
+
                     <div>
                         <label class="block text-sm font-bold text-gray-700 mb-1">Contraseña Temporal</label>
-                        <input type="password" id="profePass" class="w-full border rounded-lg p-2 bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:outline-none" required>
+                        <div class="relative">
+                            <input type="password" id="profePass" class="w-full border rounded-lg p-2 pr-10 bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:outline-none" required>
+                            <button type="button" id="btnTogglePass" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-blue-600">
+                                <i class="fas fa-eye" id="iconoEye"></i>
+                            </button>
+                        </div>
                     </div>
                     
                     <button type="submit" class="w-full bg-blue-900 hover:bg-blue-800 text-white font-bold py-3 rounded-lg transition mt-4">
@@ -186,7 +192,7 @@
                                 
                                 <div class="flex gap-2">
                                     <button onclick="aprobarSolicitud(${sol.solicitud_id}, '${sol.numero_cuenta}')" class="flex-1 bg-green-500 hover:bg-green-600 text-white font-bold py-2 rounded transition shadow-sm">Aprobar</button>
-                                    <button class="flex-1 bg-red-500 hover:bg-red-600 text-white font-bold py-2 rounded transition shadow-sm">Rechazar</button>
+                                    <button onclick="rechazarSolicitud(${sol.solicitud_id})" class="flex-1 bg-red-500 hover:bg-red-600 text-white font-bold py-2 rounded transition shadow-sm">Rechazar</button>
                                 </div>
                             </div>
                         `;
@@ -213,6 +219,28 @@
                         cargarUsuarios(); // Recargamos la tabla de abajo para que ya salga como asesor
                     } else {
                         alert("Error al aprobar.");
+                    }
+                } catch (error) {
+                    alert("Fallo de conexión.");
+                }
+            }
+        }
+
+        // Función para rechazar
+        async function rechazarSolicitud(solicitudId) {
+            if(confirm("¿Estás seguro de rechazar esta solicitud?")) {
+                try {
+                    const res = await fetch('/api/rechazar-asesor', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ solicitudId })
+                    });
+                    
+                    if (res.ok) {
+                        alert("Solicitud rechazada.");
+                        cargarSolicitudes(); // Desaparecemos la tarjeta
+                    } else {
+                        alert("Error al rechazar.");
                     }
                 } catch (error) {
                     alert("Fallo de conexión.");
@@ -264,7 +292,23 @@
                 alert("Error de conexión al registrar profesor.");
             }
         });
-        
+
+        // Mostrar/Ocultar contraseña del profesor
+        const btnTogglePass = document.getElementById('btnTogglePass');
+        const inputPass = document.getElementById('profePass');
+        const iconoEye = document.getElementById('iconoEye');
+
+        btnTogglePass.addEventListener('click', () => {
+            if (inputPass.type === 'password') {
+                inputPass.type = 'text';
+                iconoEye.classList.remove('fa-eye');
+                iconoEye.classList.add('fa-eye-slash');
+            } else {
+                inputPass.type = 'password';
+                iconoEye.classList.remove('fa-eye-slash');
+                iconoEye.classList.add('fa-eye');
+            }
+        });
         // Botón salir
         document.getElementById('btnSalirAdmin').addEventListener('click', () => {
             localStorage.clear();

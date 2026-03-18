@@ -218,7 +218,7 @@
             window.location.href = '../index.html';
         });
 
-            // --- LÓGICA DE POSTULACIÓN PARA ASESOR ---
+        // --- LÓGICA DE POSTULACIÓN PARA ASESOR ---
         const modalPostulacion = document.getElementById('modalPostulacion');
         const btnAbrirPostulacion = document.getElementById('btnAbrirPostulacion');
         const btnCerrarModal = document.getElementById('btnCerrarModal');
@@ -280,19 +280,23 @@
             modalPostulacion.classList.add('hidden');
         });
 
-        // 3. Enviar formulario
+       // 3. Enviar formulario
         formPostulacion.addEventListener('submit', async (e) => {
             e.preventDefault();
             
             const materiaId = selectMateria.value;
             const motivo = document.getElementById('textoMotivo').value;
             const numeroCuenta = localStorage.getItem('cuentaLogueada'); // Sacamos tu cuenta de la mochila
+            
+            // --- LA LÍNEA NUEVA PARA CAPTURAR EL ENLACE ---
+            const kardexUrl = document.getElementById('linkKardex').value; 
 
             try {
                 const res = await fetch('/api/solicitar-asesor', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ numeroCuenta, materiaId, motivo })
+                    // --- LA LÍNEA NUEVA PARA MANDARLO AL SERVIDOR ---
+                    body: JSON.stringify({ numeroCuenta, materiaId, motivo, kardexUrl }) 
                 });
                 
                 const datos = await res.json();

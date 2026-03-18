@@ -248,22 +248,60 @@ app.post('/api/aprobar-asesor', (req, res) => {
     });
 });
 
-// Ruta exclusiva para que el Admin dé de alta a un profesor
+// El Admin RECHAZA la solicitud
+app.post('/api/rechazar-asesor', (req, res) => {
+    const { solicitudId } = req.body;
+
+    // Cambiamos el estado a "rechazada" (el alumno sigue siendo alumno normal)
+    connection.query('UPDATE solicitudes_asesor SET estado = "rechazada" WHERE id = ?', [solicitudId], (err) => {
+        if (err) return res.status(500).json({ error: 'Error al rechazar solicitud' });
+        res.status(200).json({ mensaje: 'Solicitud rechazada.' });
+    });
+});
+
+/// Ruta para Alta de Profesor con Envío de Correo
 app.post('/api/alta-profesor', (req, res) => {
     const { nombre, numeroEmpleado, correo, password } = req.body;
 
-    // NOTA: Si en tu ruta de registro normal estás encriptando la contraseña con bcrypt, 
-    // deberías hacerlo aquí también. Si la estás guardando en texto plano, déjalo así.
-    
-    // Insertamos directamente con el rol "asesor_disciplinar" y verificado = 1 (Activo)
     const query = 'INSERT INTO usuarios (nombre, numero_cuenta, correo, password, rol, verificado) VALUES (?, ?, ?, ?, "asesor_disciplinar", 1)';
     
-    connection.query(query, [nombre, numeroEmpleado, correo, password], (err, result) => {
+    connection.query(query, [nombre, numeroEmpleado, correo, password], async (err, result) => {
         if (err) {
             console.error('Error al registrar profesor:', err);
             return res.status(500).json({ error: 'El número de empleado o correo ya están registrados.' });
         }
-        res.status(200).json({ mensaje: '¡Profesor registrado y activado con éxito!' });
+
+        // --- PREPARAMOS EL CORREO DE BIENVENIDA ---
+        const mailOptions = {
+            from: 'skillsup.asesoria@gmail.com', // El correo que ya usas en tu sistema
+            to: correo,
+            subject: 'Bienvenido a SkillsUp - Tu cuenta de Asesor Disciplinar ha sido creada 🦅',
+            html: `
+                <div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
+                    <h2 style="color: #1e3a8a;">¡Hola, ${nombre}! 👋</h2>
+                    <p>El administrador de <strong>SkillsUp UAS</strong> ha creado tu cuenta como <b>Asesor Disciplinar</b>.</p>
+                    <p>Ya puedes iniciar sesión en el portal para gestionar tus asesorías con los alumnos.</p>
+                    <br>
+                    <div style="background-color: #f3f4f6; padding: 15px; border-radius: 8px;">
+                        <p style="margin: 0;"><b>Tu usuario (No. Empleado):</b> ${numeroEmpleado}</p>
+                        <p style="margin: 5px 0 0 0;"><b>Contraseña temporal:</b> ${password}</p>
+                    </div>
+                    <br>
+                    <p style="color: #d97706; font-size: 14px;">⚠️ <b>Importante:</b> Por motivos de seguridad, te recomendamos iniciar sesión y cambiar tu contraseña lo antes posible en tu panel de configuración.</p>
+                    <p>¡Gracias por apoyar a la comunidad universitaria!</p>
+                </div>
+            `
+        };
+
+        // --- ENVIAMOS EL CORREO ---
+        try {
+            await transporter.sendMail(mailOptions);
+            res.status(200).json({ mensaje: '¡Profesor registrado y correo de bienvenida enviado con éxito!' });
+        } catch (errorCorreo) {
+            console.error('Profesor guardado, pero falló el correo:', errorCorreo);
+            // Le avisamos al admin que se guardó pero hubo bronca con el correo
+            res.status(200).json({ mensaje: 'Profesor registrado, pero hubo un problema enviando el correo de aviso.' });
+        }
     });
 });
 
