@@ -14,7 +14,7 @@
     <aside class="w-64 bg-blue-900 text-white hidden md:flex flex-col shadow-xl">
         <div class="p-6 flex items-center gap-3 border-b border-blue-800">
             <img src="../img/logo1.png" alt="UAS" class="h-10 bg-white rounded-full p-1">
-            <span class="text-xl font-bold tracking-wider" href="index.html">SkillsUp</span>
+            <span class="text-xl font-bold tracking-wider cursor-pointer">SkillsUp</span>
         </div>
         
         <nav class="flex-grow p-4 space-y-2 mt-4">
@@ -27,7 +27,7 @@
             <a href="#" class="flex items-center gap-3 p-3 hover:bg-blue-800 rounded-lg transition">
                 <i class="fas fa-book"></i> Material de Apoyo
             </a>
-            <a href="#" class="flex items-center gap-3 p-3 hover:bg-blue-800 rounded-lg transition">
+            <a href="#seccionAsesores" class="flex items-center gap-3 p-3 hover:bg-blue-800 rounded-lg transition">
                 <i class="fas fa-user-friends"></i> Buscar Asesores
             </a>
         </nav>
@@ -55,7 +55,8 @@
             
             <section class="bg-gradient-to-r from-blue-800 to-blue-600 p-8 rounded-2xl text-white shadow-lg relative overflow-hidden">
                 <div class="relative z-10">
-                <h1 class="text-3xl font-bold mb-2">¡Hola de nuevo, <span id="nombreBienvenida">Águila</span>! 🦅</h1>                    <p class="opacity-90 max-w-md">Es un buen día para reforzar tus conocimientos. Tienes 2 asesorías pendientes para esta semana.</p>
+                    <h1 class="text-3xl font-bold mb-2">¡Hola de nuevo, <span id="nombreBienvenida">Águila</span>! 🦅</h1>
+                    <p class="opacity-90 max-w-md">Es un buen día para reforzar tus conocimientos. Revisa los asesores disponibles abajo para agendar una sesión.</p>
                 </div>
                 <i class="fas fa-graduation-cap absolute right-8 bottom-[-20px] text-9xl opacity-10"></i>
             </section>
@@ -75,7 +76,7 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 
                 <div class="bg-white p-6 rounded-xl shadow-sm border flex flex-col">
                     <div class="flex justify-between items-start mb-4">
@@ -111,6 +112,13 @@
 
             </div>
 
+            <div id="seccionAsesores" class="space-y-4 pt-4">
+                <h3 class="text-xl font-bold text-gray-800"><i class="fas fa-user-friends text-blue-600 mr-2"></i>Asesores Pares Disponibles</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="contenedorAsesoresDisponibles">
+                    <p class="text-gray-500 italic col-span-full">Cargando mentores académicos...</p>
+                </div>
+            </div>
+
             <div class="bg-white rounded-xl shadow-sm border overflow-hidden">
                 <div class="p-4 border-b bg-gray-50">
                     <h3 class="font-bold text-gray-700">Notificaciones Recientes</h3>
@@ -136,118 +144,127 @@
         </div>
     </main>
 
-<div id="modalPostulacion" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-    <div class="bg-white p-8 rounded-xl shadow-2xl max-w-md w-full relative">
-        <button id="btnCerrarModal" class="absolute top-4 right-4 text-gray-500 hover:text-red-500 text-xl">
-            <i class="fas fa-times"></i>
-        </button>
-        
-        <h2 class="text-2xl font-bold text-blue-900 mb-2">Postulación para Asesor</h2>
-        <p class="text-sm text-gray-600 mb-6">Selecciona la materia que dominas y cuéntanos por qué serías un buen asesor.</p>
-        
-        <form id="formPostulacion" class="space-y-4">
-            
-            <div class="grid grid-cols-2 gap-4">
-                <div>
-                    <label class="block text-sm font-bold text-gray-700 mb-1">Tu Carrera</label>
-                    <select id="selectCarrera" class="w-full border rounded-lg p-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-purple-500" required>
-                        <option value="">Selecciona...</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-sm font-bold text-gray-700 mb-1">Semestre de la Materia</label>
-                    <select id="selectSemestre" class="w-full border rounded-lg p-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-purple-500" disabled required>
-                        <option value="">Primero elige carrera</option>
-                        <option value="1">1er Semestre</option>
-                        <option value="2">2do Semestre</option>
-                        <option value="3">3er Semestre</option>
-                        <option value="4">4to Semestre</option>
-                        <option value="5">5to Semestre</option>
-                        <option value="6">6to Semestre</option>
-                        <option value="7">7mo Semestre</option>
-                        <option value="8">8vo Semestre</option>
-                    </select>
-                </div>
-            </div>
-
-            <div>
-                <label class="block text-sm font-bold text-gray-700 mb-1">Materia a impartir</label>
-                <select id="selectMateria" class="w-full border rounded-lg p-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-purple-500" disabled required>
-                    <option value="">Primero elige semestre</option>
-                </select>
-            </div>
-            
-            <div>
-                <label class="block text-sm font-bold text-gray-700 mb-1">Enlace a tu Kardex (Drive/OneDrive)</label>
-                <input type="url" id="linkKardex" class="w-full border rounded-lg p-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="https://drive.google.com/..." required>
-            </div>
-            
-            <div>
-                <label class="block text-sm font-bold text-gray-700 mb-1">Experiencia</label>
-                <textarea id="textoMotivo" rows="2" class="w-full border rounded-lg p-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Ej: Saqué 10 en la materia..." required></textarea>
-            </div>
-            
-            <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 rounded-lg transition">
-                Enviar Solicitud
+    <div id="modalPostulacion" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white p-8 rounded-xl shadow-2xl max-w-md w-full relative">
+            <button id="btnCerrarModal" class="absolute top-4 right-4 text-gray-500 hover:text-red-500 text-xl">
+                <i class="fas fa-times"></i>
             </button>
-        </form>
+            
+            <h2 class="text-2xl font-bold text-blue-900 mb-2">Postulación para Asesor</h2>
+            <p class="text-sm text-gray-600 mb-6">Selecciona la materia que dominas y cuéntanos por qué serías un buen asesor.</p>
+            
+            <form id="formPostulacion" class="space-y-4">
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-1">Tu Carrera</label>
+                        <select id="selectCarrera" class="w-full border rounded-lg p-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-purple-500" required>
+                            <option value="">Selecciona...</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-1">Semestre de la Materia</label>
+                        <select id="selectSemestre" class="w-full border rounded-lg p-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-purple-500" disabled required>
+                            <option value="">Primero elige carrera</option>
+                            <option value="1">1er Semestre</option>
+                            <option value="2">2do Semestre</option>
+                            <option value="3">3er Semestre</option>
+                            <option value="4">4to Semestre</option>
+                            <option value="5">5to Semestre</option>
+                            <option value="6">6to Semestre</option>
+                            <option value="7">7mo Semestre</option>
+                            <option value="8">8vo Semestre</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">Materia a impartir</label>
+                    <select id="selectMateria" class="w-full border rounded-lg p-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-purple-500" disabled required>
+                        <option value="">Primero elige semestre</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">Enlace a tu Kardex (Drive/OneDrive)</label>
+                    <input type="url" id="linkKardex" class="w-full border rounded-lg p-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="https://drive.google.com/..." required>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">Experiencia</label>
+                    <textarea id="textoMotivo" rows="2" class="w-full border rounded-lg p-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Ej: Saqué 10 en la materia..." required></textarea>
+                </div>
+                
+                <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 rounded-lg transition">
+                    Enviar Solicitud
+                </button>
+            </form>
+        </div>
     </div>
-</div>
+
+    <div id="modalCita" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 backdrop-blur-sm">
+        <div class="bg-white p-8 rounded-xl shadow-2xl max-w-md w-full relative">
+            <button onclick="cerrarModalCita()" class="absolute top-4 right-4 text-gray-500 hover:text-red-500 text-xl">
+                <i class="fas fa-times"></i>
+            </button>
+            <h2 class="text-2xl font-bold text-blue-900 mb-2">Solicitar Asesoría</h2>
+            <p id="infoAsesorModal" class="text-sm text-gray-600 mb-4"></p>
+            
+            <form id="formCita" class="space-y-4">
+                <input type="hidden" id="modalAsesorCuenta">
+                <input type="hidden" id="modalMateriaId">
+                
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">¿En qué temas específicos necesitas ayuda?</label>
+                    <textarea id="citaMotivo" rows="4" class="w-full border rounded-lg p-2 bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:outline-none placeholder-gray-400" placeholder="Ej. No entiendo cómo resolver matrices por el método de Gauss-Jordan..." required></textarea>
+                </div>
+                
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition mt-4">
+                    Enviar Petición al Asesor
+                </button>
+            </form>
+        </div>
+    </div>
 
     <script>
-        document.getElementById('btnCerrarSesion').addEventListener('click', () => {
-            window.location.href = '../index.html';
-        });
-
-        // Al cargar la página, jalamos el nombre de la "mochila"
+        // 1. CARGA DE METADATOS Y SESIÓN
         const nombreReal = localStorage.getItem('nombreUsuario') || 'Usuario';
+        const cuentaAlumnoLogueado = localStorage.getItem('cuentaLogueada');
 
-        // Lo ponemos en el Header
         document.getElementById('nombreHeader').innerText = nombreReal;
-
-        // Lo ponemos en el saludo grande
         document.getElementById('nombreBienvenida').innerText = nombreReal;
-
-        // Ponemos la inicial en el avatar
         document.getElementById('avatar').innerText = nombreReal.charAt(0).toUpperCase();
 
-        // Botón cerrar sesión (limpiamos la memoria por seguridad)
+        // Botón cerrar sesión limpio
         document.getElementById('btnCerrarSesion').addEventListener('click', () => {
-            localStorage.removeItem('nombreUsuario');
-            localStorage.removeItem('cuentaPendiente');
+            localStorage.clear();
             window.location.href = '../index.html';
         });
 
-        // --- LÓGICA DE POSTULACIÓN PARA ASESOR ---
+        // 2. --- MODAL DE POSTULACIÓN PARA SER ASESOR ---
         const modalPostulacion = document.getElementById('modalPostulacion');
         const btnAbrirPostulacion = document.getElementById('btnAbrirPostulacion');
         const btnCerrarModal = document.getElementById('btnCerrarModal');
+        const selectCarrera = document.getElementById('selectCarrera');
+        const selectSemestre = document.getElementById('selectSemestre');
         const selectMateria = document.getElementById('selectMateria');
         const formPostulacion = document.getElementById('formPostulacion');
 
-        const selectCarrera = document.getElementById('selectCarrera');
-        const selectSemestre = document.getElementById('selectSemestre');
-
-        // 1. Abrir modal y cargar SOLO las carreras iniciales
         btnAbrirPostulacion.addEventListener('click', async () => {
             modalPostulacion.classList.remove('hidden'); 
-            
             try {
                 const res = await fetch('/api/carreras');
                 const carreras = await res.json();
-                
                 selectCarrera.innerHTML = '<option value="">Selecciona...</option>';
-                carreras.forEach(car => {
+                carreres = carreras.forEach(car => {
                     selectCarrera.innerHTML += `<option value="${car.id}">${car.nombre}</option>`;
                 });
-            } catch (error) { console.error("Error:", error); }
+            } catch (error) { console.error("Error cargando carreras:", error); }
         });
 
-        // 2. Cuando elige Carrera, activamos el Semestre
         selectCarrera.addEventListener('change', () => {
             if (selectCarrera.value !== "") {
                 selectSemestre.disabled = false;
-                selectSemestre.value = ""; // Reseteamos el semestre
+                selectSemestre.value = ""; 
                 selectMateria.innerHTML = '<option value="">Primero elige semestre</option>';
                 selectMateria.disabled = true;
             } else {
@@ -255,52 +272,40 @@
             }
         });
 
-        // 3. Cuando elige Semestre, buscamos las materias de ese semestre exacto
         selectSemestre.addEventListener('change', async () => {
             const carreraId = selectCarrera.value;
             const semestre = selectSemestre.value;
-
             if (semestre !== "") {
                 try {
                     selectMateria.innerHTML = '<option value="">Cargando...</option>';
                     const res = await fetch(`/api/materias/${carreraId}/${semestre}`);
                     const materias = await res.json();
-                    
                     selectMateria.innerHTML = '<option value="">Selecciona una materia...</option>';
                     materias.forEach(mat => {
                         selectMateria.innerHTML += `<option value="${mat.id}">${mat.nombre}</option>`;
                     });
                     selectMateria.disabled = false;
-                } catch (error) { console.error("Error:", error); }
+                } catch (error) { console.error("Error cargando materias:", error); }
             }
         });
 
-        // 2. Cerrar modal
         btnCerrarModal.addEventListener('click', () => {
             modalPostulacion.classList.add('hidden');
         });
 
-       // 3. Enviar formulario
         formPostulacion.addEventListener('submit', async (e) => {
             e.preventDefault();
-            
             const materiaId = selectMateria.value;
             const motivo = document.getElementById('textoMotivo').value;
-            const numeroCuenta = localStorage.getItem('cuentaLogueada'); // Sacamos tu cuenta de la mochila
-            
-            // --- LA LÍNEA NUEVA PARA CAPTURAR EL ENLACE ---
             const kardexUrl = document.getElementById('linkKardex').value; 
 
             try {
                 const res = await fetch('/api/solicitar-asesor', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    // --- LA LÍNEA NUEVA PARA MANDARLO AL SERVIDOR ---
-                    body: JSON.stringify({ numeroCuenta, materiaId, motivo, kardexUrl }) 
+                    body: JSON.stringify({ numeroCuenta: cuentaAlumnoLogueado, materiaId, motivo, kardexUrl }) 
                 });
-                
                 const datos = await res.json();
-                
                 if (res.ok) {
                     alert(datos.mensaje);
                     modalPostulacion.classList.add('hidden');
@@ -308,13 +313,86 @@
                 } else {
                     alert(datos.error);
                 }
-            } catch (error) {
-                alert("Error de conexión al enviar la solicitud.");
-            }
+            } catch (error) { alert("Error de conexión al enviar la solicitud."); }
         });
 
+        // 3. --- LÓGICA DE AGENDAR CITA CON ASESOR PAR ---
+        const modalCita = document.getElementById('modalCita');
+        const formCita = document.getElementById('formCita');
+
+        async function cargarAsesoresDisponibles() {
+            try {
+                const res = await fetch('/api/alumno/asesores-disponibles');
+                const asesores = await res.json();
+                const contenedor = document.getElementById('contenedorAsesoresDisponibles');
+                
+                if (asesores.length > 0) {
+                    contenedor.innerHTML = '';
+                    asesores.forEach(ase => {
+                        // Impedimos que el alumno se pida una cita a sí mismo
+                        if(ase.asesor_cuenta !== cuentaAlumnoLogueado) {
+                            contenedor.innerHTML += `
+                                <div class="bg-white p-6 rounded-xl shadow-md border-t-4 border-blue-600 flex flex-col transition hover:shadow-lg">
+                                    <h3 class="font-bold text-lg text-slate-800">${ase.asesor_nombre}</h3>
+                                    <p class="text-xs text-gray-400 mb-3">Cuenta: ${ase.asesor_cuenta}</p>
+                                    <p class="text-sm font-semibold text-purple-700 bg-purple-50 p-2 rounded mb-4">
+                                        <i class="fas fa-book mr-2"></i>Asesor de: ${ase.materia_nombre}
+                                    </p>
+                                    <button onclick="abrirModalCita('${ase.asesor_nombre}', '${ase.asesor_cuenta}', ${ase.materia_id}, '${ase.materia_nombre}')" class="mt-auto w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded-lg transition text-sm shadow-sm">
+                                        Pedir Asesoría
+                                    </button>
+                                </div>
+                            `;
+                        }
+                    });
+                } else {
+                    contenedor.innerHTML = `<p class="text-gray-500 italic col-span-full bg-white p-4 rounded-xl border text-center">No hay asesores pares validados disponibles en este momento.</p>`;
+                }
+            } catch (error) { console.error("Error cargando catálogo de asesores:", error); }
+        }
+
+        function abrirModalCita(nombreAsesor, cuentaAsesor, materiaId, nombreMateria) {
+            document.getElementById('infoAsesorModal').innerHTML = `Vas a solicitar apoyo a <b>${nombreAsesor}</b> para la materia de <b>${nombreMateria}</b>.`;
+            document.getElementById('modalAsesorCuenta').value = cuentaAsesor;
+            document.getElementById('modalMateriaId').value = materiaId;
+            modalCita.classList.remove('hidden');
+        }
+
+        function cerrarModalCita() {
+            modalCita.classList.add('hidden');
+            formCita.reset();
+        }
+
+        formCita.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const numeroCuentaAsesor = document.getElementById('modalAsesorCuenta').value;
+            const materiaId = document.getElementById('modalMateriaId').value;
+            const motivo = document.getElementById('citaMotivo').value;
+
+            try {
+                const res = await fetch('/api/alumno/solicitar-cita', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        numeroCuentaAlumno: cuentaAlumnoLogueado,
+                        numeroCuentaAsesor,
+                        materiaId,
+                        motivo
+                    })
+                });
+                
+                const datos = await res.json();
+                if(res.ok) {
+                    alert(datos.mensaje);
+                    cerrarModalCita();
+                } else {
+                    alert(datos.error);
+                }
+            } catch (error) { alert("Error de conexión al enviar la solicitud de cita."); }
+        });
+
+        // DISPARADOR AUTOMÁTICO AL ARRANCAR PÁGINA
+        cargarAsesoresDisponibles();
     </script>
-
-
 </body>
 </html>

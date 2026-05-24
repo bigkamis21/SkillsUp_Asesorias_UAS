@@ -363,6 +363,80 @@ app.get('/api/asesor/agenda/:numeroAsesor', (req, res) => {
     });
 });
 
+// ==========================================
+// FLUJO ALUMNO: BUSCAR ASESORES Y PEDIR CITA
+// ==========================================
+
+// 1. Obtener los asesores pares que ya están aprobados por el Admin y la materia que dan
+app.get('/api/alumno/asesores-disponibles', (req, res) => {
+    const query = `
+        SELECT u.nombre AS asesor_nombre, u.numero_cuenta AS asesor_cuenta, m.nombre AS materia_nombre, m.id AS materia_id
+        FROM usuarios u
+        JOIN solicitudes_asesor s ON u.numero_cuenta = s.numero_cuenta
+        JOIN materias m ON s.materia_id = m.id
+        WHERE u.rol = 'asesor_par' AND s.estado = 'aprobada'
+    `;
+    connection.query(query, (err, results) => {
+        if (err) return res.status(500).json({ error: 'Error al obtener asesores disponibles.' });
+        res.status(200).json(results);
+    });
+});
+
+// 2. Crear una nueva cita de asesoría desde la interfaz del alumno
+app.post('/api/alumno/solicitar-cita', (req, res) => {
+    const { numeroCuentaAlumno, numeroCuentaAsesor, materiaId, motivo } = req.body;
+    
+    if (!numeroCuentaAlumno || !numeroCuentaAsesor || !materiaId || !motivo) {
+        return res.status(400).json({ error: 'Faltan datos para procesar la cita.' });
+    }
+
+    const query = 'INSERT INTO citas_asesoria (numero_cuenta_alumno, numero_cuenta_asesor, materia_id, motivo, estado) VALUES (?, ?, ?, ?, "pendiente")';
+    connection.query(query, [numeroCuentaAlumno, numeroCuentaAsesor, materiaId, motivo], (err) => {
+        if (err) return res.status(500).json({ error: 'Error al registrar la cita en la base de datos.' });
+        res.status(200).json({ mensaje: '¡Solicitud de asesoría enviada con éxito! Espera a que tu asesor la acepte.' });
+    });
+});
+
+// ==========================================
+// FLUJO ALUMNO: BUSCAR ASESORES Y PEDIR CITA
+// ==========================================
+
+// 1. Obtener los asesores pares que ya están aprobados por el Admin y la materia que dan
+app.get('/api/alumno/asesores-disponibles', (req, res) => {
+    const query = `
+        SELECT u.nombre AS asesor_nombre, u.numero_cuenta AS asesor_cuenta, m.nombre AS materia_nombre, m.id AS materia_id
+        FROM usuarios u
+        JOIN solicitudes_asesor s ON u.numero_cuenta = s.numero_cuenta
+        JOIN materias m ON s.materia_id = m.id
+        WHERE u.rol = 'asesor_par' AND s.estado = 'aprobada'
+    `;
+    connection.query(query, (err, results) => {
+        if (err) {
+            console.error('Error al obtener asesores:', err);
+            return res.status(500).json({ error: 'Error al obtener asesores disponibles.' });
+        }
+        res.status(200).json(results);
+    });
+});
+
+// 2. Crear una nueva cita de asesoría desde la interfaz del alumno
+app.post('/api/alumno/solicitar-cita', (req, res) => {
+    const { numeroCuentaAlumno, numeroCuentaAsesor, materiaId, motivo } = req.body;
+    
+    if (!numeroCuentaAlumno || !numeroCuentaAsesor || !materiaId || !motivo) {
+        return res.status(400).json({ error: 'Faltan datos para procesar la cita.' });
+    }
+
+    const query = 'INSERT INTO citas_asesoria (numero_cuenta_alumno, numero_cuenta_asesor, materia_id, motivo, estado) VALUES (?, ?, ?, ?, "pendiente")';
+    connection.query(query, [numeroCuentaAlumno, numeroCuentaAsesor, materiaId, motivo], (err) => {
+        if (err) {
+            console.error('Error al insertar cita:', err);
+            return res.status(500).json({ error: 'Error al registrar la cita en la base de datos.' });
+        }
+        res.status(200).json({ mensaje: '¡Solicitud de asesoría enviada con éxito! Espera a que tu asesor la acepte.' });
+    });
+});
+
 // 4. Puerto para Azure
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
