@@ -306,6 +306,62 @@ app.post('/api/alta-profesor', (req, res) => {
 });
 
 // ==========================================
+// MÓDULO DE CURSOS DE REGULARIZACIÓN
+// ==========================================
+
+// 1. Ruta para que CUALQUIER ASESOR (Par o Disciplinar) cree un curso
+app.post('/api/asesor/crear-curso', (req, res) => {
+    const { numeroCuentaAsesor, materiaId, titulo, descripcion, duracion, fechaInicio, fechaFin, cupoMaximo } = req.body;
+
+    if (!numeroCuentaAsesor || !materiaId || !titulo || !cupoMaximo) {
+        return res.status(400).json({ error: 'Faltan campos obligatorios para crear el curso.' });
+    }
+
+    // Nota: Usamos la tabla cursos_regularizacion de tu modelo ER
+    const query = `
+        INSERT INTO cursos_regularizacion 
+        (numero_cuenta_asesor, id_materia, titulo_curso, descripcion, duracion_semanas, fecha_inicio, fecha_fin, cupo_maximo, estado) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'Activo')
+    `;
+
+    connection.query(query, [numeroCuentaAsesor, materiaId, titulo, descripcion, duracion, fechaInicio, fechaFin, cupoMaximo], (err, result) => {
+        if (err) {
+            console.error('Error al crear curso:', err);
+            return res.status(500).json({ error: 'Error interno al guardar el curso.' });
+        }
+        res.status(200).json({ mensaje: '¡Curso de regularización publicado con éxito!' });
+    });
+});
+
+// 2. Ruta para que los Alumnos vean TODOS los cursos disponibles
+app.get('/api/alumno/cursos-disponibles', (req, res) => {
+    const query = `
+        SELECT c.id AS curso_id, c.titulo_curso, c.descripcion, c.duracion_semanas, c.fecha_inicio, c.fecha_fin, c.cupo_maximo, 
+               m.nombre AS materia, u.nombre AS asesor_nombre
+        FROM cursos_regularizacion c
+        JOIN materias m ON c.id_materia = m.id
+        JOIN usuarios u ON c.numero_cuenta_asesor = u.numero_cuenta
+        WHERE c.estado = 'Activo'
+    `;
+    connection.query(query, (err, results) => {
+        if (err) return res.status(500).json({ error: 'Error al cargar los cursos.' });
+        res.status(200).json(results);
+    });
+});
+
+// 3. Ruta para que un Alumno solicite inscribirse a un curso
+app.post('/api/alumno/inscribir-curso', (req, res) => {
+    const { numeroCuentaAlumno, cursoId } = req.body;
+
+    const query = 'INSERT INTO inscripciones_cursos (numero_cuenta_alumno, curso_id, estado) VALUES (?, ?, "pendiente")';
+    connection.query(query, [numeroCuentaAlumno, cursoId], (err) => {
+        if (err) return res.status(500).json({ error: 'Error al enviar la solicitud de inscripción.' });
+        res.status(200).json({ mensaje: '¡Solicitud enviada! El asesor revisará tu perfil para aceptarte en el curso.' });
+    });
+});
+
+
+// ==========================================
 // MÓDULO ASESOR PAR: GESTIÓN DE CITAS
 // ==========================================
 
