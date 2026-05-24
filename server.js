@@ -317,16 +317,17 @@ app.post('/api/asesor/crear-curso', (req, res) => {
         return res.status(400).json({ error: 'Faltan campos obligatorios para crear el curso.' });
     }
 
-    // Nota: Usamos la tabla cursos_regularizacion de tu modelo ER
+    // Corregido: Usamos 'id_asesor_disciplinar' e 'id_materia' exactos de tu modelo ER
+    // Mediante (SELECT id...) obtenemos el ID numérico usando el número de cuenta de la sesión
     const query = `
         INSERT INTO cursos_regularizacion 
-        (numero_cuenta_asesor, id_materia, titulo_curso, descripcion, duracion_semanas, fecha_inicio, fecha_fin, cupo_maximo, estado) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'Activo')
+        (id_asesor_disciplinar, id_materia, titulo_curso, descripcion, duracion_semanas, fecha_inicio, fecha_fin, cupo_maximo, estado) 
+        VALUES ((SELECT id FROM usuarios WHERE numero_cuenta = ?), ?, ?, ?, ?, ?, ?, ?, 'Activo')
     `;
 
     connection.query(query, [numeroCuentaAsesor, materiaId, titulo, descripcion, duracion, fechaInicio, fechaFin, cupoMaximo], (err, result) => {
         if (err) {
-            console.error('Error al crear curso:', err);
+            console.error('Error real de MySQL:', err); // Esto saldrá en tu consola de Azure
             return res.status(500).json({ error: 'Error interno al guardar el curso.' });
         }
         res.status(200).json({ mensaje: '¡Curso de regularización publicado con éxito!' });
