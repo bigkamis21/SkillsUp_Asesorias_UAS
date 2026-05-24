@@ -305,6 +305,64 @@ app.post('/api/alta-profesor', (req, res) => {
     });
 });
 
+// ==========================================
+// MÓDULO ASESOR PAR: GESTIÓN DE CITAS
+// ==========================================
+
+// 1. Obtener solicitudes de asesoría pendientes para UN asesor específico
+app.get('/api/asesor/solicitudes/:numeroAsesor', (req, res) => {
+    const { numeroAsesor } = req.params;
+    const query = `
+        SELECT c.id AS cita_id, u.nombre AS alumno, m.nombre AS materia, c.motivo 
+        FROM citas_asesoria c
+        JOIN usuarios u ON c.numero_cuenta_alumno = u.numero_cuenta
+        JOIN materias m ON c.materia_id = m.id
+        WHERE c.numero_cuenta_asesor = ? AND c.estado = 'pendiente'
+    `;
+    connection.query(query, [numeroAsesor], (err, results) => {
+        if (err) return res.status(500).json({ error: 'Error al cargar solicitudes del asesor.' });
+        res.status(200).json(results);
+    });
+});
+
+// 2. Aceptar una cita y asignarle un enlace de Zoom/Meet
+app.post('/api/asesor/aceptar-cita', (req, res) => {
+    const { citaId, linkReunion } = req.body;
+    if (!linkReunion) return res.status(400).json({ error: 'Debes proporcionar un enlace de reunión.' });
+
+    const query = 'UPDATE citas_asesoria SET estado = "aceptada", link_reunion = ? WHERE id = ?';
+    connection.query(query, [linkReunion, citaId], (err) => {
+        if (err) return res.status(500).json({ error: 'Error al aceptar la cita.' });
+        res.status(200).json({ mensaje: '¡Asesoría aceptada con éxito! Enlace registrado.' });
+    });
+});
+
+// 3. Rechazar una cita
+app.post('/api/asesor/rechazar-cita', (req, res) => {
+    const { citaId } = req.body;
+    const query = 'UPDATE citas_asesoria SET estado = "rechazada" WHERE id = ?';
+    connection.query(query, [citaId], (err) => {
+        if (err) return res.status(500).json({ error: 'Error al rechazar la cita.' });
+        res.status(200).json({ mensaje: 'Cita rechazada correctamente.' });
+    });
+});
+
+// 4. Obtener la Agenda (Citas aceptadas) de un asesor
+app.get('/api/asesor/agenda/:numeroAsesor', (req, res) => {
+    const { numeroAsesor } = req.params;
+    const query = `
+        SELECT c.id AS cita_id, u.nombre AS alumno, m.nombre AS materia, c.motivo, c.link_reunion
+        FROM citas_asesoria c
+        JOIN usuarios u ON c.numero_cuenta_alumno = u.numero_cuenta
+        JOIN materias m ON c.materia_id = m.id
+        WHERE c.numero_cuenta_asesor = ? AND c.estado = 'aceptada'
+    `;
+    connection.query(query, [numeroAsesor], (err, results) => {
+        if (err) return res.status(500).json({ error: 'Error al cargar la agenda.' });
+        res.status(200).json(results);
+    });
+});
+
 // 4. Puerto para Azure
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
