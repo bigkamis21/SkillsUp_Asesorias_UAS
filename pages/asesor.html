@@ -21,8 +21,11 @@
                 <i class="fas fa-chalkboard-teacher"></i> Mi Agenda
             </button>
             <button id="tabSolicitudes" class="w-full flex items-center gap-3 p-3 hover:bg-gray-800 text-gray-300 rounded-lg font-medium transition relative">
-                <i class="fas fa-inbox"></i> Solicitudes Recibidas
+                <i class="fas fa-inbox"></i> Solicitudes Citas
                 <span id="badgeContador" class="hidden bg-red-500 text-white text-xs px-2 py-1 rounded-full ml-auto">0</span>
+            </button>
+            <button id="tabCrearCurso" class="w-full flex items-center gap-3 p-3 hover:bg-gray-800 text-gray-300 rounded-lg font-medium transition">
+                <i class="fas fa-plus-circle"></i> Ofertar Curso
             </button>
         </nav>
 
@@ -48,33 +51,102 @@
             <section class="bg-gradient-to-r from-gray-800 to-gray-700 p-8 rounded-2xl text-white shadow-lg relative overflow-hidden">
                 <div class="relative z-10">
                     <h1 class="text-3xl font-bold mb-2">¡Hola, <span id="nombreBienvenida">Asesor</span>! 👋</h1>
-                    <p class="opacity-90 max-w-md">Gracias por apoyar a la comunidad universitaria. Desde este panel puedes gestionar tu agenda de asesorías.</p>
+                    <p class="opacity-90 max-w-md">Gracias por apoyar a la comunidad universitaria. Desde este panel puedes gestionar tu agenda de asesorías y ofertar nuevos cursos.</p>
                 </div>
                 <i class="fas fa-hands-helping absolute right-8 bottom-[-20px] text-9xl opacity-10"></i>
             </section>
 
             <div id="seccionAgenda" class="space-y-4">
                 <h3 class="text-xl font-bold text-gray-800"><i class="fas fa-calendar-alt mr-2 text-blue-600"></i>Mi Agenda de Asesorías</h3>
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6" id="contenedorAgenda">
-                    </div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6" id="contenedorAgenda"></div>
             </div>
 
             <div id="seccionSolicitudes" class="space-y-4 hidden">
                 <h3 class="text-xl font-bold text-gray-800"><i class="fas fa-envelope-open-text mr-2 text-yellow-500"></i>Solicitudes de Alumnos Pendientes</h3>
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6" id="contenedorSolicitudes">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6" id="contenedorSolicitudes"></div>
+            </div>
+
+            <div id="seccionCrearCurso" class="space-y-4 hidden max-w-2xl bg-white p-8 rounded-xl shadow-sm border">
+                <h3 class="text-xl font-bold text-gray-800 mb-2"><i class="fas fa-graduation-cap text-purple-600 mr-2"></i>Publicar Nuevo Curso de Regularización</h3>
+                <p class="text-sm text-gray-500 mb-6">Diseña un programa estructurado asignando los cupos de alumnos y el contenido didáctico.</p>
+                
+                <form id="formCrearCurso" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-1">Título del Curso</label>
+                        <input type="text" id="cursoTitulo" class="w-full border rounded-lg p-2.5 bg-slate-50 focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="Ej. Taller Intensivo de Cálculo Vectorial" required>
                     </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-1">Carrera</label>
+                            <select id="selectCarreraCurso" class="w-full border rounded-lg p-2.5 bg-slate-50 focus:ring-2 focus:ring-blue-500 focus:outline-none" required>
+                                <option value="">Selecciona...</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-1">Semestre</label>
+                            <select id="selectSemestreCurso" class="w-full border rounded-lg p-2.5 bg-slate-50 focus:ring-2 focus:ring-blue-500 focus:outline-none" disabled required>
+                                <option value="">Primero elige carrera</option>
+                                <option value="1">1er Semestre</option>
+                                <option value="2">2do Semestre</option>
+                                <option value="3">3er Semestre</option>
+                                <option value="4">4to Semestre</option>
+                                <option value="5">5to Semestre</option>
+                                <option value="6">6to Semestre</option>
+                                <option value="7">7mo Semestre</option>
+                                <option value="8">8vo Semestre</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-1">Asignatura (Materia)</label>
+                        <select id="selectMateriaCurso" class="w-full border rounded-lg p-2.5 bg-slate-50 focus:ring-2 focus:ring-blue-500 focus:outline-none" disabled required>
+                            <option value="">Primero elige semestre</option>
+                        </select>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-1">Duración (Semanas)</label>
+                            <input type="number" id="cursoDuracion" min="1" max="16" class="w-full border rounded-lg p-2.5 bg-slate-50 focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="Ej. 4" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-1">Cupo Máximo de Alumnos</label>
+                            <input type="number" id="cursoCupo" min="1" max="50" class="w-full border rounded-lg p-2.5 bg-slate-50 focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="Ej. 15" required>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-1">Fecha de Inicio</label>
+                            <input type="date" id="cursoFechaInicio" class="w-full border rounded-lg p-2.5 bg-slate-50 focus:ring-2 focus:ring-blue-500 focus:outline-none" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-1">Fecha de Fin</label>
+                            <input type="date" id="cursoFechaFin" class="w-full border rounded-lg p-2.5 bg-slate-50 focus:ring-2 focus:ring-blue-500 focus:outline-none" required>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-1">Descripción del Curso y Criterios (Temario / Evaluación)</label>
+                        <textarea id="cursoDescripcion" rows="4" class="w-full border rounded-lg p-2.5 bg-slate-50 focus:ring-2 focus:ring-blue-500 focus:outline-none placeholder-gray-400" placeholder="Describe los temas que se verán, horarios sugeridos y los requisitos..." required></textarea>
+                    </div>
+
+                    <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 rounded-lg transition shadow-md">
+                        Publicar Curso en el Catálogo Escolar
+                    </button>
+                </form>
             </div>
 
         </div>
     </main>
 
     <script>
-        // DATOS DEL ALMACENAMIENTO LOCAL
         const nombreReal = localStorage.getItem('nombreUsuario') || 'Asesor';
         const rolUsuario = localStorage.getItem('rolUsuario') || 'asesor_par';
         const cuentaAsesor = localStorage.getItem('cuentaLogueada'); 
 
-        // RENDER INICIAL DE PERFIL
         document.getElementById('nombreHeader').innerText = nombreReal;
         document.getElementById('nombreBienvenida').innerText = nombreReal;
         document.getElementById('avatar').innerText = nombreReal.charAt(0).toUpperCase();
@@ -87,34 +159,110 @@
             tituloRol.innerText = 'Panel de Asesor Par';
         }
 
-        // CONTROL DE PESTAÑAS (TABS)
-        const tabAgenda = document.getElementById('tabAgenda');
-        const tabSolicitudes = document.getElementById('tabSolicitudes');
-        const seccionAgenda = document.getElementById('seccionAgenda');
-        const seccionSolicitudes = document.getElementById('seccionSolicitudes');
+        // --- SISTEMA DE PESTAÑAS (TABS) ---
+        const tabs = {
+            agenda: { btn: document.getElementById('tabAgenda'), sec: document.getElementById('seccionAgenda'), active: "bg-gray-800 text-yellow-400" },
+            solicitudes: { btn: document.getElementById('tabSolicitudes'), sec: document.getElementById('seccionSolicitudes'), active: "bg-gray-800 text-yellow-400" },
+            crearCurso: { btn: document.getElementById('tabCrearCurso'), sec: document.getElementById('seccionCrearCurso'), active: "bg-gray-800 text-yellow-400" }
+        };
 
-        tabAgenda.addEventListener('click', () => {
-            seccionAgenda.classList.remove('hidden');
-            seccionSolicitudes.classList.add('hidden');
-            tabAgenda.className = "w-full flex items-center gap-3 p-3 bg-gray-800 rounded-lg text-yellow-400 font-medium transition";
-            tabSolicitudes.className = "w-full flex items-center gap-3 p-3 hover:bg-gray-800 text-gray-300 rounded-lg font-medium transition relative";
+        function switchTab(activeKey) {
+            Object.keys(tabs).forEach(key => {
+                if(key === activeKey) {
+                    tabs[key].sec.classList.remove('hidden');
+                    tabs[key].btn.className = `w-full flex items-center gap-3 p-3 rounded-lg font-medium transition relative ${tabs[key].active}`;
+                } else {
+                    tabs[key].sec.classList.add('hidden');
+                    tabs[key].btn.className = "w-full flex items-center gap-3 p-3 hover:bg-gray-800 text-gray-300 rounded-lg font-medium transition relative";
+                }
+            });
+            if(activeKey === 'crearCurso') cargarCarrerasForm();
+        }
+
+        tabs.agenda.btn.addEventListener('click', () => switchTab('agenda'));
+        tabs.solicitudes.btn.addEventListener('click', () => switchTab('solicitudes'));
+        tabs.crearCurso.btn.addEventListener('click', () => switchTab('crearCurso'));
+
+        // --- MANEJO DE SELECCIÓN DE MATERIAS EN CURSOS ---
+        const selectCarreraCurso = document.getElementById('selectCarreraCurso');
+        const selectSemestreCurso = document.getElementById('selectSemestreCurso');
+        const selectMateriaCurso = document.getElementById('selectMateriaCurso');
+
+        async function cargarCarrerasForm() {
+            if(selectCarreraCurso.children.length > 1) return; // Ya cargadas
+            try {
+                const res = await fetch('/api/carreras');
+                const carreras = await res.json();
+                selectCarreraCurso.innerHTML = '<option value="">Selecciona...</option>';
+                carreras.forEach(car => {
+                    selectCarreraCurso.innerHTML += `<option value="${car.id}">${car.nombre}</option>`;
+                });
+            } catch (error) { console.error("Error:", error); }
+        }
+
+        selectCarreraCurso.addEventListener('change', () => {
+            if (selectCarreraCurso.value !== "") {
+                selectSemestreCurso.disabled = false;
+                selectSemestreCurso.value = "";
+                selectMateriaCurso.innerHTML = '<option value="">Primero elige semestre</option>';
+                selectMateriaCurso.disabled = true;
+            } else { selectSemestreCurso.disabled = true; }
         });
 
-        tabSolicitudes.addEventListener('click', () => {
-            seccionSolicitudes.classList.remove('hidden');
-            seccionAgenda.classList.add('hidden');
-            tabSolicitudes.className = "w-full flex items-center gap-3 p-3 bg-gray-800 rounded-lg text-yellow-400 font-medium transition relative";
-            tabAgenda.className = "w-full flex items-center gap-3 p-3 hover:bg-gray-800 text-gray-300 rounded-lg font-medium transition";
+        selectSemestreCurso.addEventListener('change', async () => {
+            const carreraId = selectCarreraCurso.value;
+            const semestre = selectSemestreCurso.value;
+            if (semestre !== "") {
+                try {
+                    selectMateriaCurso.innerHTML = '<option value="">Cargando...</option>';
+                    const res = await fetch(`/api/materias/${carreraId}/${semestre}`);
+                    const materias = await res.json();
+                    selectMateriaCurso.innerHTML = '<option value="">Selecciona una materia...</option>';
+                    materias.forEach(mat => {
+                        selectMateriaCurso.innerHTML += `<option value="${mat.id}">${mat.nombre}</option>`;
+                    });
+                    selectMateriaCurso.disabled = false;
+                } catch (error) { console.error("Error:", error); }
+            }
         });
 
-        // CARGAR SOLICITUDES PENDIENTES
+        // --- SUBMIT: EVENTO ENVIAR CURSO NUEVO AL SERVIDOR ---
+        document.getElementById('formCrearCurso').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const cursoData = {
+                numeroCuentaAsesor: cuentaAsesor,
+                materiaId: selectMateriaCurso.value,
+                titulo: document.getElementById('cursoTitulo').value,
+                descripcion: document.getElementById('cursoDescripcion').value,
+                duracion: document.getElementById('cursoDuracion').value,
+                fechaInicio: document.getElementById('cursoFechaInicio').value,
+                fechaFin: document.getElementById('cursoFechaFin').value,
+                cupoMaximo: document.getElementById('cursoCupo').value
+            };
+
+            try {
+                const res = await fetch('/api/asesor/crear-curso', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(cursoData)
+                });
+                const data = await res.json();
+                if(res.ok) {
+                    alert(data.mensaje);
+                    document.getElementById('formCrearCurso').reset();
+                    switchTab('agenda');
+                } else { alert(data.error); }
+            } catch (error) { alert("Error al conectar con el servidor."); }
+        });
+
+        // --- RESPONSES CITAS (CÓDIGO ORIGINAL ANTERIOR) ---
         async function cargarSolicitudes() {
             try {
                 const res = await fetch(`/api/asesor/solicitudes/${cuentaAsesor}`);
                 const datos = await res.json();
                 const contenedor = document.getElementById('contenedorSolicitudes');
                 const badge = document.getElementById('badgeContador');
-                
                 contenedor.innerHTML = '';
                 if(datos.length > 0) {
                     badge.innerText = datos.length;
@@ -132,25 +280,20 @@
                                     <button onclick="aceptarAsesoria(${sol.cita_id})" class="flex-1 bg-green-500 hover:bg-green-600 text-white font-bold py-2 rounded-lg transition shadow-sm">Aceptar</button>
                                     <button onclick="rechazarAsesoria(${sol.cita_id})" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 rounded-lg transition">Rechazar</button>
                                 </div>
-                            </div>
-                        `;
+                            </div>`;
                     });
                 } else {
                     badge.classList.add('hidden');
-                    contenedor.innerHTML = `<p class="text-gray-500 italic">No tienes solicitudes pendientes por el momento.</p>`;
+                    contenedor.innerHTML = `<p class="text-gray-500 italic">No tienes solicitudes pendientes.</p>`;
                 }
-            } catch (error) {
-                console.error("Error cargando solicitudes del asesor:", error);
-            }
+            } catch (error) { console.error(error); }
         }
 
-        // CARGAR AGENDA
         async function cargarAgenda() {
             try {
                 const res = await fetch(`/api/asesor/agenda/${cuentaAsesor}`);
                 const datos = await res.json();
                 const contenedor = document.getElementById('contenedorAgenda');
-                
                 contenedor.innerHTML = '';
                 if(datos.length > 0) {
                     datos.forEach(cita => {
@@ -160,60 +303,31 @@
                                 <p class="text-sm text-gray-600 mb-2"><b>Asesorado:</b> ${cita.alumno}</p>
                                 <p class="text-xs text-gray-500 mb-4 bg-gray-50 p-2 rounded"><b>Mensaje:</b> ${cita.motivo}</p>
                                 <a href="${cita.link_reunion}" target="_blank" class="w-full text-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition flex items-center justify-center gap-2">
-                                    <i class="fas fa-video"></i> Ir a la Reunión (Zoom/Meet)
+                                    <i class="fas fa-video"></i> Ir a la Reunión
                                 </a>
-                            </div>
-                        `;
+                            </div>`;
                     });
-                } else {
-                    contenedor.innerHTML = `<p class="text-gray-500 italic">No tienes asesorías programadas en tu agenda.</p>`;
-                }
-            } catch (error) {
-                console.error("Error cargando la agenda:", error);
-            }
+                } else { contenedor.innerHTML = `<p class="text-gray-500 italic">No tienes asesorías agendadas.</p>`; }
+            } catch (error) { console.error(error); }
         }
 
-        // ACCIÓN: RECHAZAR ASESORÍA
         async function rechazarAsesoria(citaId) {
-            if(confirm("¿Estás seguro de rechazar esta solicitud de asesoría?")) {
-                const res = await fetch('/api/asesor/rechazar-cita', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ citaId })
-                });
-                if(res.ok) {
-                    alert("Solicitud rechazada.");
-                    cargarSolicitudes();
-                }
+            if(confirm("¿Rechazar solicitud?")) {
+                const res = await fetch('/api/asesor/rechazar-cita', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ citaId }) });
+                if(res.ok) { alert("Rechazada."); cargarSolicitudes(); }
             }
         }
 
-        // ACCIÓN: ACEPTAR ASESORÍA (Pidiendo Link externo)
         async function aceptarAsesoria(citaId) {
-            const link = prompt("Por favor, introduce el enlace de la reunión (Zoom, Google Meet, Teams, etc.):");
-            if (link === null) return; // Cancelado
-            if (link.trim() === "") return alert("Debes poner un link válido para aceptar la asesoría.");
-
-            const res = await fetch('/api/asesor/aceptar-cita', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ citaId, linkReunion: link })
-            });
-
-            if(res.ok) {
-                alert("¡Asesoría agendada! Se le notificará al alumno.");
-                cargarSolicitudes();
-                cargarAgenda();
-            } else {
-                alert("Hubo un error al procesar la solicitud.");
-            }
+            const link = prompt("Introduce el enlace de la reunión (Zoom/Meet):");
+            if (!link || link.trim() === "") return;
+            const res = await fetch('/api/asesor/aceptar-cita', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ citaId, linkReunion: link }) });
+            if(res.ok) { alert("¡Agendada!"); cargarSolicitudes(); cargarAgenda(); }
         }
 
-        // DISPARADORES AL CARGAR PÁGINA
         cargarSolicitudes();
         cargarAgenda();
 
-        // CERRAR SESIÓN
         document.getElementById('btnCerrarSesion').addEventListener('click', () => {
             localStorage.clear();
             window.location.href = '../index.html';
