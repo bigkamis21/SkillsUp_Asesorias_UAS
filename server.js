@@ -309,16 +309,21 @@ app.post('/api/alta-profesor', (req, res) => {
 // MÓDULO DE CURSOS DE REGULARIZACIÓN
 // ==========================================
 
-// 1. Ruta para que CUALQUIER ASESOR (Par o Disciplinar) cree un curso
+/// ==========================================
+// RUTA DE DIAGNÓSTICO DE CURSOS (CON LOGS)
+// ==========================================
 app.post('/api/asesor/crear-curso', (req, res) => {
     const { numeroCuentaAsesor, materiaId, titulo, descripcion, duracion, fechaInicio, fechaFin, cupoMaximo } = req.body;
 
+    // IMPRESIÓN EN CONSOLA: Revisa tu terminal de Node/Azure para ver si los datos llegan limpios
+    console.log("=== INTENTO DE CREAR CURSO ===");
+    console.log("Datos recibidos:", req.body);
+
     if (!numeroCuentaAsesor || !materiaId || !titulo || !cupoMaximo) {
-        return res.status(400).json({ error: 'Faltan campos obligatorios para crear el curso.' });
+        return res.status(400).json({ error: 'Faltan campos obligatorios en el formulario.' });
     }
 
-    // Corregido: Usamos 'id_asesor_disciplinar' e 'id_materia' exactos de tu modelo ER
-    // Mediante (SELECT id...) obtenemos el ID numérico usando el número de cuenta de la sesión
+    // Consulta fiel a los nombres exactos de tu Diagrama ER
     const query = `
         INSERT INTO cursos_regularizacion 
         (id_asesor_disciplinar, id_materia, titulo_curso, descripcion, duracion_semanas, fecha_inicio, fecha_fin, cupo_maximo, estado) 
@@ -327,8 +332,12 @@ app.post('/api/asesor/crear-curso', (req, res) => {
 
     connection.query(query, [numeroCuentaAsesor, materiaId, titulo, descripcion, duracion, fechaInicio, fechaFin, cupoMaximo], (err, result) => {
         if (err) {
-            console.error('Error real de MySQL:', err); // Esto saldrá en tu consola de Azure
-            return res.status(500).json({ error: 'Error interno al guardar el curso.' });
+            console.error('❌ Error detectado en MySQL:', err);
+            
+            // Hack de oro: Mandamos el mensaje de error real del motor de la BD a la alerta flotante
+            return res.status(500).json({ 
+                error: `Error de MySQL: ${err.message} (Código: ${err.code})` 
+            });
         }
         res.status(200).json({ mensaje: '¡Curso de regularización publicado con éxito!' });
     });
