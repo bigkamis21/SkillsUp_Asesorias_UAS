@@ -327,7 +327,7 @@ app.post('/api/asesor/crear-curso', (req, res) => {
     const query = `
         INSERT INTO cursos_regularizacion 
         (id_asesor_disciplinar, id_materia, titulo_curso, descripcion, duracion_semanas, fecha_inicio, fecha_fin, cupo_maximo, estado) 
-        VALUES ((SELECT id FROM usuarios WHERE numero_cuenta = ?), ?, ?, ?, ?, ?, ?, ?, 'activo')
+        VALUES ((SELECT id FROM usuarios WHERE numero_cuenta = ?), ?, ?, ?, ?, ?, ?, ?, 'aceptado')
     `;
 
     connection.query(query, [numeroCuentaAsesor, materiaId, titulo, descripcion, duracion, fechaInicio, fechaFin, cupoMaximo], (err, result) => {
