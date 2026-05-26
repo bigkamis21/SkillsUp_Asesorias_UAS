@@ -323,11 +323,11 @@ app.post('/api/asesor/crear-curso', (req, res) => {
         return res.status(400).json({ error: 'Faltan campos obligatorios en el formulario.' });
     }
 
-    // Consulta fiel a los nombres exactos de tu Diagrama ER
+    // Consulta 
     const query = `
         INSERT INTO cursos_regularizacion 
         (id_asesor_disciplinar, id_materia, titulo_curso, descripcion, duracion_semanas, fecha_inicio, fecha_fin, cupo_maximo, estado) 
-        VALUES ((SELECT id FROM usuarios WHERE numero_cuenta = ?), ?, ?, ?, ?, ?, ?, ?, 'aceptado')
+        VALUES ((SELECT id FROM usuarios WHERE numero_cuenta = ?), ?, ?, ?, ?, ?, ?, ?, 'abierto')
     `;
 
     connection.query(query, [numeroCuentaAsesor, materiaId, titulo, descripcion, duracion, fechaInicio, fechaFin, cupoMaximo], (err, result) => {
