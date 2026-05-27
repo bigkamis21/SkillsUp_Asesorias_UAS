@@ -306,58 +306,48 @@ app.post('/api/alta-profesor', (req, res) => {
 });
 
 // ==========================================
-// MÓDULO DE CURSOS DE REGULARIZACIÓN
+// MÓDULO DE CURSOS DE REGULARIZACIÓN (ACTUALIZADO)
 // ==========================================
 
-/// ==========================================
-// RUTA DE DIAGNÓSTICO DE CURSOS (CON LOGS)
-// ==========================================
+// 1. Crear curso (Añadido Modalidad y Horario)
 app.post('/api/asesor/crear-curso', (req, res) => {
-    const { numeroCuentaAsesor, materiaId, titulo, descripcion, duracion, fechaInicio, fechaFin, cupoMaximo } = req.body;
+    const { numeroCuentaAsesor, materiaId, titulo, descripcion, duracion, fechaInicio, fechaFin, cupoMaximo, modalidad, horario } = req.body;
 
-    // IMPRESIÓN EN CONSOLA: Revisa tu terminal de Node/Azure para ver si los datos llegan limpios
-    console.log("=== INTENTO DE CREAR CURSO ===");
-    console.log("Datos recibidos:", req.body);
-
-    if (!numeroCuentaAsesor || !materiaId || !titulo || !cupoMaximo) {
+    if (!numeroCuentaAsesor || !materiaId || !titulo || !cupoMaximo || !modalidad || !horario) {
         return res.status(400).json({ error: 'Faltan campos obligatorios en el formulario.' });
     }
 
-    // Consulta 
     const query = `
         INSERT INTO cursos_regularizacion 
-        (id_asesor_disciplinar, id_materia, titulo_curso, descripcion, duracion_semanas, fecha_inicio, fecha_fin, cupo_maximo, estado) 
-        VALUES ((SELECT id FROM usuarios WHERE numero_cuenta = ?), ?, ?, ?, ?, ?, ?, ?, 'abierto')
+        (id_asesor_disciplinar, id_materia, titulo_curso, descripcion, modalidad, horario, duracion_semanas, fecha_inicio, fecha_fin, cupo_maximo, estado) 
+        VALUES ((SELECT id FROM usuarios WHERE numero_cuenta = ?), ?, ?, ?, ?, ?, ?, ?, ?, ?, 'activo')
     `;
 
-    connection.query(query, [numeroCuentaAsesor, materiaId, titulo, descripcion, duracion, fechaInicio, fechaFin, cupoMaximo], (err, result) => {
+    connection.query(query, [numeroCuentaAsesor, materiaId, titulo, descripcion, modalidad, horario, duracion, fechaInicio, fechaFin, cupoMaximo], (err, result) => {
         if (err) {
-            console.error('❌ Error detectado en MySQL:', err);
-            
-            // Hack de oro: Mandamos el mensaje de error real del motor de la BD a la alerta flotante
-            return res.status(500).json({ 
-                error: `Error de MySQL: ${err.message} (Código: ${err.code})` 
-            });
+            console.error('Error detectado en MySQL:', err);
+            return res.status(500).json({ error: `Error de MySQL: ${err.message}` });
         }
         res.status(200).json({ mensaje: '¡Curso de regularización publicado con éxito!' });
     });
 });
 
-// 2. Ruta para que los Alumnos vean TODOS los cursos disponibles
+// 2. Alumnos ven TODOS los cursos (Traemos Modalidad y Horario)
 app.get('/api/alumno/cursos-disponibles', (req, res) => {
     const query = `
-        SELECT c.id AS curso_id, c.titulo_curso, c.descripcion, c.duracion_semanas, c.fecha_inicio, c.fecha_fin, c.cupo_maximo, 
+        SELECT c.id AS curso_id, c.titulo_curso, c.descripcion, c.modalidad, c.horario, c.duracion_semanas, c.fecha_inicio, c.fecha_fin, c.cupo_maximo, 
                m.nombre AS materia, u.nombre AS asesor_nombre
         FROM cursos_regularizacion c
         JOIN materias m ON c.id_materia = m.id
-        JOIN usuarios u ON c.numero_cuenta_asesor = u.numero_cuenta
-        WHERE c.estado = 'Activo'
+        JOIN usuarios u ON c.id_asesor_disciplinar = u.id
+        WHERE c.estado = 'activo'
     `;
     connection.query(query, (err, results) => {
         if (err) return res.status(500).json({ error: 'Error al cargar los cursos.' });
         res.status(200).json(results);
     });
 });
+
 
 // 3. Ruta para que un Alumno solicite inscribirse a un curso
 app.post('/api/alumno/inscribir-curso', (req, res) => {
