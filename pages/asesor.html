@@ -196,24 +196,34 @@
         const textoBienvenida = document.getElementById('textoBienvenida');
         
         // --- SEPARACIÓN PERFECTA DE ROLES ---
+        
+        // AMBOS roles pueden ver el botón de Ofertar y su panel de cosas publicadas
+        document.getElementById('tabCrearCurso').classList.remove('hidden');
+        if(document.getElementById('panelMisCursos')) document.getElementById('panelMisCursos').classList.remove('hidden');
+
         if (rolUsuario === 'asesor_disciplinar') {
             // VISTA MAESTRO
             tituloRol.innerText = 'Panel de Asesor Disciplinar';
             tituloRol.classList.replace('text-blue-600', 'text-purple-600');
-            if(textoBienvenida) textoBienvenida.innerText = 'Gracias por apoyar a la comunidad universitaria. Desde este panel puedes gestionar las inscripciones y ofertar nuevos cursos.';
+            if(textoBienvenida) textoBienvenida.innerText = 'Gracias por apoyar a la comunidad universitaria. Desde este panel puedes gestionar las inscripciones y ofertar cursos de regularización.';
             
-            document.getElementById('tabCrearCurso').classList.remove('hidden');
-            if(document.getElementById('panelMisCursos')) document.getElementById('panelMisCursos').classList.remove('hidden');
-            
+            // Ocultamos cosas exclusivas de los alumnos (barra de horas y grid 1 a 1)
             document.getElementById('panelProgresoHoras').classList.add('hidden');
-            document.getElementById('contenedorAgenda').classList.add('hidden'); // Ocultamos citas 1a1
+            document.getElementById('contenedorAgenda').classList.add('hidden'); 
         } else {
             // VISTA ALUMNO (ASESOR PAR)
             tituloRol.innerText = 'Panel de Asesor Par';
-            if(textoBienvenida) textoBienvenida.innerText = 'Gracias por apoyar a la comunidad universitaria. Desde este panel puedes gestionar tu agenda de asesorías 1 a 1.';
+            if(textoBienvenida) textoBienvenida.innerText = 'Gestiona tu agenda de asesorías 1 a 1 y publica grupos de estudio para validar tus horas.';
             
-            document.getElementById('tabCrearCurso').classList.add('hidden');
-            if(document.getElementById('panelMisCursos')) document.getElementById('panelMisCursos').classList.add('hidden');
+            // Adaptamos los títulos visuales para que tengan sentido para el alumno
+            document.getElementById('tabCrearCurso').innerHTML = '<i class="fas fa-bullhorn"></i> Publicar Asesoría';
+            document.querySelector('#seccionCrearCurso h3').innerHTML = '<i class="fas fa-bullhorn text-purple-600 mr-2"></i>Publicar Asesoría o Grupo de Estudio';
+            document.querySelector('#formCrearCurso button[type="submit"]').innerText = 'Publicar Asesoría en el Catálogo';
+            
+            if(document.getElementById('panelMisCursos')) {
+                document.querySelector('#panelMisCursos h3').innerHTML = '<i class="fas fa-bullhorn text-purple-600 mr-2"></i>Mis Asesorías Publicadas';
+                document.querySelector('#panelMisCursos p').innerText = 'Catálogo de asesorías y grupos que has ofertado a tus compañeros.';
+            }
         }
 
         // --- SISTEMA DE PESTAÑAS (TABS) ---

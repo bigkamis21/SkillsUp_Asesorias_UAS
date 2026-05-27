@@ -102,31 +102,66 @@
 
         async function cargarAsesoresDisponibles() {
             try {
-                const res = await fetch('/api/alumno/asesores-disponibles');
-                const asesores = await res.json();
+                // Ahora llama a la ruta correcta que diseñamos en la Cirugía 1
+                const res = await fetch('/api/alumno/asesorias-grupos-pares');
+                const asesorias = await res.json();
                 const contenedor = document.getElementById('contenedorAsesoresDisponibles');
                 
-                if (asesores.length > 0) {
+                if (asesorias.length > 0) {
                     contenedor.innerHTML = '';
-                    asesores.forEach(ase => {
+                    asesorias.forEach(ase => {
+                        // Evitar que el alumno vea su propia asesoría para inscribirse
                         if(ase.asesor_cuenta !== cuentaAlumnoLogueado) {
+                            const fInicio = new Date(ase.fecha_inicio).toLocaleDateString('es-MX');
+                            const fFin = new Date(ase.fecha_fin).toLocaleDateString('es-MX');
+
                             contenedor.innerHTML += `
                                 <div class="bg-white p-6 rounded-xl border-2 border-purple-200 flex flex-col shadow-sm">
-                                    <h3 class="font-bold text-lg text-purple-900">${ase.asesor_nombre}</h3>
-                                    <p class="text-sm font-semibold text-purple-700 bg-purple-50 border border-purple-100 p-2 rounded mb-4 mt-2">
-                                        <i class="fas fa-book mr-2"></i>Materia: ${ase.materia_nombre}
-                                    </p>
-                                    <p class="text-xs text-gray-500 mb-4">Acuerda la modalidad (presencial/en línea) directo con tu compañero al agendar.</p>
+                                    <div class="flex justify-between items-start mb-2">
+                                        <h3 class="font-bold text-lg text-purple-900">${ase.titulo_curso}</h3>
+                                        <span class="bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded font-bold">${ase.materia}</span>
+                                    </div>
+                                    <p class="text-sm text-gray-500 mb-4"><i class="fas fa-user-graduate mr-2 text-purple-400"></i>Asesor Par: <b>${ase.asesor_nombre}</b></p>
                                     
-                                    <button onclick="alert('Funcionalidad de agendar cita aquí (ya la tienes)')" class="mt-auto w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 rounded-lg transition text-sm">
+                                    <div class="grid grid-cols-2 gap-3 mb-4 text-xs bg-purple-50 p-3 rounded-lg border border-purple-100">
+                                        <div><i class="fas fa-map-marker-alt text-purple-500 mr-1"></i><b>Modalidad:</b> ${ase.modalidad}</div>
+                                        <div><i class="fas fa-clock text-purple-500 mr-1"></i><b>Horario:</b> ${ase.horario}</div>
+                                        <div><i class="far fa-calendar-alt text-purple-500 mr-1"></i><b>Fechas:</b> ${fInicio} al ${fFin}</div>
+                                        <div><i class="fas fa-users text-purple-500 mr-1"></i><b>Cupo:</b> ${ase.cupo_maximo}</div>
+                                    </div>
+                                    <p class="text-gray-600 text-sm mb-6"><b>Descripción:</b><br>${ase.descripcion}</p>
+                                    
+                                    <button onclick="solicitarAsesoriaParDirecta('${ase.asesor_cuenta}', ${ase.materia_id}, '${ase.titulo_curso}')" class="mt-auto w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 rounded-lg transition text-sm shadow-md">
                                         Solicitar Asesoría Par
                                     </button>
                                 </div>
                             `;
                         }
                     });
-                } else { contenedor.innerHTML = `<p class="text-gray-500">No hay asesores pares disponibles.</p>`; }
+                } else { contenedor.innerHTML = `<p class="text-gray-500 col-span-full">Aún no hay asesorías publicadas por compañeros.</p>`; }
             } catch (error) { console.error(error); }
+        }
+
+        // NUEVA FUNCIÓN: Envía la petición directo usando la info que el Par ya predefinió
+        async function solicitarAsesoriaParDirecta(asesorCuenta, materiaId, titulo) {
+            if(confirm(`¿Enviar solicitud de asesoría para: ${titulo}?`)) {
+                try {
+                    const motivoAutomatico = `Solicitud de inscripción a la asesoría/grupo: ${titulo}`;
+                    
+                    const res = await fetch('/api/alumno/solicitar-cita', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ 
+                            numeroCuentaAlumno: cuentaAlumnoLogueado, 
+                            numeroCuentaAsesor: asesorCuenta, 
+                            materiaId: materiaId, 
+                            motivo: motivoAutomatico 
+                        })
+                    });
+                    const data = await res.json();
+                    alert(data.mensaje || data.error);
+                } catch(error) { alert("Error de conexión."); }
+            }
         }
 
         async function inscribirseCurso(cursoId) {
