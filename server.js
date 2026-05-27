@@ -306,7 +306,7 @@ app.post('/api/alta-profesor', (req, res) => {
 });
 
 // ==========================================
-// MÓDULO DE CURSOS DE REGULARIZACIÓN (ACTUALIZADO)
+// MÓDULO DE CURSOS DE REGULARIZACIÓN 
 // ==========================================
 
 // 1. Crear curso (Añadido Modalidad y Horario)
@@ -381,15 +381,65 @@ app.get('/api/asesor/solicitudes/:numeroAsesor', (req, res) => {
     });
 });
 
-// 2. Aceptar una cita y asignarle un enlace de Zoom/Meet
+// 2. ACEPTAR CITA (Modificado para generar PIN automático)
 app.post('/api/asesor/aceptar-cita', (req, res) => {
     const { citaId, linkReunion } = req.body;
     if (!linkReunion) return res.status(400).json({ error: 'Debes proporcionar un enlace de reunión.' });
+    
+    // Generamos un PIN secreto de 4 dígitos (Ej. 4829)
+    const pinSecreto = Math.floor(1000 + Math.random() * 9000).toString();
 
-    const query = 'UPDATE citas_asesoria SET estado = "aceptada", link_reunion = ? WHERE id = ?';
-    connection.query(query, [linkReunion, citaId], (err) => {
+    // Actualizamos el estado, el link y guardamos el PIN en la base de datos
+    const query = 'UPDATE citas_asesoria SET estado = "aceptada", link_reunion = ?, pin_validacion = ? WHERE id = ?';
+    
+    connection.query(query, [linkReunion, pinSecreto, citaId], (err) => {
         if (err) return res.status(500).json({ error: 'Error al aceptar la cita.' });
-        res.status(200).json({ mensaje: '¡Asesoría aceptada con éxito! Enlace registrado.' });
+        res.status(200).json({ mensaje: '¡Asesoría aceptada con éxito! El alumno recibirá su PIN secreto.' });
+    });
+});
+
+// 2.1 VALIDAR PIN Y COMPLETAR CITA (NUEVA FUNCIÓN)
+app.post('/api/asesor/validar-pin', (req, res) => {
+    const { citaId, pinIngresado } = req.body;
+
+    // Primero buscamos cuál era el PIN real de esa cita
+    const queryBuscar = 'SELECT pin_validacion FROM citas_asesoria WHERE id = ?';
+    
+    connection.query(queryBuscar, [citaId], (err, results) => {
+        if (err || results.length === 0) return res.status(500).json({ error: 'Error al buscar la cita.' });
+
+        const pinReal = results[0].pin_validacion;
+
+        if (pinIngresado === pinReal) {
+            // Si el PIN coincide, cambiamos el estado a Completada
+            const queryCompletar = 'UPDATE citas_asesoria SET estado = "Completada" WHERE id = ?';
+            connection.query(queryCompletar, [citaId], (err) => {
+                if (err) return res.status(500).json({ error: 'Error al registrar la hora.' });
+                res.status(200).json({ mensaje: '¡PIN correcto! Hora de servicio sumada a tu progreso.' });
+            });
+        } else {
+            res.status(400).json({ error: 'PIN incorrecto. Pídele al alumno su código de 4 dígitos.' });
+        }
+    });
+});
+
+// 2.2 CALCULAR HORAS ANUALES DEL ASESOR (NUEVA FUNCIÓN)
+app.get('/api/asesor/progreso-horas/:cuenta', (req, res) => {
+    const { cuenta } = req.params;
+    
+    // Suma las horas SOLO si están completadas y son de este año
+    const query = `
+        SELECT SUM(duracion_horas) AS total_horas 
+        FROM citas_asesoria 
+        WHERE numero_cuenta_asesor = ? 
+        AND estado = 'Completada' 
+        AND YEAR(fecha_registro) = YEAR(CURRENT_DATE)
+    `;
+    
+    connection.query(query, [cuenta], (err, results) => {
+        if (err) return res.status(500).json({ error: 'Error al calcular progreso.' });
+        const total = results[0].total_horas || 0; // Si es nulo, devuelve 0
+        res.status(200).json({ total_horas: total });
     });
 });
 
@@ -449,46 +499,6 @@ app.post('/api/alumno/solicitar-cita', (req, res) => {
     const query = 'INSERT INTO citas_asesoria (numero_cuenta_alumno, numero_cuenta_asesor, materia_id, motivo, estado) VALUES (?, ?, ?, ?, "pendiente")';
     connection.query(query, [numeroCuentaAlumno, numeroCuentaAsesor, materiaId, motivo], (err) => {
         if (err) return res.status(500).json({ error: 'Error al registrar la cita en la base de datos.' });
-        res.status(200).json({ mensaje: '¡Solicitud de asesoría enviada con éxito! Espera a que tu asesor la acepte.' });
-    });
-});
-
-// ==========================================
-// FLUJO ALUMNO: BUSCAR ASESORES Y PEDIR CITA
-// ==========================================
-
-// 1. Obtener los asesores pares que ya están aprobados por el Admin y la materia que dan
-app.get('/api/alumno/asesores-disponibles', (req, res) => {
-    const query = `
-        SELECT u.nombre AS asesor_nombre, u.numero_cuenta AS asesor_cuenta, m.nombre AS materia_nombre, m.id AS materia_id
-        FROM usuarios u
-        JOIN solicitudes_asesor s ON u.numero_cuenta = s.numero_cuenta
-        JOIN materias m ON s.materia_id = m.id
-        WHERE u.rol = 'asesor_par' AND s.estado = 'aprobada'
-    `;
-    connection.query(query, (err, results) => {
-        if (err) {
-            console.error('Error al obtener asesores:', err);
-            return res.status(500).json({ error: 'Error al obtener asesores disponibles.' });
-        }
-        res.status(200).json(results);
-    });
-});
-
-// 2. Crear una nueva cita de asesoría desde la interfaz del alumno
-app.post('/api/alumno/solicitar-cita', (req, res) => {
-    const { numeroCuentaAlumno, numeroCuentaAsesor, materiaId, motivo } = req.body;
-    
-    if (!numeroCuentaAlumno || !numeroCuentaAsesor || !materiaId || !motivo) {
-        return res.status(400).json({ error: 'Faltan datos para procesar la cita.' });
-    }
-
-    const query = 'INSERT INTO citas_asesoria (numero_cuenta_alumno, numero_cuenta_asesor, materia_id, motivo, estado) VALUES (?, ?, ?, ?, "pendiente")';
-    connection.query(query, [numeroCuentaAlumno, numeroCuentaAsesor, materiaId, motivo], (err) => {
-        if (err) {
-            console.error('Error al insertar cita:', err);
-            return res.status(500).json({ error: 'Error al registrar la cita en la base de datos.' });
-        }
         res.status(200).json({ mensaje: '¡Solicitud de asesoría enviada con éxito! Espera a que tu asesor la acepte.' });
     });
 });

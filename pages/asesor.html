@@ -58,6 +58,20 @@
 
             <div id="seccionAgenda" class="space-y-4">
                 <h3 class="text-xl font-bold text-gray-800"><i class="fas fa-calendar-alt mr-2 text-blue-600"></i>Mi Agenda de Asesorías</h3>
+                
+                <div class="bg-white p-6 rounded-xl shadow-sm border mb-6">
+                    <div class="flex justify-between items-end mb-4">
+                        <div>
+                            <h4 class="font-bold text-gray-800"><i class="fas fa-medal text-yellow-500 mr-2"></i>Horas para Descuento de Inscripción</h4>
+                            <p class="text-xs text-gray-500 mt-1">Valida tus clases con el PIN de tus alumnos.</p>
+                        </div>
+                        <span id="textoHoras" class="text-xl font-bold text-blue-900">0 / 100 hrs</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-3 mb-1 overflow-hidden">
+                        <div id="barraProgreso" class="bg-gradient-to-r from-blue-500 to-purple-600 h-3 rounded-full transition-all duration-1000" style="width: 0%"></div>
+                    </div>
+                </div>
+
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6" id="contenedorAgenda"></div>
             </div>
 
@@ -332,6 +346,68 @@
             localStorage.clear();
             window.location.href = '../index.html';
         });
+
+        // META DE HORAS PARA EL DESCUENTO
+        const META_HORAS_ANUAL = 100;
+
+        // 1. CARGAR PROGRESO REAL DE HORAS
+        async function cargarProgreso() {
+            try {
+                const res = await fetch(`/api/asesor/progreso-horas/${cuentaAsesor}`);
+                const data = await res.json();
+                const horas = data.total_horas;
+                
+                // Calculamos porcentaje (máximo 100%)
+                let porcentaje = (horas / META_HORAS_ANUAL) * 100;
+                if (porcentaje > 100) porcentaje = 100;
+
+                // Animamos la barra y el texto
+                document.getElementById('textoHoras').innerText = `${horas} / ${META_HORAS_ANUAL} hrs`;
+                document.getElementById('barraProgreso').style.width = `${porcentaje}%`;
+            } catch (error) { console.error("Error cargando progreso:", error); }
+        }
+
+        // 2. FUNCIÓN PARA VALIDAR EL PIN DE LA CLASE
+        async function finalizarClase(citaId) {
+            const pin = prompt("Por favor, pídele al alumno su PIN secreto de 4 dígitos para validar esta hora:");
+            
+            if (!pin || pin.trim() === "") return;
+
+            try {
+                const res = await fetch('/api/asesor/validar-pin', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ citaId: citaId, pinIngresado: pin })
+                });
+                const data = await res.json();
+                
+                if (res.ok) {
+                    alert(data.mensaje); // ¡PIN Correcto!
+                    cargarAgenda();      // Recargamos la agenda para quitar la clase
+                    cargarProgreso();    // ¡Vemos cómo sube la barrita!
+                } else {
+                    alert(data.error);   // PIN Incorrecto
+                }
+            } catch (error) { alert("Error de conexión."); }
+        }
+
+        // 3. ACTUALIZAR LA VISTA DE LA AGENDA (Añadir botón de PIN)
+        // Busca tu función cargarAgenda() que ya tenías y asegúrate de cambiar el botón de las tarjetas:
+        // Reemplaza el botón anterior por estos dos:
+        /*
+        <div class="flex gap-2 w-full mt-4">
+            <a href="${cita.link_reunion}" target="_blank" class="flex-1 text-center bg-blue-100 hover:bg-blue-200 text-blue-800 font-bold py-2 rounded-lg transition text-sm">
+                <i class="fas fa-video"></i> Ir a Sala
+            </a>
+            <button onclick="finalizarClase(${cita.id})" class="flex-1 bg-green-500 hover:bg-green-600 text-white font-bold py-2 rounded-lg transition text-sm shadow-sm">
+                <i class="fas fa-check-circle"></i> Validar PIN
+            </button>
+        </div>
+        */
+
+        // Llama a cargarProgreso() al final de tus scripts
+        cargarProgreso();
+        
     </script>
 </body>
 </html>
