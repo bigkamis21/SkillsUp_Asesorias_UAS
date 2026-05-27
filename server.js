@@ -332,7 +332,8 @@ app.post('/api/asesor/crear-curso', (req, res) => {
     });
 });
 
-// 2. Alumnos ven TODOS los cursos OFICIALES (Filtro: Solo Maestros)
+
+// 2. Alumnos ven Cursos OFICIALES (Filtro: Solo Maestros)
 app.get('/api/alumno/cursos-disponibles', (req, res) => {
     const query = `
         SELECT c.id AS curso_id, c.titulo_curso, c.descripcion, c.modalidad, c.horario, c.duracion_semanas, c.fecha_inicio, c.fecha_fin, c.cupo_maximo, 
@@ -343,13 +344,13 @@ app.get('/api/alumno/cursos-disponibles', (req, res) => {
         WHERE c.estado = 'abierto' AND u.rol = 'asesor_disciplinar'
     `;
     connection.query(query, (err, results) => {
-        if (err) return res.status(500).json({ error: 'Error al cargar los cursos.' });
+        if (err) return res.status(500).json({ error: 'Error al cargar cursos oficiales.' });
         res.status(200).json(results);
     });
 });
 
-// 2.1 Alumnos ven ASESORÍAS/GRUPOS publicados (Filtro: Solo Asesores Pares)
-app.get('/api/alumno/asesorias-pares-disponibles', (req, res) => {
+// 2.1 Alumnos ven ASESORÍAS PARES (Filtro: Solo Alumnos)
+app.get('/api/alumno/asesorias-grupos-pares', (req, res) => {
     const query = `
         SELECT c.id AS curso_id, c.titulo_curso, c.descripcion, c.modalidad, c.horario, c.duracion_semanas, c.fecha_inicio, c.fecha_fin, c.cupo_maximo, 
                m.nombre AS materia, u.nombre AS asesor_nombre, u.numero_cuenta AS asesor_cuenta, m.id AS materia_id
@@ -359,7 +360,7 @@ app.get('/api/alumno/asesorias-pares-disponibles', (req, res) => {
         WHERE c.estado = 'abierto' AND u.rol = 'asesor_par'
     `;
     connection.query(query, (err, results) => {
-        if (err) return res.status(500).json({ error: 'Error al cargar asesorías pares.' });
+        if (err) return res.status(500).json({ error: 'Error al cargar asesorias pares.' });
         res.status(200).json(results);
     });
 });

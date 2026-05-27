@@ -495,6 +495,7 @@
         } else {
             cargarAgenda();
             cargarProgreso();
+            cargarMisCursosCreados(); // <--- ¡ESTO ERA LO QUE FALTABA!
         }
 
         // Cerrar sesión
@@ -502,6 +503,7 @@
             localStorage.clear();
             window.location.href = '../index.html';
         });
+        
     </script>
 </body>
 </html>
