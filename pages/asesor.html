@@ -353,7 +353,7 @@
                                         <h4 class="font-bold text-lg text-slate-800">${sol.materia}</h4>
                                         <span class="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded font-bold">Cita Privada</span>
                                     </div>
-                                    <p class="text-sm text-gray-500 mb-2"><i class="fas fa-user mr-2"></i>Compañero: ${sol.alumno}</p>
+                                    <p class="text-sm text-gray-500 mb-2"><i class="fas fa-user mr-2"></i>Alumno/a: ${sol.alumno}</p>
                                     <p class="text-gray-700 mb-6 bg-gray-50 p-3 rounded italic text-sm">"${sol.motivo}"</p>
                                     <div class="mt-auto flex gap-3">
                                         <button onclick="aceptarAsesoria(${sol.cita_id})" class="flex-1 bg-green-500 hover:bg-green-600 text-white font-bold py-2 rounded-lg transition shadow-sm">Aceptar</button>
@@ -455,9 +455,9 @@
         async function aceptarAsesoria(citaId) {
             const { value: lugar } = await Swal.fire({
                 title: 'Establecer Lugar',
-                text: 'Escribe el enlace web O el lugar físico (Ej. Biblioteca, Aula 5)',
+                text: 'Escribe el enlace web o el lugar físico',
                 input: 'text', inputPlaceholder: 'Link o lugar...',
-                showCancelButton: true, confirmButtonText: 'Confirmar Cita', confirmButtonColor: '#10b981'
+                showCancelButton: true, confirmButtonText: 'Confirmar', confirmButtonColor: '#10b981'
             });
             if (lugar) {
                 const res = await fetch('/api/asesor/aceptar-cita', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ citaId, linkReunion: lugar }) });
@@ -503,7 +503,7 @@
             localStorage.clear();
             window.location.href = '../index.html';
         });
-        
+
     </script>
 </body>
 </html>
