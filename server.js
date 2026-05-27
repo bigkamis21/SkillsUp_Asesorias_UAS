@@ -503,6 +503,87 @@ app.post('/api/alumno/solicitar-cita', (req, res) => {
     });
 });
 
+// ==========================================
+// MÓDULO MAESTROS: GESTIÓN DE INSCRIPCIONES A CURSOS
+// ==========================================
+
+// 1. Obtener alumnos que solicitaron entrar al curso del maestro
+app.get('/api/asesor/inscripciones/:cuentaAsesor', (req, res) => {
+    const { cuentaAsesor } = req.params;
+    const query = `
+        SELECT i.id AS inscripcion_id, u.nombre AS alumno, u.kardex_url, c.titulo_curso, c.modalidad 
+        FROM inscripciones_cursos i
+        JOIN usuarios u ON i.numero_cuenta_alumno = u.numero_cuenta
+        JOIN cursos_regularizacion c ON i.curso_id = c.id
+        WHERE c.id_asesor_disciplinar = (SELECT id FROM usuarios WHERE numero_cuenta = ?) 
+        AND i.estado = 'pendiente'
+    `;
+    connection.query(query, [cuentaAsesor], (err, results) => {
+        if (err) return res.status(500).json({ error: 'Error al cargar inscripciones.' });
+        res.status(200).json(results);
+    });
+});
+
+// 2. Aceptar alumno en el curso
+app.post('/api/asesor/aceptar-inscripcion', (req, res) => {
+    const { inscripcionId } = req.body;
+    const query = "UPDATE inscripciones_cursos SET estado = 'aceptado' WHERE id = ?";
+    connection.query(query, [inscripcionId], (err) => {
+        if (err) return res.status(500).json({ error: 'Error al aceptar alumno.' });
+        res.status(200).json({ mensaje: 'Alumno aceptado en el curso de regularización.' });
+    });
+});
+
+// 3. Rechazar alumno en el curso
+app.post('/api/asesor/rechazar-inscripcion', (req, res) => {
+    const { inscripcionId } = req.body;
+    const query = "UPDATE inscripciones_cursos SET estado = 'rechazado' WHERE id = ?";
+    connection.query(query, [inscripcionId], (err) => {
+        if (err) return res.status(500).json({ error: 'Error al rechazar alumno.' });
+        res.status(200).json({ mensaje: 'Alumno rechazado (No cumple los criterios).' });
+    });
+});
+
+// ==========================================
+// MÓDULO ALUMNO: MIS CITAS Y APRENDIZAJE
+// ==========================================
+
+// 1. Obtener las Tutorías 1 a 1 del Alumno (Incluye PIN Secreto)
+app.get('/api/alumno/mis-tutorias/:cuenta', (req, res) => {
+    const { cuenta } = req.params;
+    const query = `
+        SELECT c.id AS cita_id, m.nombre AS materia, u.nombre AS asesor_nombre, 
+               c.estado, c.link_reunion, c.pin_validacion, c.motivo
+        FROM citas_asesoria c
+        JOIN materias m ON c.materia_id = m.id
+        JOIN usuarios u ON c.numero_cuenta_asesor = u.numero_cuenta
+        WHERE c.numero_cuenta_alumno = ?
+        ORDER BY c.id DESC
+    `;
+    connection.query(query, [cuenta], (err, results) => {
+        if (err) return res.status(500).json({ error: 'Error al cargar tutorías.' });
+        res.status(200).json(results);
+    });
+});
+
+// 2. Obtener el estado de sus Inscripciones a Cursos
+app.get('/api/alumno/mis-inscripciones/:cuenta', (req, res) => {
+    const { cuenta } = req.params;
+    const query = `
+        SELECT i.id AS inscripcion_id, c.titulo_curso, c.modalidad, c.horario, 
+               u.nombre AS maestro_nombre, i.estado
+        FROM inscripciones_cursos i
+        JOIN cursos_regularizacion c ON i.curso_id = c.id
+        JOIN usuarios u ON c.id_asesor_disciplinar = u.id
+        WHERE i.numero_cuenta_alumno = ?
+        ORDER BY i.id DESC
+    `;
+    connection.query(query, [cuenta], (err, results) => {
+        if (err) return res.status(500).json({ error: 'Error al cargar inscripciones.' });
+        res.status(200).json(results);
+    });
+});
+
 // 4. Puerto para Azure
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {

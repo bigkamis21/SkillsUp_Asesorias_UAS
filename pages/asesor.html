@@ -347,76 +347,110 @@
         }
 
         // --- CARGAR CITAS CON SWEETALERT ---
+        // --- CARGAR CITAS O INSCRIPCIONES (INTELIGENTE POR ROL) ---
         async function cargarSolicitudes() {
+            const contenedor = document.getElementById('contenedorSolicitudes');
+            const badge = document.getElementById('badgeContador');
+            contenedor.innerHTML = '';
+
             try {
-                const res = await fetch(`/api/asesor/solicitudes/${cuentaAsesor}`);
-                const datos = await res.json();
-                const contenedor = document.getElementById('contenedorSolicitudes');
-                const badge = document.getElementById('badgeContador');
-                contenedor.innerHTML = '';
-                if(datos.length > 0) {
-                    badge.innerText = datos.length;
-                    badge.classList.remove('hidden');
-                    datos.forEach(sol => {
-                        contenedor.innerHTML += `
-                            <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-yellow-400 flex flex-col">
-                                <div class="flex justify-between items-start mb-2">
-                                    <h4 class="font-bold text-lg text-slate-800">${sol.materia}</h4>
-                                    <span class="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded font-bold">Pendiente</span>
-                                </div>
-                                <p class="text-sm text-gray-500 mb-2"><i class="fas fa-user mr-2"></i>Alumno: ${sol.alumno}</p>
-                                <p class="text-gray-700 mb-6 bg-gray-50 p-3 rounded italic text-sm">"${sol.motivo}"</p>
-                                <div class="mt-auto flex gap-3">
-                                    <button onclick="aceptarAsesoria(${sol.cita_id})" class="flex-1 bg-green-500 hover:bg-green-600 text-white font-bold py-2 rounded-lg transition shadow-sm">Aceptar</button>
-                                    <button onclick="rechazarAsesoria(${sol.cita_id})" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 rounded-lg transition">Rechazar</button>
-                                </div>
-                            </div>`;
-                    });
+                if (rolUsuario === 'asesor_disciplinar') {
+                    // SI ES MAESTRO: Carga inscripciones a Cursos
+                    const res = await fetch(`/api/asesor/inscripciones/${cuentaAsesor}`);
+                    const datos = await res.json();
+                    
+                    if(datos.length > 0) {
+                        badge.innerText = datos.length;
+                        badge.classList.remove('hidden');
+                        datos.forEach(sol => {
+                            contenedor.innerHTML += `
+                                <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-purple-500 flex flex-col">
+                                    <div class="flex justify-between items-start mb-2">
+                                        <h4 class="font-bold text-lg text-slate-800">${sol.titulo_curso}</h4>
+                                        <span class="bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded font-bold">Inscripción</span>
+                                    </div>
+                                    <p class="text-sm text-gray-600 mb-2"><i class="fas fa-user-graduate mr-2"></i>Alumno: ${sol.alumno}</p>
+                                    <p class="text-xs text-gray-500 mb-4 bg-gray-50 p-2 rounded"><b>Modalidad:</b> ${sol.modalidad}</p>
+                                    <div class="mb-6 flex gap-2">
+                                        <a href="${sol.kardex_url}" target="_blank" class="text-blue-600 hover:underline text-sm font-bold"><i class="fas fa-file-pdf mr-1"></i> Ver Kardex del Alumno</a>
+                                    </div>
+                                    <div class="mt-auto flex gap-3">
+                                        <button onclick="gestionarInscripcion(${sol.inscripcion_id}, 'aceptar')" class="flex-1 bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 rounded-lg transition shadow-sm">Aceptar en Curso</button>
+                                        <button onclick="gestionarInscripcion(${sol.inscripcion_id}, 'rechazar')" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 rounded-lg transition">Rechazar</button>
+                                    </div>
+                                </div>`;
+                        });
+                    } else {
+                        badge.classList.add('hidden');
+                        contenedor.innerHTML = `<p class="text-gray-500 italic">No tienes alumnos esperando revisión de Kardex.</p>`;
+                    }
                 } else {
-                    badge.classList.add('hidden');
-                    contenedor.innerHTML = `<p class="text-gray-500 italic">No tienes solicitudes pendientes.</p>`;
+                    // SI ES ASESOR PAR: Carga Citas 1 a 1 normales
+                    const res = await fetch(`/api/asesor/solicitudes/${cuentaAsesor}`);
+                    const datos = await res.json();
+                    
+                    if(datos.length > 0) {
+                        badge.innerText = datos.length;
+                        badge.classList.remove('hidden');
+                        datos.forEach(sol => {
+                            contenedor.innerHTML += `
+                                <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-yellow-400 flex flex-col">
+                                    <div class="flex justify-between items-start mb-2">
+                                        <h4 class="font-bold text-lg text-slate-800">${sol.materia}</h4>
+                                        <span class="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded font-bold">Cita Privada</span>
+                                    </div>
+                                    <p class="text-sm text-gray-500 mb-2"><i class="fas fa-user mr-2"></i>Compañero: ${sol.alumno}</p>
+                                    <p class="text-gray-700 mb-6 bg-gray-50 p-3 rounded italic text-sm">"${sol.motivo}"</p>
+                                    <div class="mt-auto flex gap-3">
+                                        <button onclick="aceptarAsesoria(${sol.cita_id})" class="flex-1 bg-green-500 hover:bg-green-600 text-white font-bold py-2 rounded-lg transition shadow-sm">Aceptar y Dar Lugar</button>
+                                        <button onclick="rechazarAsesoria(${sol.cita_id})" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 rounded-lg transition">Rechazar</button>
+                                    </div>
+                                </div>`;
+                        });
+                    } else {
+                        badge.classList.add('hidden');
+                        contenedor.innerHTML = `<p class="text-gray-500 italic">No tienes solicitudes pendientes.</p>`;
+                    }
                 }
             } catch (error) { console.error(error); }
         }
 
-        async function cargarAgenda() {
-            try {
-                const res = await fetch(`/api/asesor/agenda/${cuentaAsesor}`);
-                const datos = await res.json();
-                const contenedor = document.getElementById('contenedorAgenda');
-                contenedor.innerHTML = '';
-                if(datos.length > 0) {
-                    datos.forEach(cita => {
-                        contenedor.innerHTML += `
-                            <div class="bg-white p-6 rounded-xl shadow-sm border-t-4 border-blue-500 flex flex-col">
-                                <h4 class="font-bold text-lg text-slate-800 mb-1">${cita.materia}</h4>
-                                <p class="text-sm text-gray-600 mb-2"><b>Asesorado:</b> ${cita.alumno}</p>
-                                <div class="flex gap-2 w-full mt-4">
-                                    <a href="${cita.link_reunion}" target="_blank" class="flex-1 text-center bg-blue-100 text-blue-800 font-bold py-2 rounded-lg transition text-sm"><i class="fas fa-video"></i> Sala</a>
-                                    <button onclick="finalizarClase(${cita.cita_id})" class="flex-1 bg-green-500 text-white font-bold py-2 rounded-lg transition text-sm shadow-sm"><i class="fas fa-check-circle"></i> Validar PIN</button>
-                                </div>
-                            </div>`;
-                    });
-                } else { contenedor.innerHTML = `<p class="text-gray-500 italic">No tienes asesorías agendadas.</p>`; }
-            } catch (error) { console.error(error); }
+        // LÓGICA PARA MAESTROS (Cursos)
+        async function gestionarInscripcion(inscripcionId, accion) {
+            const endpoint = accion === 'aceptar' ? '/api/asesor/aceptar-inscripcion' : '/api/asesor/rechazar-inscripcion';
+            
+            const result = await Swal.fire({
+                title: accion === 'aceptar' ? '¿Aprobar Kardex?' : '¿Rechazar Alumno?',
+                icon: accion === 'aceptar' ? 'question' : 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Sí, confirmar',
+                confirmButtonColor: accion === 'aceptar' ? '#9333ea' : '#ef4444'
+            });
+
+            if(result.isConfirmed) {
+                const res = await fetch(endpoint, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ inscripcionId }) });
+                const data = await res.json();
+                if(res.ok) { Swal.fire('¡Listo!', data.mensaje, 'success'); cargarSolicitudes(); }
+            }
         }
 
+        // LÓGICA PARA PARES (Punto 8: Permite Links o Aulas físicas)
         async function aceptarAsesoria(citaId) {
-            const { value: link } = await Swal.fire({
-                title: 'Aceptar Asesoría',
-                text: 'Pega el enlace de Zoom, Meet o Teams',
-                input: 'url',
-                inputPlaceholder: 'https://...',
+            const { value: lugar } = await Swal.fire({
+                title: 'Establecer Lugar',
+                text: 'Escribe el enlace de videollamada O el lugar físico (Ej. Biblioteca, Aula 5)',
+                input: 'text',
+                inputPlaceholder: 'Link de Zoom o lugar físico...',
                 showCancelButton: true,
-                confirmButtonText: 'Agendar Cita',
+                confirmButtonText: 'Confirmar Cita',
                 confirmButtonColor: '#10b981'
             });
 
-            if (link) {
+            if (lugar) {
                 const res = await fetch('/api/asesor/aceptar-cita', { 
                     method: 'POST', 
                     headers: {'Content-Type': 'application/json'}, 
-                    body: JSON.stringify({ citaId, linkReunion: link }) 
+                    body: JSON.stringify({ citaId, linkReunion: lugar }) 
                 });
                 const data = await res.json();
                 if(res.ok) {
@@ -428,7 +462,7 @@
 
         async function rechazarAsesoria(citaId) {
             const result = await Swal.fire({
-                title: '¿Rechazar solicitud?',
+                title: '¿Rechazar cita?',
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonText: 'Sí, rechazar',

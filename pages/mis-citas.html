@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mis Citas - SkillsUp</title>
+    <link rel="icon" type="image/png" href="../img/logo7.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="bg-slate-50 flex min-h-screen">
+
+    <aside class="w-64 bg-blue-900 text-white hidden md:flex flex-col shadow-xl h-screen overflow-y-auto shrink-0">
+        <div class="p-6 flex items-center gap-3 border-b border-blue-800 shrink-0">
+            <img src="../img/logo1.png" alt="UAS" class="h-10 bg-white rounded-full p-1">
+            <span class="text-xl font-bold tracking-wider">SkillsUp</span>
+        </div>
+        
+        <nav class="flex-grow p-4 space-y-2 mt-4">
+            <a href="dashboard.html" class="w-full flex items-center gap-3 p-3 hover:bg-blue-800 text-gray-300 rounded-lg font-medium transition">
+                <i class="fas fa-arrow-left"></i> Volver al Inicio
+            </a>
+            <a href="#" class="w-full flex items-center gap-3 p-3 bg-blue-800 rounded-lg text-yellow-400 font-medium transition">
+                <i class="fas fa-calendar-check"></i> Mis Citas / Cursos
+            </a>
+        </nav>
+    </aside>
+
+    <main class="flex-grow flex flex-col h-screen overflow-y-auto">
+        <header class="bg-white shadow-sm p-4 flex justify-between items-center px-8 shrink-0">
+            <h2 class="text-gray-500 font-medium">Mi Aprendizaje</h2>
+            <div class="flex items-center gap-4">
+                <span id="nombreHeader" class="text-sm font-semibold text-gray-700">Cargando...</span>
+                <div id="avatar" class="w-10 h-10 bg-yellow-400 rounded-full flex items-center justify-center font-bold text-blue-900 uppercase">U</div>
+            </div>
+        </header>
+
+        <div class="p-8 space-y-12">
+            
+            <div>
+                <div class="border-b pb-4 mb-6">
+                    <h2 class="text-3xl font-bold text-blue-900 mb-2"><i class="fas fa-user-friends mr-3"></i>Tutorías 1 a 1 (Asesor Par)</h2>
+                    <p class="text-gray-600">Revisa el estado de tus peticiones. Si ya fue aceptada, encontrarás el lugar de reunión y tu PIN secreto.</p>
+                </div>
+                <div id="contenedorTutorias" class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+                    </div>
+            </div>
+
+            <div>
+                <div class="border-b pb-4 mb-6 pt-8">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-2"><i class="fas fa-chalkboard-teacher mr-3 text-purple-600"></i>Cursos de Regularización Oficiales</h2>
+                    <p class="text-gray-600">Seguimiento a la revisión de tu Kardex por parte del maestro titular.</p>
+                </div>
+                <div id="contenedorCursos" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        const nombreReal = localStorage.getItem('nombreUsuario') || 'Alumno';
+        const cuentaAlumno = localStorage.getItem('cuentaLogueada');
+
+        document.getElementById('nombreHeader').innerText = nombreReal;
+        document.getElementById('avatar').innerText = nombreReal.charAt(0).toUpperCase();
+
+        // 1. CARGAR TUTORÍAS 1 a 1
+        async function cargarTutorias() {
+            try {
+                const res = await fetch(`/api/alumno/mis-tutorias/${cuentaAlumno}`);
+                const tutorias = await res.json();
+                const contenedor = document.getElementById('contenedorTutorias');
+                contenedor.innerHTML = '';
+                
+                if (tutorias.length > 0) {
+                    tutorias.forEach(tut => {
+                        let estadoBadge = '';
+                        let bloqueAccion = '';
+
+                        if (tut.estado === 'pendiente' || tut.estado === 'Pendiente') {
+                            estadoBadge = `<span class="bg-yellow-100 text-yellow-800 text-xs px-3 py-1 rounded-full font-bold uppercase"><i class="fas fa-clock mr-1"></i> Pendiente</span>`;
+                            bloqueAccion = `<p class="text-sm text-gray-500 italic mt-4">Esperando a que el asesor acepte tu solicitud...</p>`;
+                        } else if (tut.estado === 'aceptada' || tut.estado === 'Aceptado' || tut.estado === 'Aceptada') {
+                            estadoBadge = `<span class="bg-green-100 text-green-800 text-xs px-3 py-1 rounded-full font-bold uppercase"><i class="fas fa-check mr-1"></i> Aceptada</span>`;
+                            
+                            // Determinar si es link web o lugar físico
+                            const esLinkWeb = tut.link_reunion && (tut.link_reunion.includes('http') || tut.link_reunion.includes('zoom') || tut.link_reunion.includes('meet'));
+                            const botonReunion = esLinkWeb 
+                                ? `<a href="${tut.link_reunion}" target="_blank" class="block w-full text-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded-lg transition text-sm mb-4"><i class="fas fa-video mr-2"></i> Ir a la Videollamada</a>`
+                                : `<div class="bg-blue-50 text-blue-800 p-3 rounded-lg text-sm font-semibold mb-4 text-center border border-blue-200"><i class="fas fa-map-marker-alt mr-2"></i> Lugar: ${tut.link_reunion}</div>`;
+
+                            bloqueAccion = `
+                                ${botonReunion}
+                                <div class="bg-gray-800 rounded-xl p-4 text-center text-white border-2 border-yellow-400 border-dashed">
+                                    <p class="text-xs text-gray-300 mb-1 uppercase tracking-widest">Tu PIN Secreto</p>
+                                    <p class="text-3xl font-mono font-bold tracking-[0.2em] text-yellow-400">${tut.pin_validacion}</p>
+                                    <p class="text-xs text-gray-400 mt-2">Dicta este número a tu asesor al terminar para que se validen sus horas.</p>
+                                </div>
+                            `;
+                        } else if (tut.estado === 'rechazada') {
+                            estadoBadge = `<span class="bg-red-100 text-red-800 text-xs px-3 py-1 rounded-full font-bold uppercase"><i class="fas fa-times mr-1"></i> Rechazada</span>`;
+                            bloqueAccion = `<p class="text-sm text-red-500 mt-4"><i class="fas fa-exclamation-circle mr-1"></i> El asesor no pudo aceptar la cita en este momento. Intenta con otro compañero.</p>`;
+                        } else if (tut.estado === 'Completada') {
+                            estadoBadge = `<span class="bg-blue-100 text-blue-800 text-xs px-3 py-1 rounded-full font-bold uppercase"><i class="fas fa-award mr-1"></i> Completada</span>`;
+                            bloqueAccion = `<p class="text-sm text-blue-600 font-bold mt-4 text-center">¡Asesoría concluida exitosamente!</p>`;
+                        }
+
+                        contenedor.innerHTML += `
+                            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 flex flex-col transition hover:shadow-md">
+                                <div class="flex justify-between items-start mb-4">
+                                    <div>
+                                        <h3 class="font-bold text-lg text-slate-800">${tut.materia}</h3>
+                                        <p class="text-sm text-gray-500 mt-1"><i class="fas fa-user-graduate mr-2"></i>Asesor: <b>${tut.asesor_nombre}</b></p>
+                                    </div>
+                                    ${estadoBadge}
+                                </div>
+                                <div class="bg-gray-50 p-3 rounded-lg text-sm text-gray-600 mb-4 border italic">
+                                    " ${tut.motivo} "
+                                </div>
+                                <div class="mt-auto">
+                                    ${bloqueAccion}
+                                </div>
+                            </div>
+                        `;
+                    });
+                } else {
+                    contenedor.innerHTML = `<div class="col-span-full bg-white p-8 rounded-xl border text-center text-gray-500">No has solicitado ninguna tutoría todavía.</div>`;
+                }
+            } catch (error) { console.error("Error:", error); }
+        }
+
+        // 2. CARGAR INSCRIPCIONES A CURSOS OFICIALES
+        async function cargarInscripciones() {
+            try {
+                const res = await fetch(`/api/alumno/mis-inscripciones/${cuentaAlumno}`);
+                const inscripciones = await res.json();
+                const contenedor = document.getElementById('contenedorCursos');
+                contenedor.innerHTML = '';
+                
+                if (inscripciones.length > 0) {
+                    inscripciones.forEach(ins => {
+                        let estadoVisual = '';
+                        if (ins.estado === 'pendiente') estadoVisual = `<span class="text-yellow-600 bg-yellow-50 px-2 py-1 rounded font-bold text-xs border border-yellow-200"><i class="fas fa-spinner fa-spin mr-1"></i> Kardex en Revisión</span>`;
+                        else if (ins.estado === 'aceptado') estadoVisual = `<span class="text-green-600 bg-green-50 px-2 py-1 rounded font-bold text-xs border border-green-200"><i class="fas fa-check-circle mr-1"></i> Inscripción Aprobada</span>`;
+                        else if (ins.estado === 'rechazado') estadoVisual = `<span class="text-red-600 bg-red-50 px-2 py-1 rounded font-bold text-xs border border-red-200"><i class="fas fa-times-circle mr-1"></i> No Cumple Requisitos</span>`;
+
+                        contenedor.innerHTML += `
+                            <div class="bg-white p-6 rounded-xl shadow-sm border-t-4 border-purple-500 flex flex-col">
+                                <h3 class="font-bold text-lg text-slate-800 mb-1">${ins.titulo_curso}</h3>
+                                <p class="text-sm text-gray-600 mb-4">Profesor: ${ins.maestro_nombre}</p>
+                                <div class="space-y-2 text-sm text-gray-500 mb-6 flex-grow">
+                                    <p><i class="fas fa-building w-5 text-center text-purple-400"></i> ${ins.modalidad}</p>
+                                    <p><i class="fas fa-clock w-5 text-center text-purple-400"></i> ${ins.horario}</p>
+                                </div>
+                                <div class="mt-auto border-t pt-4 text-center">
+                                    ${estadoVisual}
+                                </div>
+                            </div>
+                        `;
+                    });
+                } else {
+                    contenedor.innerHTML = `<p class="text-gray-500 italic col-span-full">No tienes solicitudes de inscripción a cursos.</p>`;
+                }
+            } catch (error) { console.error("Error:", error); }
+        }
+
+        // INICIAR CARGA
+        cargarTutorias();
+        cargarInscripciones();
+    </script>
+</body>
+</html>
