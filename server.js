@@ -613,6 +613,38 @@ app.post('/api/asesor/dar-de-baja', (req, res) => {
     });
 });
 
+// ==========================================
+// RUTAS PARA GESTIONAR MIS PUBLICACIONES (MAESTROS Y PARES)
+// ==========================================
+
+// 1. Obtener los cursos/asesorías creados por el usuario logueado
+app.get('/api/asesor/mis-cursos-creados/:cuenta', (req, res) => {
+    const { cuenta } = req.params;
+    const query = `
+        SELECT c.*, m.nombre as materia 
+        FROM cursos_regularizacion c 
+        JOIN materias m ON c.id_materia = m.id 
+        WHERE c.id_asesor_disciplinar = (SELECT id FROM usuarios WHERE numero_cuenta = ?)
+        AND c.estado = 'abierto'
+    `;
+    connection.query(query, [cuenta], (err, results) => {
+        if (err) return res.status(500).json({ error: 'Error al cargar tus publicaciones.' });
+        res.status(200).json(results);
+    });
+});
+
+// 2. Dar de baja (ocultar) una publicación
+app.post('/api/asesor/dar-de-baja', (req, res) => {
+    const { cursoId } = req.body;
+    // En lugar de borrar de la BD, lo marcamos como 'cerrado' para que desaparezca
+    const query = "UPDATE cursos_regularizacion SET estado = 'cerrado' WHERE id = ?";
+    
+    connection.query(query, [cursoId], (err) => {
+        if (err) return res.status(500).json({ error: 'Error al dar de baja.' });
+        res.status(200).json({ mensaje: 'Publicación dada de baja exitosamente.' });
+    });
+});
+
 // 4. Puerto para Azure
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {

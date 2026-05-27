@@ -195,29 +195,40 @@
         
         // --- SEPARACIÓN PERFECTA DE ROLES ---
         if (rolUsuario === 'asesor_disciplinar') {
+            // VISTA MAESTRO
             tituloRol.innerText = 'Panel de Asesor Disciplinar';
             tituloRol.classList.replace('text-blue-600', 'text-purple-600');
             if(textoBienvenida) textoBienvenida.innerText = 'Gracias por apoyar a la comunidad universitaria. Desde este panel puedes gestionar las inscripciones y ofertar nuevos cursos.';
+            
             document.getElementById('tabCrearCurso').classList.remove('hidden');
             if(document.getElementById('panelMisCursos')) document.getElementById('panelMisCursos').classList.remove('hidden');
+            
             document.getElementById('panelProgresoHoras').classList.add('hidden');
             document.getElementById('contenedorAgenda').classList.add('hidden'); 
         } else {
+            // VISTA ALUMNO (ASESOR PAR)
             tituloRol.innerText = 'Panel de Asesor Par';
-            if(textoBienvenida) textoBienvenida.innerText = 'Gracias por apoyar a la comunidad universitaria. Desde este panel puedes gestionar tu agenda de asesorías 1 a 1.';
-            document.getElementById('tabCrearCurso').classList.remove('hidden'); // Lo mostramos para el Par
-            if(document.getElementById('panelMisCursos')) document.getElementById('panelMisCursos').classList.remove('hidden');
+            if(textoBienvenida) textoBienvenida.innerText = 'Gestiona tu agenda de asesorías 1 a 1 y publica grupos de estudio.';
             
-            // Adaptamos textos
+            document.getElementById('tabCrearCurso').classList.remove('hidden'); 
+            if(document.getElementById('panelMisCursos')) document.getElementById('panelMisCursos').classList.remove('hidden'); 
+            
+            // Cambiar los textos para que tengan sentido para el alumno
             document.getElementById('tabCrearCurso').innerHTML = '<i class="fas fa-bullhorn"></i> Publicar Asesoría';
             document.querySelector('#seccionCrearCurso h3').innerHTML = '<i class="fas fa-bullhorn text-purple-600 mr-2"></i>Ofrecer Asesoría 1 a 1';
             
-            // OCULTAMOS LOS CAMPOS QUE NO LE SIRVEN AL ALUMNO
-            document.getElementById('divHorario').classList.add('hidden');
-            document.getElementById('divDuracionCupo').classList.add('hidden');
-            document.getElementById('divFechas').classList.add('hidden');
+            // Esto arregla el título de la sección de abajo
+            if(document.querySelector('#panelMisCursos h3')) {
+                document.querySelector('#panelMisCursos h3').innerHTML = '<i class="fas fa-bullhorn text-purple-600 mr-2"></i>Mis Asesorías Publicadas';
+                document.querySelector('#panelMisCursos p').innerText = 'Catálogo de asesorías que has ofertado a tus compañeros.';
+            }
+            
+            // Ocultar los inputs que son exclusivos del maestro
+            if(document.getElementById('divHorario')) document.getElementById('divHorario').classList.add('hidden');
+            if(document.getElementById('divDuracionCupo')) document.getElementById('divDuracionCupo').classList.add('hidden');
+            if(document.getElementById('divFechas')) document.getElementById('divFechas').classList.add('hidden');
         }
-
+        
         // --- SISTEMA DE PESTAÑAS (TABS) ---
         const tabs = {
             agenda: { btn: document.getElementById('tabAgenda'), sec: document.getElementById('seccionAgenda'), active: "bg-gray-800 text-yellow-400" },
