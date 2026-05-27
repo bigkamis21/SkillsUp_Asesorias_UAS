@@ -601,6 +601,18 @@ app.get('/api/alumno/mis-inscripciones/:cuenta', (req, res) => {
     });
 });
 
+// DAR DE BAJA UN CURSO O ASESORÍA
+app.post('/api/asesor/dar-de-baja', (req, res) => {
+    const { cursoId } = req.body;
+    // En lugar de borrarlo y arriesgar las Foreign Keys, lo ocultamos cambiándolo a 'cerrado'
+    const query = "UPDATE cursos_regularizacion SET estado = 'cerrado' WHERE id = ?";
+    
+    connection.query(query, [cursoId], (err) => {
+        if (err) return res.status(500).json({ error: 'Error al dar de baja.' });
+        res.status(200).json({ mensaje: 'Asesoría dada de baja exitosamente.' });
+    });
+});
+
 // 4. Puerto para Azure
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {

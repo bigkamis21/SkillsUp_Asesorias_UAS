@@ -130,8 +130,7 @@
                         </select>
                     </div>
 
-                    <!-- NUEVOS CAMPOS (Modalidad y Horario) -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                   <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-bold text-gray-700 mb-1">Modalidad</label>
                             <select id="cursoModalidad" class="w-full border rounded-lg p-2.5 bg-slate-50 focus:ring-2 focus:ring-blue-500 focus:outline-none" required>
@@ -139,34 +138,33 @@
                                 <option value="En línea">En línea</option>
                             </select>
                         </div>
-                        <div>
+                        <div id="divHorario">
                             <label class="block text-sm font-bold text-gray-700 mb-1">Horario Sugerido</label>
-                            <input type="text" id="cursoHorario" class="w-full border rounded-lg p-2.5 bg-slate-50 focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="Ej. Lunes y Miércoles 4:00 PM" required>
+                            <input type="text" id="cursoHorario" class="w-full border rounded-lg p-2.5 bg-slate-50 focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="Ej. Lunes y Miércoles 4:00 PM">
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div id="divDuracionCupo" class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-bold text-gray-700 mb-1">Duración (Semanas)</label>
-                            <input type="number" id="cursoDuracion" min="1" max="16" class="w-full border rounded-lg p-2.5 bg-slate-50 focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="Ej. 4" required>
+                            <input type="number" id="cursoDuracion" min="1" max="16" class="w-full border rounded-lg p-2.5 bg-slate-50 focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="Ej. 4">
                         </div>
                         <div>
                             <label class="block text-sm font-bold text-gray-700 mb-1">Cupo Máximo</label>
-                            <input type="number" id="cursoCupo" min="1" max="50" class="w-full border rounded-lg p-2.5 bg-slate-50 focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="Ej. 15" required>
+                            <input type="number" id="cursoCupo" min="1" max="50" class="w-full border rounded-lg p-2.5 bg-slate-50 focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="Ej. 15">
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div id="divFechas" class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-bold text-gray-700 mb-1">Fecha de Inicio</label>
-                            <input type="date" id="cursoFechaInicio" class="w-full border rounded-lg p-2.5 bg-slate-50 focus:ring-2 focus:ring-blue-500 focus:outline-none" required>
+                            <input type="date" id="cursoFechaInicio" class="w-full border rounded-lg p-2.5 bg-slate-50 focus:ring-2 focus:ring-blue-500 focus:outline-none">
                         </div>
                         <div>
                             <label class="block text-sm font-bold text-gray-700 mb-1">Fecha de Fin</label>
-                            <input type="date" id="cursoFechaFin" class="w-full border rounded-lg p-2.5 bg-slate-50 focus:ring-2 focus:ring-blue-500 focus:outline-none" required>
+                            <input type="date" id="cursoFechaFin" class="w-full border rounded-lg p-2.5 bg-slate-50 focus:ring-2 focus:ring-blue-500 focus:outline-none">
                         </div>
                     </div>
-
                     <div>
                         <label class="block text-sm font-bold text-gray-700 mb-1">Descripción del Curso y Criterios</label>
                         <textarea id="cursoDescripcion" rows="4" class="w-full border rounded-lg p-2.5 bg-slate-50 focus:ring-2 focus:ring-blue-500 focus:outline-none placeholder-gray-400" placeholder="Describe los temas que se verán, requisitos..." required></textarea>
@@ -196,34 +194,28 @@
         const textoBienvenida = document.getElementById('textoBienvenida');
         
         // --- SEPARACIÓN PERFECTA DE ROLES ---
-        
-        // AMBOS roles pueden ver el botón de Ofertar y su panel de cosas publicadas
-        document.getElementById('tabCrearCurso').classList.remove('hidden');
-        if(document.getElementById('panelMisCursos')) document.getElementById('panelMisCursos').classList.remove('hidden');
-
         if (rolUsuario === 'asesor_disciplinar') {
-            // VISTA MAESTRO
             tituloRol.innerText = 'Panel de Asesor Disciplinar';
             tituloRol.classList.replace('text-blue-600', 'text-purple-600');
-            if(textoBienvenida) textoBienvenida.innerText = 'Gracias por apoyar a la comunidad universitaria. Desde este panel puedes gestionar las inscripciones y ofertar cursos de regularización.';
-            
-            // Ocultamos cosas exclusivas de los alumnos (barra de horas y grid 1 a 1)
+            if(textoBienvenida) textoBienvenida.innerText = 'Gracias por apoyar a la comunidad universitaria. Desde este panel puedes gestionar las inscripciones y ofertar nuevos cursos.';
+            document.getElementById('tabCrearCurso').classList.remove('hidden');
+            if(document.getElementById('panelMisCursos')) document.getElementById('panelMisCursos').classList.remove('hidden');
             document.getElementById('panelProgresoHoras').classList.add('hidden');
             document.getElementById('contenedorAgenda').classList.add('hidden'); 
         } else {
-            // VISTA ALUMNO (ASESOR PAR)
             tituloRol.innerText = 'Panel de Asesor Par';
-            if(textoBienvenida) textoBienvenida.innerText = 'Gestiona tu agenda de asesorías 1 a 1 y publica grupos de estudio para validar tus horas.';
+            if(textoBienvenida) textoBienvenida.innerText = 'Gracias por apoyar a la comunidad universitaria. Desde este panel puedes gestionar tu agenda de asesorías 1 a 1.';
+            document.getElementById('tabCrearCurso').classList.remove('hidden'); // Lo mostramos para el Par
+            if(document.getElementById('panelMisCursos')) document.getElementById('panelMisCursos').classList.remove('hidden');
             
-            // Adaptamos los títulos visuales para que tengan sentido para el alumno
+            // Adaptamos textos
             document.getElementById('tabCrearCurso').innerHTML = '<i class="fas fa-bullhorn"></i> Publicar Asesoría';
-            document.querySelector('#seccionCrearCurso h3').innerHTML = '<i class="fas fa-bullhorn text-purple-600 mr-2"></i>Publicar Asesoría o Grupo de Estudio';
-            document.querySelector('#formCrearCurso button[type="submit"]').innerText = 'Publicar Asesoría en el Catálogo';
+            document.querySelector('#seccionCrearCurso h3').innerHTML = '<i class="fas fa-bullhorn text-purple-600 mr-2"></i>Ofrecer Asesoría 1 a 1';
             
-            if(document.getElementById('panelMisCursos')) {
-                document.querySelector('#panelMisCursos h3').innerHTML = '<i class="fas fa-bullhorn text-purple-600 mr-2"></i>Mis Asesorías Publicadas';
-                document.querySelector('#panelMisCursos p').innerText = 'Catálogo de asesorías y grupos que has ofertado a tus compañeros.';
-            }
+            // OCULTAMOS LOS CAMPOS QUE NO LE SIRVEN AL ALUMNO
+            document.getElementById('divHorario').classList.add('hidden');
+            document.getElementById('divDuracionCupo').classList.add('hidden');
+            document.getElementById('divFechas').classList.add('hidden');
         }
 
         // --- SISTEMA DE PESTAÑAS (TABS) ---
@@ -286,25 +278,38 @@
             }
         });
 
+        // --- SUBMIT: CREAR CURSO O ASESORÍA ---
         document.getElementById('formCrearCurso').addEventListener('submit', async (e) => {
             e.preventDefault();
+            
+            // Si es Par, le inyectamos valores "falsos" para que la BD los acepte sin molestar
+            const esPar = rolUsuario === 'asesor_par';
+            const fechaHoy = new Date().toISOString().split('T')[0];
+
             const cursoData = {
-                numeroCuentaAsesor: cuentaAsesor, materiaId: selectMateriaCurso.value, titulo: document.getElementById('cursoTitulo').value,
-                descripcion: document.getElementById('cursoDescripcion').value, duracion: document.getElementById('cursoDuracion').value,
-                fechaInicio: document.getElementById('cursoFechaInicio').value, fechaFin: document.getElementById('cursoFechaFin').value,
-                cupoMaximo: document.getElementById('cursoCupo').value, modalidad: document.getElementById('cursoModalidad').value, 
-                horario: document.getElementById('cursoHorario').value
+                numeroCuentaAsesor: cuentaAsesor, 
+                materiaId: selectMateriaCurso.value, 
+                titulo: document.getElementById('cursoTitulo').value,
+                descripcion: document.getElementById('cursoDescripcion').value, 
+                modalidad: document.getElementById('cursoModalidad').value, 
+                // Datos condicionales:
+                duracion: esPar ? 1 : document.getElementById('cursoDuracion').value,
+                cupoMaximo: esPar ? 1 : document.getElementById('cursoCupo').value,
+                fechaInicio: esPar ? fechaHoy : document.getElementById('cursoFechaInicio').value,
+                fechaFin: esPar ? fechaHoy : document.getElementById('cursoFechaFin').value,
+                horario: esPar ? 'A convenir con el compañero' : document.getElementById('cursoHorario').value
             };
+
             try {
                 const res = await fetch('/api/asesor/crear-curso', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(cursoData) });
                 const data = await res.json();
                 if(res.ok) {
                     Swal.fire('¡Publicado!', data.mensaje, 'success');
                     document.getElementById('formCrearCurso').reset();
-                    cargarMisCursosCreados(); // Recargamos para que aparezca
+                    cargarMisCursosCreados(); 
                     switchTab('agenda');
                 } else { Swal.fire('Error', data.error, 'error'); }
-            } catch (error) { Swal.fire('Error al conectar', 'Revisa tu servidor.', 'error'); }
+            } catch (error) { Swal.fire('Error', 'Revisa tu servidor.', 'error'); }
         });
 
         // --- CARGAR CITAS O INSCRIPCIONES (INTELIGENTE POR ROL) ---
@@ -321,6 +326,10 @@
                         badge.innerText = datos.length; badge.classList.remove('hidden');
                         datos.forEach(sol => {
                             contenedor.innerHTML += `
+                                <button onclick="darDeBajaCurso(${curso.id})" class="mt-4 w-full bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 font-bold py-2 rounded-lg transition text-sm">
+                                    <i class="fas fa-trash-alt mr-1"></i> Dar de baja
+                                </button>
+
                                 <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-purple-500 flex flex-col">
                                     <div class="flex justify-between items-start mb-2">
                                         <h4 class="font-bold text-lg text-slate-800">${sol.titulo_curso}</h4>
@@ -367,6 +376,19 @@
                     }
                 }
             } catch (error) { console.error(error); }
+        }
+
+        //FUNCION DEL BOTON DAR DE BAJA CURSO 
+        async function darDeBajaCurso(cursoId) {
+            const result = await Swal.fire({
+                title: '¿Dar de baja?',
+                text: 'Esta publicación desaparecerá del catálogo.',
+                icon: 'warning', showCancelButton: true, confirmButtonText: 'Sí, dar de baja', confirmButtonColor: '#ef4444'
+            });
+            if(result.isConfirmed) {
+                const res = await fetch('/api/asesor/dar-de-baja', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ cursoId }) });
+                if(res.ok) { Swal.fire('Eliminado', '', 'success'); cargarMisCursosCreados(); }
+            }
         }
 
         // --- FUNCIONES ESPECÍFICAS DE MAESTRO ---
@@ -487,15 +509,13 @@
             }
         }
 
-        // --- INICIALIZACIÓN GLOBAL ---
-        cargarSolicitudes(); // Inteligente, sirve para ambos roles
+       // --- INICIALIZACIÓN GLOBAL ---
+        cargarSolicitudes();
+        cargarMisCursosCreados();
 
-        if (rolUsuario === 'asesor_disciplinar') {
-            cargarMisCursosCreados();
-        } else {
+        if (rolUsuario !== 'asesor_disciplinar') {
             cargarAgenda();
             cargarProgreso();
-            cargarMisCursosCreados(); // <--- ¡ESTO ERA LO QUE FALTABA!
         }
 
         // Cerrar sesión
@@ -503,7 +523,6 @@
             localStorage.clear();
             window.location.href = '../index.html';
         });
-
     </script>
 </body>
 </html>
