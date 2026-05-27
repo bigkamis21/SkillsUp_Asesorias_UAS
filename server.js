@@ -320,7 +320,7 @@ app.post('/api/asesor/crear-curso', (req, res) => {
     const query = `
         INSERT INTO cursos_regularizacion 
         (id_asesor_disciplinar, id_materia, titulo_curso, descripcion, modalidad, horario, duracion_semanas, fecha_inicio, fecha_fin, cupo_maximo, estado) 
-        VALUES ((SELECT id FROM usuarios WHERE numero_cuenta = ?), ?, ?, ?, ?, ?, ?, ?, ?, ?, 'activo')
+        VALUES ((SELECT id FROM usuarios WHERE numero_cuenta = ?), ?, ?, ?, ?, ?, ?, ?, ?, ?, 'abierto')
     `;
 
     connection.query(query, [numeroCuentaAsesor, materiaId, titulo, descripcion, modalidad, horario, duracion, fechaInicio, fechaFin, cupoMaximo], (err, result) => {
@@ -340,7 +340,7 @@ app.get('/api/alumno/cursos-disponibles', (req, res) => {
         FROM cursos_regularizacion c
         JOIN materias m ON c.id_materia = m.id
         JOIN usuarios u ON c.id_asesor_disciplinar = u.id
-        WHERE c.estado = 'activo'
+        WHERE c.estado = 'abierto'
     `;
     connection.query(query, (err, results) => {
         if (err) return res.status(500).json({ error: 'Error al cargar los cursos.' });
