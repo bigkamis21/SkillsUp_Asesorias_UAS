@@ -7,6 +7,8 @@
     <link rel="icon" type="image/png" href="../img/logo7.png">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- LIBRERÍA PARA ALERTAS PROFESIONALES -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body class="bg-slate-50 flex min-h-screen">
 
@@ -24,7 +26,8 @@
                 <i class="fas fa-inbox"></i> Solicitudes Citas
                 <span id="badgeContador" class="hidden bg-red-500 text-white text-xs px-2 py-1 rounded-full ml-auto">0</span>
             </button>
-            <button id="tabCrearCurso" class="w-full flex items-center gap-3 p-3 hover:bg-gray-800 text-gray-300 rounded-lg font-medium transition">
+            <!-- PESTAÑA PARA CURSOS (Oculta por defecto, se muestra a Profesores) -->
+            <button id="tabCrearCurso" class="w-full flex items-center gap-3 p-3 hover:bg-gray-800 text-gray-300 rounded-lg font-medium transition hidden">
                 <i class="fas fa-plus-circle"></i> Ofertar Curso
             </button>
         </nav>
@@ -36,9 +39,9 @@
         </div>
     </aside>
 
-    <main class="flex-grow flex flex-col">
+    <main class="flex-grow flex flex-col h-screen overflow-y-auto">
         
-        <header class="bg-white shadow-sm p-4 flex justify-between items-center px-8">
+        <header class="bg-white shadow-sm p-4 flex justify-between items-center px-8 shrink-0">
             <h2 id="tituloRol" class="text-blue-600 font-bold uppercase tracking-wide">Panel de Asesor</h2>
             <div class="flex items-center gap-4">
                 <span id="nombreHeader" class="text-sm font-semibold text-gray-700">Cargando...</span>
@@ -59,7 +62,8 @@
             <div id="seccionAgenda" class="space-y-4">
                 <h3 class="text-xl font-bold text-gray-800"><i class="fas fa-calendar-alt mr-2 text-blue-600"></i>Mi Agenda de Asesorías</h3>
                 
-                <div class="bg-white p-6 rounded-xl shadow-sm border mb-6">
+                <!-- BARRA DE PROGRESO (Con ID para poder ocultarla a los maestros) -->
+                <div id="panelProgresoHoras" class="bg-white p-6 rounded-xl shadow-sm border mb-6">
                     <div class="flex justify-between items-end mb-4">
                         <div>
                             <h4 class="font-bold text-gray-800"><i class="fas fa-medal text-yellow-500 mr-2"></i>Horas para Descuento de Inscripción</h4>
@@ -120,13 +124,28 @@
                         </select>
                     </div>
 
+                    <!-- NUEVOS CAMPOS (Modalidad y Horario) -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-1">Modalidad</label>
+                            <select id="cursoModalidad" class="w-full border rounded-lg p-2.5 bg-slate-50 focus:ring-2 focus:ring-blue-500 focus:outline-none" required>
+                                <option value="Presencial">Presencial</option>
+                                <option value="En línea">En línea</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-1">Horario Sugerido</label>
+                            <input type="text" id="cursoHorario" class="w-full border rounded-lg p-2.5 bg-slate-50 focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="Ej. Lunes y Miércoles 4:00 PM" required>
+                        </div>
+                    </div>
+
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-bold text-gray-700 mb-1">Duración (Semanas)</label>
                             <input type="number" id="cursoDuracion" min="1" max="16" class="w-full border rounded-lg p-2.5 bg-slate-50 focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="Ej. 4" required>
                         </div>
                         <div>
-                            <label class="block text-sm font-bold text-gray-700 mb-1">Cupo Máximo de Alumnos</label>
+                            <label class="block text-sm font-bold text-gray-700 mb-1">Cupo Máximo</label>
                             <input type="number" id="cursoCupo" min="1" max="50" class="w-full border rounded-lg p-2.5 bg-slate-50 focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="Ej. 15" required>
                         </div>
                     </div>
@@ -143,8 +162,8 @@
                     </div>
 
                     <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-1">Descripción del Curso y Criterios (Temario / Evaluación)</label>
-                        <textarea id="cursoDescripcion" rows="4" class="w-full border rounded-lg p-2.5 bg-slate-50 focus:ring-2 focus:ring-blue-500 focus:outline-none placeholder-gray-400" placeholder="Describe los temas que se verán, horarios sugeridos y los requisitos..." required></textarea>
+                        <label class="block text-sm font-bold text-gray-700 mb-1">Descripción del Curso y Criterios</label>
+                        <textarea id="cursoDescripcion" rows="4" class="w-full border rounded-lg p-2.5 bg-slate-50 focus:ring-2 focus:ring-blue-500 focus:outline-none placeholder-gray-400" placeholder="Describe los temas que se verán, requisitos..." required></textarea>
                     </div>
 
                     <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 rounded-lg transition shadow-md">
@@ -160,15 +179,22 @@
         const nombreReal = localStorage.getItem('nombreUsuario') || 'Asesor';
         const rolUsuario = localStorage.getItem('rolUsuario') || 'asesor_par';
         const cuentaAsesor = localStorage.getItem('cuentaLogueada'); 
+        const META_HORAS_ANUAL = 100;
 
         document.getElementById('nombreHeader').innerText = nombreReal;
         document.getElementById('nombreBienvenida').innerText = nombreReal;
         document.getElementById('avatar').innerText = nombreReal.charAt(0).toUpperCase();
 
         const tituloRol = document.getElementById('tituloRol');
+        
+        // --- SEPARACIÓN DE ROLES (Aquí ocultamos la barra a los maestros) ---
         if (rolUsuario === 'asesor_disciplinar') {
             tituloRol.innerText = 'Panel de Asesor Disciplinar';
             tituloRol.classList.replace('text-blue-600', 'text-purple-600');
+            // Mostrar botón de crear curso
+            document.getElementById('tabCrearCurso').classList.remove('hidden');
+            // OCULTAR BARRA DE HORAS
+            document.getElementById('panelProgresoHoras').classList.add('hidden');
         } else {
             tituloRol.innerText = 'Panel de Asesor Par';
         }
@@ -197,13 +223,13 @@
         tabs.solicitudes.btn.addEventListener('click', () => switchTab('solicitudes'));
         tabs.crearCurso.btn.addEventListener('click', () => switchTab('crearCurso'));
 
-        // --- MANEJO DE SELECCIÓN DE MATERIAS EN CURSOS ---
+        // --- LÓGICA DEL FORMULARIO DE CURSOS ---
         const selectCarreraCurso = document.getElementById('selectCarreraCurso');
         const selectSemestreCurso = document.getElementById('selectSemestreCurso');
         const selectMateriaCurso = document.getElementById('selectMateriaCurso');
 
         async function cargarCarrerasForm() {
-            if(selectCarreraCurso.children.length > 1) return; // Ya cargadas
+            if(selectCarreraCurso.children.length > 1) return;
             try {
                 const res = await fetch('/api/carreras');
                 const carreras = await res.json();
@@ -240,7 +266,7 @@
             }
         });
 
-        // --- SUBMIT: EVENTO ENVIAR CURSO NUEVO AL SERVIDOR ---
+        // --- SUBMIT: CREAR CURSO CON SWEETALERT ---
         document.getElementById('formCrearCurso').addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -252,7 +278,9 @@
                 duracion: document.getElementById('cursoDuracion').value,
                 fechaInicio: document.getElementById('cursoFechaInicio').value,
                 fechaFin: document.getElementById('cursoFechaFin').value,
-                cupoMaximo: document.getElementById('cursoCupo').value
+                cupoMaximo: document.getElementById('cursoCupo').value,
+                modalidad: document.getElementById('cursoModalidad').value, // NUEVO DATO
+                horario: document.getElementById('cursoHorario').value      // NUEVO DATO
             };
 
             try {
@@ -263,14 +291,62 @@
                 });
                 const data = await res.json();
                 if(res.ok) {
-                    alert(data.mensaje);
+                    Swal.fire('¡Publicado!', data.mensaje, 'success');
                     document.getElementById('formCrearCurso').reset();
                     switchTab('agenda');
-                } else { alert(data.error); }
-            } catch (error) { alert("Error al conectar con el servidor."); }
+                } else { Swal.fire('Error', data.error, 'error'); }
+            } catch (error) { Swal.fire('Error al conectar', 'Revisa tu servidor.', 'error'); }
         });
 
-        // --- RESPONSES CITAS (CÓDIGO ORIGINAL ANTERIOR) ---
+        // --- PROGRESO Y VALIDACIÓN DE HORAS ---
+        async function cargarProgreso() {
+            if(rolUsuario === 'asesor_disciplinar') return; // Maestros no cargan esto
+            try {
+                const res = await fetch(`/api/asesor/progreso-horas/${cuentaAsesor}`);
+                const data = await res.json();
+                const horas = data.total_horas;
+                
+                let porcentaje = (horas / META_HORAS_ANUAL) * 100;
+                if (porcentaje > 100) porcentaje = 100;
+
+                document.getElementById('textoHoras').innerText = `${horas} / ${META_HORAS_ANUAL} hrs`;
+                document.getElementById('barraProgreso').style.width = `${porcentaje}%`;
+            } catch (error) { console.error("Error cargando progreso:", error); }
+        }
+
+        async function finalizarClase(citaId) {
+            const { value: pin } = await Swal.fire({
+                title: 'Validar Asistencia',
+                text: 'Pídele al alumno su PIN secreto de 4 dígitos',
+                input: 'text',
+                inputPlaceholder: 'Ej. 4829',
+                showCancelButton: true,
+                confirmButtonText: 'Validar PIN',
+                confirmButtonColor: '#10b981',
+                cancelButtonText: 'Cancelar'
+            });
+
+            if (pin) {
+                try {
+                    const res = await fetch('/api/asesor/validar-pin', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ citaId: citaId, pinIngresado: pin })
+                    });
+                    const data = await res.json();
+                    
+                    if (res.ok) {
+                        Swal.fire('¡Éxito!', data.mensaje, 'success');
+                        cargarAgenda();
+                        cargarProgreso();
+                    } else {
+                        Swal.fire('Incorrecto', data.error, 'error');
+                    }
+                } catch (error) { Swal.fire('Error', 'Problema de conexión.', 'error'); }
+            }
+        }
+
+        // --- CARGAR CITAS CON SWEETALERT ---
         async function cargarSolicitudes() {
             try {
                 const res = await fetch(`/api/asesor/solicitudes/${cuentaAsesor}`);
@@ -312,102 +388,68 @@
                 if(datos.length > 0) {
                     datos.forEach(cita => {
                         contenedor.innerHTML += `
-                            <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-green-500 flex flex-col">
+                            <div class="bg-white p-6 rounded-xl shadow-sm border-t-4 border-blue-500 flex flex-col">
                                 <h4 class="font-bold text-lg text-slate-800 mb-1">${cita.materia}</h4>
                                 <p class="text-sm text-gray-600 mb-2"><b>Asesorado:</b> ${cita.alumno}</p>
-                                <p class="text-xs text-gray-500 mb-4 bg-gray-50 p-2 rounded"><b>Mensaje:</b> ${cita.motivo}</p>
-                                <a href="${cita.link_reunion}" target="_blank" class="w-full text-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition flex items-center justify-center gap-2">
-                                    <i class="fas fa-video"></i> Ir a la Reunión
-                                </a>
+                                <div class="flex gap-2 w-full mt-4">
+                                    <a href="${cita.link_reunion}" target="_blank" class="flex-1 text-center bg-blue-100 text-blue-800 font-bold py-2 rounded-lg transition text-sm"><i class="fas fa-video"></i> Sala</a>
+                                    <button onclick="finalizarClase(${cita.cita_id})" class="flex-1 bg-green-500 text-white font-bold py-2 rounded-lg transition text-sm shadow-sm"><i class="fas fa-check-circle"></i> Validar PIN</button>
+                                </div>
                             </div>`;
                     });
                 } else { contenedor.innerHTML = `<p class="text-gray-500 italic">No tienes asesorías agendadas.</p>`; }
             } catch (error) { console.error(error); }
         }
 
-        async function rechazarAsesoria(citaId) {
-            if(confirm("¿Rechazar solicitud?")) {
-                const res = await fetch('/api/asesor/rechazar-cita', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ citaId }) });
-                if(res.ok) { alert("Rechazada."); cargarSolicitudes(); }
+        async function aceptarAsesoria(citaId) {
+            const { value: link } = await Swal.fire({
+                title: 'Aceptar Asesoría',
+                text: 'Pega el enlace de Zoom, Meet o Teams',
+                input: 'url',
+                inputPlaceholder: 'https://...',
+                showCancelButton: true,
+                confirmButtonText: 'Agendar Cita',
+                confirmButtonColor: '#10b981'
+            });
+
+            if (link) {
+                const res = await fetch('/api/asesor/aceptar-cita', { 
+                    method: 'POST', 
+                    headers: {'Content-Type': 'application/json'}, 
+                    body: JSON.stringify({ citaId, linkReunion: link }) 
+                });
+                const data = await res.json();
+                if(res.ok) {
+                    Swal.fire('¡Agendada!', data.mensaje, 'success');
+                    cargarSolicitudes(); cargarAgenda();
+                }
             }
         }
 
-        async function aceptarAsesoria(citaId) {
-            const link = prompt("Introduce el enlace de la reunión (Zoom/Meet):");
-            if (!link || link.trim() === "") return;
-            const res = await fetch('/api/asesor/aceptar-cita', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ citaId, linkReunion: link }) });
-            if(res.ok) { alert("¡Agendada!"); cargarSolicitudes(); cargarAgenda(); }
+        async function rechazarAsesoria(citaId) {
+            const result = await Swal.fire({
+                title: '¿Rechazar solicitud?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Sí, rechazar',
+                confirmButtonColor: '#ef4444'
+            });
+
+            if(result.isConfirmed) {
+                const res = await fetch('/api/asesor/rechazar-cita', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ citaId }) });
+                if(res.ok) { Swal.fire('Rechazada', '', 'info'); cargarSolicitudes(); }
+            }
         }
 
+        // INICIALIZACIÓN
         cargarSolicitudes();
         cargarAgenda();
+        cargarProgreso();
 
         document.getElementById('btnCerrarSesion').addEventListener('click', () => {
             localStorage.clear();
             window.location.href = '../index.html';
         });
-
-        // META DE HORAS PARA EL DESCUENTO
-        const META_HORAS_ANUAL = 100;
-
-        // 1. CARGAR PROGRESO REAL DE HORAS
-        async function cargarProgreso() {
-            try {
-                const res = await fetch(`/api/asesor/progreso-horas/${cuentaAsesor}`);
-                const data = await res.json();
-                const horas = data.total_horas;
-                
-                // Calculamos porcentaje (máximo 100%)
-                let porcentaje = (horas / META_HORAS_ANUAL) * 100;
-                if (porcentaje > 100) porcentaje = 100;
-
-                // Animamos la barra y el texto
-                document.getElementById('textoHoras').innerText = `${horas} / ${META_HORAS_ANUAL} hrs`;
-                document.getElementById('barraProgreso').style.width = `${porcentaje}%`;
-            } catch (error) { console.error("Error cargando progreso:", error); }
-        }
-
-        // 2. FUNCIÓN PARA VALIDAR EL PIN DE LA CLASE
-        async function finalizarClase(citaId) {
-            const pin = prompt("Por favor, pídele al alumno su PIN secreto de 4 dígitos para validar esta hora:");
-            
-            if (!pin || pin.trim() === "") return;
-
-            try {
-                const res = await fetch('/api/asesor/validar-pin', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ citaId: citaId, pinIngresado: pin })
-                });
-                const data = await res.json();
-                
-                if (res.ok) {
-                    alert(data.mensaje); // ¡PIN Correcto!
-                    cargarAgenda();      // Recargamos la agenda para quitar la clase
-                    cargarProgreso();    // ¡Vemos cómo sube la barrita!
-                } else {
-                    alert(data.error);   // PIN Incorrecto
-                }
-            } catch (error) { alert("Error de conexión."); }
-        }
-
-        // 3. ACTUALIZAR LA VISTA DE LA AGENDA (Añadir botón de PIN)
-        // Busca tu función cargarAgenda() que ya tenías y asegúrate de cambiar el botón de las tarjetas:
-        // Reemplaza el botón anterior por estos dos:
-        /*
-        <div class="flex gap-2 w-full mt-4">
-            <a href="${cita.link_reunion}" target="_blank" class="flex-1 text-center bg-blue-100 hover:bg-blue-200 text-blue-800 font-bold py-2 rounded-lg transition text-sm">
-                <i class="fas fa-video"></i> Ir a Sala
-            </a>
-            <button onclick="finalizarClase(${cita.id})" class="flex-1 bg-green-500 hover:bg-green-600 text-white font-bold py-2 rounded-lg transition text-sm shadow-sm">
-                <i class="fas fa-check-circle"></i> Validar PIN
-            </button>
-        </div>
-        */
-
-        // Llama a cargarProgreso() al final de tus scripts
-        cargarProgreso();
-        
     </script>
 </body>
 </html>
