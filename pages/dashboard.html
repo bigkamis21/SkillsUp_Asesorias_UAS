@@ -8,6 +8,7 @@
 
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body class="bg-slate-50 flex min-h-screen">
 
@@ -18,18 +19,18 @@
         </div>
         
         <nav class="flex-grow p-4 space-y-2 mt-4 overflow-y-auto">
-            <a href="#" class="w-full flex items-center gap-3 p-3 bg-blue-800 rounded-lg text-yellow-400 font-medium transition whitespace-nowrap">
+            <button id="btnInicio" class="w-full flex items-center gap-3 p-3 bg-blue-800 rounded-lg text-yellow-400 font-medium transition whitespace-nowrap">
                 <i class="fas fa-home"></i> Inicio
-            </a>
+            </button>
             <a href="catalogo.html" class="w-full flex items-center gap-3 p-3 hover:bg-blue-800 rounded-lg transition font-medium text-gray-300 whitespace-nowrap">
                 <i class="fas fa-layer-group"></i> Catálogo Escolar
             </a>
             <a href="mis-citas.html" class="w-full flex items-center gap-3 p-3 hover:bg-blue-800 rounded-lg transition font-medium text-gray-300 whitespace-nowrap">
                 <i class="fas fa-calendar-alt"></i> Mis Citas / Cursos
             </a>
-            <a href="#" class="w-full flex items-center gap-3 p-3 hover:bg-blue-800 rounded-lg transition font-medium text-gray-300 whitespace-nowrap">
+            <button id="btnVerMateriales" class="w-full flex items-center gap-3 p-3 hover:bg-blue-800 rounded-lg transition font-medium text-gray-300 whitespace-nowrap text-left">
                 <i class="fas fa-book"></i> Material de Apoyo
-            </a>
+            </button>
             
             <hr class="border-blue-800 my-4">
 
@@ -49,7 +50,7 @@
     </aside>
 
     <main class="flex-grow flex flex-col h-screen overflow-y-auto">        
-        <header class="bg-white shadow-sm p-4 flex justify-between items-center px-8">
+        <header class="bg-white shadow-sm p-4 flex justify-between items-center px-8 shrink-0">
             <h2 class="text-gray-500 font-medium">Panel del Estudiante</h2>
             <div class="flex items-center gap-4">
                 <span id="nombreHeader" class="text-sm font-semibold text-gray-700">Cargando...</span>
@@ -59,7 +60,7 @@
             </div>
         </header>
 
-        <div class="p-8 space-y-8">
+        <div class="p-8 space-y-8" id="vistaInicio">
             
             <section class="bg-gradient-to-r from-blue-800 to-blue-600 p-8 rounded-2xl text-white shadow-lg relative overflow-hidden">
                 <div class="relative z-10">
@@ -135,6 +136,16 @@
             </div>
 
         </div>
+
+        <div id="vistaMateriales" class="p-8 space-y-6 hidden">
+            <div class="border-b pb-4 mb-6">
+                <h2 class="text-2xl font-bold text-gray-800"><i class="fas fa-book-reader text-blue-600 mr-2"></i>Biblioteca de Materiales de Apoyo</h2>
+                <p class="text-gray-600 mt-1">Recursos compartidos y aprobados por profesores y asesores pares para complementar tus materias.</p>
+            </div>
+            
+            <div id="contenedorMaterialesAlumno" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+        </div>
+
     </main>
 
     <div id="modalPostulacion" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -155,9 +166,9 @@
                         </select>
                     </div>
                     <div>
-                        <label class="block text-sm font-bold text-gray-700 mb-1">Semestre de la Materia</label>
+                        <label class="block text-sm font-bold text-gray-700 mb-1">Semestre</label>
                         <select id="selectSemestre" class="w-full border rounded-lg p-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-purple-500" disabled required>
-                            <option value="">Primero elige carrera</option>
+                            <option value="">Primero elige...</option>
                             <option value="1">1er Semestre</option>
                             <option value="2">2do Semestre</option>
                             <option value="3">3er Semestre</option>
@@ -194,30 +205,6 @@
         </div>
     </div>
 
-    <div id="modalCita" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 backdrop-blur-sm">
-        <div class="bg-white p-8 rounded-xl shadow-2xl max-w-md w-full relative">
-            <button onclick="cerrarModalCita()" class="absolute top-4 right-4 text-gray-500 hover:text-red-500 text-xl">
-                <i class="fas fa-times"></i>
-            </button>
-            <h2 class="text-2xl font-bold text-blue-900 mb-2">Solicitar Asesoría</h2>
-            <p id="infoAsesorModal" class="text-sm text-gray-600 mb-4"></p>
-            
-            <form id="formCita" class="space-y-4">
-                <input type="hidden" id="modalAsesorCuenta">
-                <input type="hidden" id="modalMateriaId">
-                
-                <div>
-                    <label class="block text-sm font-bold text-gray-700 mb-1">¿En qué temas específicos necesitas ayuda?</label>
-                    <textarea id="citaMotivo" rows="4" class="w-full border rounded-lg p-2 bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:outline-none placeholder-gray-400" placeholder="Ej. No entiendo cómo resolver matrices por el método de Gauss-Jordan..." required></textarea>
-                </div>
-                
-                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition mt-4">
-                    Enviar Petición al Asesor
-                </button>
-            </form>
-        </div>
-    </div>
-
     <script>
         // 1. CARGA DE METADATOS Y SESIÓN
         const nombreReal = localStorage.getItem('nombreUsuario') || 'Usuario';
@@ -227,13 +214,64 @@
         document.getElementById('nombreBienvenida').innerText = nombreReal;
         document.getElementById('avatar').innerText = nombreReal.charAt(0).toUpperCase();
 
-        // Botón cerrar sesión limpio
-        document.getElementById('btnCerrarSesion').addEventListener('click', () => {
-            localStorage.clear();
-            window.location.href = '../index.html';
+        // CONTROL INTEGRADO DE NAVEGACIÓN DE VISTAS INTERNAS
+        const btnInicio = document.getElementById('btnInicio');
+        const btnVerMateriales = document.getElementById('btnVerMateriales');
+        const vistaInicio = document.getElementById('vistaInicio');
+        const vistaMateriales = document.getElementById('vistaMateriales');
+
+        btnInicio.addEventListener('click', (e) => {
+            e.preventDefault();
+            vistaInicio.classList.remove('hidden');
+            vistaMateriales.classList.add('hidden');
+            btnInicio.className = "w-full flex items-center gap-3 p-3 bg-blue-800 rounded-lg text-yellow-400 font-medium transition whitespace-nowrap";
+            btnVerMateriales.className = "w-full flex items-center gap-3 p-3 hover:bg-blue-800 rounded-lg transition font-medium text-gray-300 whitespace-nowrap text-left";
         });
 
-        // 2. --- MODAL DE POSTULACIÓN PARA SER ASESOR ---
+        btnVerMateriales.addEventListener('click', () => {
+            vistaInicio.classList.add('hidden');
+            vistaMateriales.classList.remove('hidden');
+            btnInicio.className = "w-full flex items-center gap-3 p-3 hover:bg-blue-800 rounded-lg transition font-medium text-gray-300 whitespace-nowrap";
+            btnVerMateriales.className = "w-full flex items-center gap-3 p-3 bg-blue-800 rounded-lg text-yellow-400 font-medium transition whitespace-nowrap text-left";
+            cargarMateriales('contenedorMaterialesAlumno');
+        });
+
+        // FUNCIÓN CONSUMIDORA DEL BACKEND: LEER MATERIALES DE APOYO
+        async function cargarMateriales(idContenedor) {
+            try {
+                const res = await fetch('/api/materiales');
+                const materiales = await res.json();
+                const contenedor = document.getElementById(idContenedor);
+                contenedor.innerHTML = '';
+
+                if(materiales.length > 0) {
+                    materiales.forEach(mat => {
+                        const badgeRol = mat.rol === 'asesor_disciplinar' 
+                            ? '<span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded font-bold">Profesor</span>'
+                            : '<span class="bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded font-bold">Asesor Par</span>';
+
+                        contenedor.innerHTML += `
+                            <div class="bg-white p-6 rounded-xl shadow-sm border-t-4 border-blue-400 flex flex-col hover:shadow-md transition">
+                                <div class="flex justify-between items-start mb-3">
+                                    ${badgeRol}
+                                    <span class="text-xs text-gray-400 font-semibold">${mat.fecha}</span>
+                                </div>
+                                <p class="font-bold text-gray-800 mb-4 text-sm">${mat.descripcion}</p>
+                                <p class="text-xs text-gray-500 mb-6"><i class="fas fa-user-edit mr-1"></i> Por: ${mat.asesor_nombre}</p>
+                                
+                                <a href="${mat.enlace_url}" target="_blank" class="mt-auto w-full text-center bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold py-2.5 rounded-lg transition text-sm">
+                                    <i class="fas fa-external-link-alt mr-2 text-blue-600"></i>Abrir Recurso
+                                </a>
+                            </div>
+                        `;
+                    });
+                } else {
+                    contenedor.innerHTML = `<p class="text-gray-500 col-span-full italic text-center py-4">Aún no hay materiales de apoyo publicados por los asesores.</p>`;
+                }
+            } catch(error) { console.error("Error al cargar materiales", error); }
+        }
+
+        // 2. MODAL DE POSTULACIÓN PARA SER ASESOR
         const modalPostulacion = document.getElementById('modalPostulacion');
         const btnAbrirPostulacion = document.getElementById('btnAbrirPostulacion');
         const btnCerrarModal = document.getElementById('btnCerrarModal');
@@ -248,7 +286,7 @@
                 const res = await fetch('/api/carreras');
                 const carreras = await res.json();
                 selectCarrera.innerHTML = '<option value="">Selecciona...</option>';
-                carreres = carreras.forEach(car => {
+                carreras.forEach(car => {
                     selectCarrera.innerHTML += `<option value="${car.id}">${car.nombre}</option>`;
                 });
             } catch (error) { console.error("Error cargando carreras:", error); }
@@ -300,92 +338,20 @@
                 });
                 const datos = await res.json();
                 if (res.ok) {
-                    alert(datos.mensaje);
+                    Swal.fire('¡Enviado!', datos.mensaje, 'success');
                     modalPostulacion.classList.add('hidden');
                     formPostulacion.reset();
                 } else {
-                    alert(datos.error);
+                    Swal.fire('Error', datos.error, 'error');
                 }
-            } catch (error) { alert("Error de conexión al enviar la solicitud."); }
+            } catch (error) { Swal.fire('Error', 'Error de conexión al enviar la solicitud.', 'error'); }
         });
 
-        // 3. --- LÓGICA DE AGENDAR CITA CON ASESOR PAR ---
-        const modalCita = document.getElementById('modalCita');
-        const formCita = document.getElementById('formCita');
-
-        async function cargarAsesoresDisponibles() {
-            try {
-                const res = await fetch('/api/alumno/asesores-disponibles');
-                const asesores = await res.json();
-                const contenedor = document.getElementById('contenedorAsesoresDisponibles');
-                
-                if (asesores.length > 0) {
-                    contenedor.innerHTML = '';
-                    asesores.forEach(ase => {
-                        // Impedimos que el alumno se pida una cita a sí mismo
-                        if(ase.asesor_cuenta !== cuentaAlumnoLogueado) {
-                            contenedor.innerHTML += `
-                                <div class="bg-white p-6 rounded-xl shadow-md border-t-4 border-blue-600 flex flex-col transition hover:shadow-lg">
-                                    <h3 class="font-bold text-lg text-slate-800">${ase.asesor_nombre}</h3>
-                                    <p class="text-xs text-gray-400 mb-3">Cuenta: ${ase.asesor_cuenta}</p>
-                                    <p class="text-sm font-semibold text-purple-700 bg-purple-50 p-2 rounded mb-4">
-                                        <i class="fas fa-book mr-2"></i>Asesor de: ${ase.materia_nombre}
-                                    </p>
-                                    <button onclick="abrirModalCita('${ase.asesor_nombre}', '${ase.asesor_cuenta}', ${ase.materia_id}, '${ase.materia_nombre}')" class="mt-auto w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded-lg transition text-sm shadow-sm">
-                                        Pedir Asesoría
-                                    </button>
-                                </div>
-                            `;
-                        }
-                    });
-                } else {
-                    contenedor.innerHTML = `<p class="text-gray-500 italic col-span-full bg-white p-4 rounded-xl border text-center">No hay asesores pares validados disponibles en este momento.</p>`;
-                }
-            } catch (error) { console.error("Error cargando catálogo de asesores:", error); }
-        }
-
-        function abrirModalCita(nombreAsesor, cuentaAsesor, materiaId, nombreMateria) {
-            document.getElementById('infoAsesorModal').innerHTML = `Vas a solicitar apoyo a <b>${nombreAsesor}</b> para la materia de <b>${nombreMateria}</b>.`;
-            document.getElementById('modalAsesorCuenta').value = cuentaAsesor;
-            document.getElementById('modalMateriaId').value = materiaId;
-            modalCita.classList.remove('hidden');
-        }
-
-        function cerrarModalCita() {
-            modalCita.classList.add('hidden');
-            formCita.reset();
-        }
-
-        formCita.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const numeroCuentaAsesor = document.getElementById('modalAsesorCuenta').value;
-            const materiaId = document.getElementById('modalMateriaId').value;
-            const motivo = document.getElementById('citaMotivo').value;
-
-            try {
-                const res = await fetch('/api/alumno/solicitar-cita', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        numeroCuentaAlumno: cuentaAlumnoLogueado,
-                        numeroCuentaAsesor,
-                        materiaId,
-                        motivo
-                    })
-                });
-                
-                const datos = await res.json();
-                if(res.ok) {
-                    alert(datos.mensaje);
-                    cerrarModalCita();
-                } else {
-                    alert(datos.error);
-                }
-            } catch (error) { alert("Error de conexión al enviar la solicitud de cita."); }
+        // Botón cerrar sesión limpio
+        document.getElementById('btnCerrarSesion').addEventListener('click', () => {
+            localStorage.clear();
+            window.location.href = '../index.html';
         });
-
-        // DISPARADOR AUTOMÁTICO AL ARRANCAR PÁGINA
-        cargarAsesoresDisponibles();
     </script>
 </body>
 </html>

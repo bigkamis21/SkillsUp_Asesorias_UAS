@@ -524,7 +524,7 @@ app.post('/api/alumno/solicitar-cita', (req, res) => {
 // MÓDULO MAESTROS: GESTIÓN DE INSCRIPCIONES A CURSOS
 // ==========================================
 
-// 1. Obtener alumnos que solicitaron entrar al curso del maestro
+/// 1. Obtener alumnos que solicitaron entrar al curso del maestro
 app.get('/api/asesor/inscripciones/:cuentaAsesor', (req, res) => {
     const { cuentaAsesor } = req.params;
     const query = `
@@ -534,6 +534,7 @@ app.get('/api/asesor/inscripciones/:cuentaAsesor', (req, res) => {
         JOIN cursos_regularizacion c ON i.curso_id = c.id
         WHERE c.id_asesor_disciplinar = (SELECT id FROM usuarios WHERE numero_cuenta = ?) 
         AND i.estado = 'pendiente'
+        AND c.estado = 'abierto'
     `;
     connection.query(query, [cuentaAsesor], (err, results) => {
         if (err) return res.status(500).json({ error: 'Error al cargar inscripciones.' });
@@ -644,7 +645,8 @@ app.post('/api/asesor/dar-de-baja', (req, res) => {
 app.get('/api/asesor/mis-cursos-creados/:cuenta', (req, res) => {
     const { cuenta } = req.params;
     const query = `
-        SELECT c.*, m.nombre as materia 
+        SELECT c.*, m.nombre as materia,
+               (SELECT COUNT(*) FROM inscripciones_cursos WHERE curso_id = c.id AND estado = 'aceptado') AS inscritos
         FROM cursos_regularizacion c 
         JOIN materias m ON c.id_materia = m.id 
         WHERE c.id_asesor_disciplinar = (SELECT id FROM usuarios WHERE numero_cuenta = ?)
@@ -707,6 +709,39 @@ app.post('/api/asesor/finalizar-curso', (req, res) => {
     });
 });
 
+// ==========================================
+// MÓDULO MATERIAL DE APOYO
+// ==========================================
+
+// 1. Asesores publican nuevo material
+app.post('/api/materiales', (req, res) => {
+    const { numeroCuenta, descripcion, enlace } = req.body;
+    
+    if (!numeroCuenta || !descripcion || !enlace) {
+        return res.status(400).json({ error: 'Todos los campos son obligatorios.' });
+    }
+
+    const query = 'INSERT INTO material_apoyo (numero_cuenta_asesor, descripcion, enlace_url) VALUES (?, ?, ?)';
+    connection.query(query, [numeroCuenta, descripcion, enlace], (err) => {
+        if (err) return res.status(500).json({ error: 'Error al guardar el material en la base de datos.' });
+        res.status(200).json({ mensaje: '¡Material publicado exitosamente para los alumnos!' });
+    });
+});
+
+// 2. Alumnos y asesores consultan el material
+app.get('/api/materiales', (req, res) => {
+    const query = `
+        SELECT m.id, m.descripcion, m.enlace_url, DATE_FORMAT(m.fecha_publicacion, '%d/%m/%Y') AS fecha, 
+               u.nombre AS asesor_nombre, u.rol
+        FROM material_apoyo m
+        JOIN usuarios u ON m.numero_cuenta_asesor = u.numero_cuenta
+        ORDER BY m.fecha_publicacion DESC
+    `;
+    connection.query(query, (err, results) => {
+        if (err) return res.status(500).json({ error: 'Error al cargar el material de apoyo.' });
+        res.status(200).json(results);
+    });
+});
 
 
 // 4. Puerto para Azure
