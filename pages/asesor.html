@@ -41,7 +41,6 @@
     </aside>
 
     <main class="flex-grow flex flex-col h-screen overflow-y-auto">
-        
         <header class="bg-white shadow-sm p-4 flex justify-between items-center px-8 shrink-0">
             <h2 id="tituloRol" class="text-blue-600 font-bold uppercase tracking-wide">Panel de Asesor</h2>
             <div class="flex items-center gap-4">
@@ -51,7 +50,6 @@
         </header>
 
         <div class="p-8 space-y-8">
-            
             <section class="bg-gradient-to-r from-gray-800 to-gray-700 p-8 rounded-2xl text-white shadow-lg relative overflow-hidden">
                 <div class="relative z-10">
                     <h1 class="text-3xl font-bold mb-2">¡Hola, <span id="nombreBienvenida">Asesor</span>! 👋</h1>
@@ -80,26 +78,23 @@
 
                 <div id="panelMisCursos" class="hidden mt-10">
                     <div class="border-b pb-4 mb-6">
-                        <h3 class="text-xl font-bold text-gray-800"><i class="fas fa-chalkboard text-purple-600 mr-2"></i>Mis Cursos de Regularización Activos</h3>
-                        <p class="text-gray-600 text-sm">Catálogo de cursos que has publicado para este ciclo escolar.</p>
+                        <h3 class="text-xl font-bold text-gray-800"><i class="fas fa-chalkboard text-purple-600 mr-2"></i>Mis Cursos / Asesorías</h3>
                     </div>
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6" id="contenedorMisCursos"></div>
                 </div>
             </div>
 
             <div id="seccionSolicitudes" class="space-y-4 hidden">
-                <h3 class="text-xl font-bold text-gray-800"><i class="fas fa-envelope-open-text mr-2 text-yellow-500"></i>Solicitudes de Alumnos Pendientes</h3>
+                <h3 class="text-xl font-bold text-gray-800"><i class="fas fa-envelope-open-text mr-2 text-yellow-500"></i>Solicitudes Pendientes</h3>
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6" id="contenedorSolicitudes"></div>
             </div>
 
             <div id="seccionCrearCurso" class="space-y-4 hidden max-w-2xl bg-white p-8 rounded-xl shadow-sm border">
                 <h3 class="text-xl font-bold text-gray-800 mb-2"><i class="fas fa-graduation-cap text-purple-600 mr-2"></i>Publicar nueva materia a asesorar</h3>
-                <p class="text-sm text-gray-500 mb-6">Diseña un programa estructurado asignando los cupos de alumnos y el contenido didáctico.</p>
-                
                 <form id="formCrearCurso" class="space-y-4">
                     <div>
                         <label class="block text-sm font-bold text-gray-700 mb-1">Título del Curso</label>
-                        <input type="text" id="cursoTitulo" class="w-full border rounded-lg p-2.5 bg-slate-50 focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="Ej. Taller Intensivo de Cálculo Vectorial" required>
+                        <input type="text" id="cursoTitulo" class="w-full border rounded-lg p-2.5 bg-slate-50 focus:ring-2 focus:ring-blue-500 focus:outline-none" required>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -113,14 +108,10 @@
                             <label class="block text-sm font-bold text-gray-700 mb-1">Semestre</label>
                             <select id="selectSemestreCurso" class="w-full border rounded-lg p-2.5 bg-slate-50 focus:ring-2 focus:ring-blue-500 focus:outline-none" disabled required>
                                 <option value="">Primero elige carrera</option>
-                                <option value="1">1er Semestre</option>
-                                <option value="2">2do Semestre</option>
-                                <option value="3">3er Semestre</option>
-                                <option value="4">4to Semestre</option>
-                                <option value="5">5to Semestre</option>
-                                <option value="6">6to Semestre</option>
-                                <option value="7">7mo Semestre</option>
-                                <option value="8">8vo Semestre</option>
+                                <option value="1">1er Semestre</option><option value="2">2do Semestre</option>
+                                <option value="3">3er Semestre</option><option value="4">4to Semestre</option>
+                                <option value="5">5to Semestre</option><option value="6">6to Semestre</option>
+                                <option value="7">7mo Semestre</option><option value="8">8vo Semestre</option>
                             </select>
                         </div>
                     </div>
@@ -136,24 +127,23 @@
                         <div>
                             <label class="block text-sm font-bold text-gray-700 mb-1">Modalidad</label>
                             <select id="cursoModalidad" class="w-full border rounded-lg p-2.5 bg-slate-50 focus:ring-2 focus:ring-blue-500 focus:outline-none" required>
-                                <option value="Presencial">Presencial</option>
-                                <option value="En línea">En línea</option>
+                                <option value="Presencial">Presencial</option><option value="En línea">En línea</option>
                             </select>
                         </div>
                         <div id="divHorario">
                             <label class="block text-sm font-bold text-gray-700 mb-1">Horario Sugerido</label>
-                            <input type="text" id="cursoHorario" class="w-full border rounded-lg p-2.5 bg-slate-50 focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="Ej. Lunes y Miércoles 4:00 PM">
+                            <input type="text" id="cursoHorario" class="w-full border rounded-lg p-2.5 bg-slate-50 focus:ring-2 focus:ring-blue-500 focus:outline-none">
                         </div>
                     </div>
 
                     <div id="divDuracionCupo" class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-bold text-gray-700 mb-1">Duración (Semanas)</label>
-                            <input type="number" id="cursoDuracion" min="1" max="16" class="w-full border rounded-lg p-2.5 bg-slate-50 focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="Ej. 4">
+                            <input type="number" id="cursoDuracion" min="1" max="16" class="w-full border rounded-lg p-2.5 bg-slate-50 focus:ring-2 focus:ring-blue-500 focus:outline-none">
                         </div>
                         <div>
                             <label class="block text-sm font-bold text-gray-700 mb-1">Cupo Máximo</label>
-                            <input type="number" id="cursoCupo" min="1" max="50" class="w-full border rounded-lg p-2.5 bg-slate-50 focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="Ej. 15">
+                            <input type="number" id="cursoCupo" min="1" max="50" class="w-full border rounded-lg p-2.5 bg-slate-50 focus:ring-2 focus:ring-blue-500 focus:outline-none">
                         </div>
                     </div>
 
@@ -169,27 +159,52 @@
                     </div>
                     <div>
                         <label class="block text-sm font-bold text-gray-700 mb-1">Descripción del Curso y Criterios</label>
-                        <textarea id="cursoDescripcion" rows="4" class="w-full border rounded-lg p-2.5 bg-slate-50 focus:ring-2 focus:ring-blue-500 focus:outline-none placeholder-gray-400" placeholder="Describe los temas que se verán, requisitos..." required></textarea>
+                        <textarea id="cursoDescripcion" rows="4" class="w-full border rounded-lg p-2.5 bg-slate-50 focus:ring-2 focus:ring-blue-500 focus:outline-none" required></textarea>
                     </div>
-
                     <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 rounded-lg transition shadow-md">
                         Publicar Curso en el Catálogo Escolar
                     </button>
                 </form>
             </div>
 
-            <div id="seccionMaterial" class="space-y-4 hidden max-w-4xl bg-white p-8 rounded-xl shadow-sm border">
+            <div id="seccionMaterial" class="space-y-4 hidden max-w-5xl bg-white p-8 rounded-xl shadow-sm border">
                 <h3 class="text-xl font-bold text-gray-800 mb-2"><i class="fas fa-book-open text-blue-600 mr-2"></i>Compartir Material de Apoyo</h3>
-                <p class="text-sm text-gray-500 mb-6">Publica enlaces a libros de Drive, repositorios de GitHub, videos didácticos de YouTube o carpetas de apuntes para ayudar a la comunidad estudiantil.</p>
+                <p class="text-sm text-gray-500 mb-6">Publica enlaces a libros de Drive, repositorios o videos didácticos especificando a qué materia pertenecen.</p>
                 
                 <form id="formMaterial" class="bg-gray-50 p-6 rounded-xl border mb-8 space-y-4">
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-1">Carrera</label>
+                            <select id="selectCarreraMat" class="w-full border rounded-lg p-2.5 bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none" required>
+                                <option value="">Selecciona...</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-1">Semestre</label>
+                            <select id="selectSemestreMat" class="w-full border rounded-lg p-2.5 bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none" disabled required>
+                                <option value="">Primero elige carrera</option>
+                                <option value="1">1er Semestre</option><option value="2">2do Semestre</option>
+                                <option value="3">3er Semestre</option><option value="4">4to Semestre</option>
+                                <option value="5">5to Semestre</option><option value="6">6to Semestre</option>
+                                <option value="7">7mo Semestre</option><option value="8">8vo Semestre</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-1">Materia</label>
+                            <select id="selectMateriaMat" class="w-full border rounded-lg p-2.5 bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none" disabled required>
+                                <option value="">Primero elige semestre</option>
+                            </select>
+                        </div>
+                    </div>
+
                     <div>
                         <label class="block text-sm font-bold text-gray-700 mb-1">Descripción del Material</label>
-                        <input type="text" id="descMaterial" class="w-full border rounded-lg p-2.5 bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="Ej. Formulario completo de integrales y derivadas (PDF)" required>
+                        <input type="text" id="descMaterial" class="w-full border rounded-lg p-2.5 bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="Ej. Formulario completo de integrales (PDF)" required>
                     </div>
                     <div>
                         <label class="block text-sm font-bold text-gray-700 mb-1">Enlace del Recurso (URL)</label>
-                        <input type="url" id="linkMaterial" class="w-full border rounded-lg p-2.5 bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="https://drive.google.com/..." required>
+                        <input type="url" id="linkMaterial" class="w-full border rounded-lg p-2.5 bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="https://..." required>
                     </div>
                     <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition shadow-md">
                         Publicar Material de Apoyo
@@ -230,17 +245,13 @@
         const cuentaAsesor = localStorage.getItem('cuentaLogueada'); 
         const META_HORAS_ANUAL = 100;
 
-        // Configuración de la cabecera
         document.getElementById('nombreHeader').innerText = nombreReal;
         document.getElementById('nombreBienvenida').innerText = nombreReal;
         document.getElementById('avatar').innerText = nombreReal.charAt(0).toUpperCase();
-
         const tituloRol = document.getElementById('tituloRol');
         const textoBienvenida = document.getElementById('textoBienvenida');
         
-        // --- SEPARACIÓN PERFECTA DE ROLES ---
         if (rolUsuario === 'asesor_disciplinar') {
-            // VISTA MAESTRO
             tituloRol.innerText = 'Panel de Asesor Disciplinar';
             tituloRol.classList.replace('text-blue-600', 'text-purple-600');
             if(textoBienvenida) textoBienvenida.innerText = 'Gracias por apoyar a la comunidad universitaria. Desde este panel puedes gestionar las inscripciones y ofertar nuevos cursos.';
@@ -251,30 +262,24 @@
             document.getElementById('panelProgresoHoras').classList.add('hidden');
             document.getElementById('contenedorAgenda').classList.add('hidden'); 
         } else {
-            // VISTA ALUMNO (ASESOR PAR)
             tituloRol.innerText = 'Panel de Asesor Par';
             if(textoBienvenida) textoBienvenida.innerText = 'Gestiona tu agenda de asesorías 1 a 1 y publica grupos de estudio.';
             
             document.getElementById('tabCrearCurso').classList.remove('hidden'); 
             if(document.getElementById('panelMisCursos')) document.getElementById('panelMisCursos').classList.remove('hidden'); 
             
-            // Cambiar los textos para que tengan sentido para el alumno
             document.getElementById('tabCrearCurso').innerHTML = '<i class="fas fa-bullhorn"></i> Publicar Asesoría';
             document.querySelector('#seccionCrearCurso h3').innerHTML = '<i class="fas fa-bullhorn text-purple-600 mr-2"></i>Ofrecer Asesoría 1 a 1';
             
-            // Esto arregla el título de la sección de abajo
             if(document.querySelector('#panelMisCursos h3')) {
                 document.querySelector('#panelMisCursos h3').innerHTML = '<i class="fas fa-bullhorn text-purple-600 mr-2"></i>Mis Asesorías Publicadas';
-                document.querySelector('#panelMisCursos p').innerText = 'Catálogo de asesorías que has ofertado a tus compañeros.';
             }
             
-            // Ocultar los inputs que son exclusivos del maestro
             if(document.getElementById('divHorario')) document.getElementById('divHorario').classList.add('hidden');
             if(document.getElementById('divDuracionCupo')) document.getElementById('divDuracionCupo').classList.add('hidden');
             if(document.getElementById('divFechas')) document.getElementById('divFechas').classList.add('hidden');
         }
 
-        // --- SISTEMA DE PESTAÑAS (TABS) ---
         const tabs = {
             agenda: { btn: document.getElementById('tabAgenda'), sec: document.getElementById('seccionAgenda'), active: "bg-gray-800 text-yellow-400" },
             solicitudes: { btn: document.getElementById('tabSolicitudes'), sec: document.getElementById('seccionSolicitudes'), active: "bg-gray-800 text-yellow-400" },
@@ -292,87 +297,59 @@
                     tabs[key].btn.className = "w-full flex items-center gap-3 p-3 hover:bg-gray-800 text-gray-300 rounded-lg font-medium transition relative whitespace-normal text-sm leading-tight";
                 }
             });
-            if(activeKey === 'crearCurso') cargarCarrerasForm();
+            if(activeKey === 'crearCurso') cargarCarrerasForm(document.getElementById('selectCarreraCurso'));
+            if(activeKey === 'material') {
+                cargarCarrerasForm(document.getElementById('selectCarreraMat'));
+                cargarMateriales('contenedorMaterialAsesor');
+            }
         }
 
         tabs.agenda.btn.addEventListener('click', () => switchTab('agenda'));
         tabs.solicitudes.btn.addEventListener('click', () => switchTab('solicitudes'));
         tabs.crearCurso.btn.addEventListener('click', () => switchTab('crearCurso'));
-        tabs.material.btn.addEventListener('click', () => {
-            switchTab('material');
-            cargarMateriales('contenedorMaterialAsesor');
-        });
+        tabs.material.btn.addEventListener('click', () => switchTab('material'));
 
-        // --- LÓGICA DEL FORMULARIO DE CURSOS (MAESTROS / PARES) ---
-        const selectCarreraCurso = document.getElementById('selectCarreraCurso');
-        const selectSemestreCurso = document.getElementById('selectSemestreCurso');
-        const selectMateriaCurso = document.getElementById('selectMateriaCurso');
-
-        async function cargarCarrerasForm() {
-            if(selectCarreraCurso.children.length > 1) return;
+        // LÓGICA DE SELECTORES EN CASCADA
+        async function cargarCarrerasForm(selectElement) {
+            if(selectElement.children.length > 1) return;
             try {
                 const res = await fetch('/api/carreras');
                 const carreras = await res.json();
-                selectCarreraCurso.innerHTML = '<option value="">Selecciona...</option>';
-                carreras.forEach(car => { selectCarreraCurso.innerHTML += `<option value="${car.id}">${car.nombre}</option>`; });
+                selectElement.innerHTML = '<option value="">Selecciona...</option>';
+                carreras.forEach(car => { selectElement.innerHTML += `<option value="${car.id}">${car.nombre}</option>`; });
             } catch (error) { console.error("Error:", error); }
         }
 
-        selectCarreraCurso.addEventListener('change', () => {
-            if (selectCarreraCurso.value !== "") {
-                selectSemestreCurso.disabled = false; selectSemestreCurso.value = "";
-                selectMateriaCurso.innerHTML = '<option value="">Primero elige semestre</option>'; selectMateriaCurso.disabled = true;
-            } else { selectSemestreCurso.disabled = true; }
-        });
+        function configurarSelectores(selectCarrera, selectSemestre, selectMateria) {
+            selectCarrera.addEventListener('change', () => {
+                if (selectCarrera.value !== "") {
+                    selectSemestre.disabled = false; selectSemestre.value = "";
+                    selectMateria.innerHTML = '<option value="">Primero elige semestre</option>'; selectMateria.disabled = true;
+                } else { selectSemestre.disabled = true; }
+            });
 
-        selectSemestreCurso.addEventListener('change', async () => {
-            const carreraId = selectCarreraCurso.value; const semestre = selectSemestreCurso.value;
-            if (semestre !== "") {
-                try {
-                    selectMateriaCurso.innerHTML = '<option value="">Cargando...</option>';
-                    const res = await fetch(`/api/materias/${carreraId}/${semestre}`);
-                    const materias = await res.json();
-                    selectMateriaCurso.innerHTML = '<option value="">Selecciona una materia...</option>';
-                    materias.forEach(mat => { selectMateriaCurso.innerHTML += `<option value="${mat.id}">${mat.nombre}</option>`; });
-                    selectMateriaCurso.disabled = false;
-                } catch (error) { console.error("Error:", error); }
-            }
-        });
-
-        // --- SUBMIT: CREAR CURSO O ASESORÍA ---
-        document.getElementById('formCrearCurso').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const esPar = rolUsuario === 'asesor_par';
-            const fechaHoy = new Date().toISOString().split('T')[0];
-
-            const cursoData = {
-                numeroCuentaAsesor: cuentaAsesor, 
-                materiaId: selectMateriaCurso.value, 
-                titulo: document.getElementById('cursoTitulo').value,
-                descripcion: document.getElementById('cursoDescripcion').value, 
-                modalidad: document.getElementById('cursoModalidad').value, 
-                duracion: esPar ? 1 : document.getElementById('cursoDuracion').value,
-                cupoMaximo: esPar ? 1 : document.getElementById('cursoCupo').value,
-                fechaInicio: esPar ? fechaHoy : document.getElementById('cursoFechaInicio').value,
-                fechaFin: esPar ? fechaHoy : document.getElementById('cursoFechaFin').value,
-                horario: esPar ? 'A convenir con el compañero' : document.getElementById('cursoHorario').value
-            };
-
-            try {
-                const res = await fetch('/api/asesor/crear-curso', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(cursoData) });
-                const data = await res.json();
-                if(res.ok) {
-                    Swal.fire('¡Publicado!', data.mensaje, 'success');
-                    document.getElementById('formCrearCurso').reset();
-                    cargarMisCursosCreados(); 
-                    switchTab('agenda');
-                } else { Swal.fire('Error', data.error, 'error'); }
-            } catch (error) { Swal.fire('Error', 'Revisa tu servidor.', 'error'); }
-        });
+            selectSemestre.addEventListener('change', async () => {
+                const carreraId = selectCarrera.value; const semestre = selectSemestre.value;
+                if (semestre !== "") {
+                    try {
+                        selectMateria.innerHTML = '<option value="">Cargando...</option>';
+                        const res = await fetch(`/api/materias/${carreraId}/${semestre}`);
+                        const materias = await res.json();
+                        selectMateria.innerHTML = '<option value="">Selecciona una materia...</option>';
+                        materias.forEach(mat => { selectMateria.innerHTML += `<option value="${mat.id}">${mat.nombre}</option>`; });
+                        selectMateria.disabled = false;
+                    } catch (error) { console.error("Error:", error); }
+                }
+            });
+        }
         
-        // --- FORMULARIO NUEVO: PUBLICAR MATERIAL DE APOYO ---
+        configurarSelectores(document.getElementById('selectCarreraCurso'), document.getElementById('selectSemestreCurso'), document.getElementById('selectMateriaCurso'));
+        configurarSelectores(document.getElementById('selectCarreraMat'), document.getElementById('selectSemestreMat'), document.getElementById('selectMateriaMat'));
+
+        // --- SUBMIT PUBLICAR MATERIAL DE APOYO ---
         document.getElementById('formMaterial').addEventListener('submit', async (e) => {
             e.preventDefault();
+            const materiaId = document.getElementById('selectMateriaMat').value;
             const descripcion = document.getElementById('descMaterial').value;
             const enlace = document.getElementById('linkMaterial').value;
 
@@ -380,27 +357,27 @@
                 const res = await fetch('/api/materiales', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ numeroCuenta: cuentaAsesor, descripcion, enlace })
+                    body: JSON.stringify({ numeroCuenta: cuentaAsesor, materiaId, descripcion, enlace })
                 });
                 const data = await res.json();
                 
                 if(res.ok) {
                     Swal.fire('¡Publicado!', data.mensaje, 'success');
                     document.getElementById('formMaterial').reset();
+                    // Resetear comboboxes
+                    document.getElementById('selectSemestreMat').disabled = true;
+                    document.getElementById('selectMateriaMat').disabled = true;
                     cargarMateriales('contenedorMaterialAsesor');
-                } else {
-                    Swal.fire('Error', data.error, 'error');
-                }
+                } else { Swal.fire('Error', data.error, 'error'); }
             } catch(error) { Swal.fire('Error', 'Fallo de conexión.', 'error'); }
         });
 
-        // --- FUNCIÓN GLOBAL: CARGAR MATERIALES DE APOYO ---
+        // --- CARGAR MATERIALES CON BOTONES DE EDICIÓN Y ELIMINACIÓN ---
         async function cargarMateriales(idContenedor) {
             try {
                 const res = await fetch('/api/materiales');
                 const materiales = await res.json();
                 const contenedor = document.getElementById(idContenedor);
-                if(!contenedor) return;
                 contenedor.innerHTML = '';
 
                 if(materiales.length > 0) {
@@ -409,28 +386,89 @@
                             ? '<span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded font-bold">Profesor</span>'
                             : '<span class="bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded font-bold">Asesor Par</span>';
 
+                        const esAutor = mat.autor_cuenta === cuentaAsesor;
+                        const botonesAccion = esAutor ? `
+                            <div class="mt-3 flex gap-2 border-t pt-3">
+                                <button onclick="editarMaterial(${mat.id}, '${mat.descripcion}', '${mat.enlace_url}')" class="flex-1 bg-yellow-400 hover:bg-yellow-500 text-blue-900 font-bold py-1.5 rounded transition text-xs shadow-sm"><i class="fas fa-edit"></i> Editar</button>
+                                <button onclick="eliminarMaterial(${mat.id})" class="flex-1 bg-red-500 hover:bg-red-600 text-white font-bold py-1.5 rounded transition text-xs shadow-sm"><i class="fas fa-trash"></i> Eliminar</button>
+                            </div>
+                        ` : '';
+
                         contenedor.innerHTML += `
                             <div class="bg-white p-6 rounded-xl shadow-sm border-t-4 border-blue-400 flex flex-col hover:shadow-md transition">
-                                <div class="flex justify-between items-start mb-3">
+                                <div class="flex justify-between items-start mb-2">
                                     ${badgeRol}
                                     <span class="text-xs text-gray-400 font-semibold">${mat.fecha}</span>
                                 </div>
+                                <span class="bg-gray-100 text-gray-600 text-[10px] uppercase font-bold px-2 py-1 rounded self-start mb-3 border">Semestre ${mat.semestre} | ${mat.materia_nombre}</span>
+                                
                                 <p class="font-bold text-gray-800 mb-4 text-sm">${mat.descripcion}</p>
-                                <p class="text-xs text-gray-500 mb-6"><i class="fas fa-user-edit mr-1"></i> Por: ${mat.asesor_nombre}</p>
+                                <p class="text-xs text-gray-500 mb-4"><i class="fas fa-user-edit mr-1"></i> Por: ${mat.asesor_nombre}</p>
                                 
                                 <a href="${mat.enlace_url}" target="_blank" class="mt-auto w-full text-center bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold py-2.5 rounded-lg transition text-sm">
                                     <i class="fas fa-external-link-alt mr-2 text-blue-600"></i>Abrir Recurso
                                 </a>
+                                ${botonesAccion}
                             </div>
                         `;
                     });
-                } else {
-                    contenedor.innerHTML = `<p class="text-gray-500 col-span-full italic">Aún no hay materiales de apoyo publicados.</p>`;
-                }
+                } else { contenedor.innerHTML = `<p class="text-gray-500 col-span-full italic">Aún no hay materiales de apoyo publicados.</p>`; }
             } catch(error) { console.error("Error al cargar materiales", error); }
         }
 
-        // Aceptar alumno y pedirle el Link/Aula al maestro (VALIDADO)
+        async function eliminarMaterial(id) {
+            const result = await Swal.fire({
+                title: '¿Eliminar Material?',
+                text: "Esta acción no se puede deshacer.",
+                icon: 'warning', showCancelButton: true, confirmButtonColor: '#ef4444', confirmButtonText: 'Sí, eliminar', cancelButtonText: 'Cancelar'
+            });
+            if (result.isConfirmed) {
+                const res = await fetch(`/api/materiales/${id}`, { method: 'DELETE' });
+                if(res.ok) { Swal.fire('Eliminado', '', 'success'); cargarMateriales('contenedorMaterialAsesor'); }
+            }
+        }
+
+        async function editarMaterial(id, descActual, linkActual) {
+            const { value: formValues } = await Swal.fire({
+                title: 'Editar Material',
+                html: `
+                    <input id="swal-input1" class="swal2-input text-sm" value="${descActual}">
+                    <input id="swal-input2" class="swal2-input text-sm" value="${linkActual}">
+                `,
+                focusConfirm: false, showCancelButton: true, confirmButtonColor: '#2563eb', cancelButtonText: 'Cancelar', confirmButtonText: 'Guardar',
+                preConfirm: () => {
+                    return { desc: document.getElementById('swal-input1').value, link: document.getElementById('swal-input2').value }
+                }
+            });
+            if (formValues) {
+                const res = await fetch(`/api/materiales/${id}`, {
+                    method: 'PUT', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ descripcion: formValues.desc, enlace: formValues.link })
+                });
+                if(res.ok) { Swal.fire('Actualizado', '', 'success'); cargarMateriales('contenedorMaterialAsesor'); }
+            }
+        }
+
+        // --- SUBMIT OFERTAR CURSO ---
+        document.getElementById('formCrearCurso').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const esPar = rolUsuario === 'asesor_par';
+            const fechaHoy = new Date().toISOString().split('T')[0];
+            const cursoData = {
+                numeroCuentaAsesor: cuentaAsesor, materiaId: document.getElementById('selectMateriaCurso').value, 
+                titulo: document.getElementById('cursoTitulo').value, descripcion: document.getElementById('cursoDescripcion').value, 
+                modalidad: document.getElementById('cursoModalidad').value, duracion: esPar ? 1 : document.getElementById('cursoDuracion').value,
+                cupoMaximo: esPar ? 1 : document.getElementById('cursoCupo').value, fechaInicio: esPar ? fechaHoy : document.getElementById('cursoFechaInicio').value,
+                fechaFin: esPar ? fechaHoy : document.getElementById('cursoFechaFin').value, horario: esPar ? 'A convenir con el compañero' : document.getElementById('cursoHorario').value
+            };
+            try {
+                const res = await fetch('/api/asesor/crear-curso', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(cursoData) });
+                const data = await res.json();
+                if(res.ok) { Swal.fire('¡Publicado!', data.mensaje, 'success'); document.getElementById('formCrearCurso').reset(); switchTab('agenda'); }
+            } catch (error) {}
+        });
+
+        // --- MANEJO DE ACEPTAR ALUMNOS Y AULA VIRTUAL ---
         async function aceptarInscripcionConLink(inscripcionId) {
             const { value: link } = await Swal.fire({
                 title: 'Aceptar Alumno',
@@ -459,11 +497,8 @@
                     if (res.ok) { 
                         Swal.fire('¡Listo!', data.mensaje, 'success'); 
                     } else {
-                        // Muestra el mensaje de rechazo por límite de cupo
                         Swal.fire('Aviso', data.error, 'warning'); 
                     }
-                    
-                    // CLAVE: Recargar siempre para limpiar la UI
                     cargarSolicitudes(); 
                     
                 } catch (e) {
@@ -472,7 +507,21 @@
             }
         }
 
-        // --- CARGAR CITAS O INSCRIPCIONES (INTELIGENTE POR ROL) ---
+        async function gestionarInscripcion(inscripcionId, accion) {
+            const endpoint = accion === 'aceptar' ? '/api/asesor/aceptar-inscripcion' : '/api/asesor/rechazar-inscripcion';
+            const result = await Swal.fire({
+                title: accion === 'aceptar' ? '¿Aprobar Kardex?' : '¿Rechazar Alumno?',
+                icon: accion === 'aceptar' ? 'question' : 'warning',
+                showCancelButton: true, confirmButtonText: 'Sí, confirmar',
+                confirmButtonColor: accion === 'aceptar' ? '#9333ea' : '#ef4444'
+            });
+            if(result.isConfirmed) {
+                const res = await fetch(endpoint, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ inscripcionId }) });
+                const data = await res.json();
+                if(res.ok) { Swal.fire('¡Listo!', data.mensaje, 'success'); cargarSolicitudes(); }
+            }
+        }
+
         async function cargarSolicitudes() {
             const contenedor = document.getElementById('contenedorSolicitudes');
             const badge = document.getElementById('badgeContador');
@@ -540,35 +589,6 @@
             } catch (error) { console.error("Error cargando solicitudes:", error); }
         }
 
-        // FUNCION DEL BOTON DAR DE BAJA CURSO 
-        async function darDeBajaCurso(cursoId) {
-            const result = await Swal.fire({
-                title: '¿Dar de baja?',
-                text: 'Esta publicación desaparecerá del catálogo.',
-                icon: 'warning', showCancelButton: true, confirmButtonText: 'Sí, dar de baja', confirmButtonColor: '#ef4444'
-            });
-            if(result.isConfirmed) {
-                const res = await fetch('/api/asesor/dar-de-baja', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ cursoId }) });
-                if(res.ok) { Swal.fire('Eliminado', '', 'success'); cargarMisCursosCreados(); }
-            }
-        }
-
-        // GESTIONAR INSCRIPCIÓN DE MAESTRO
-        async function gestionarInscripcion(inscripcionId, accion) {
-            const endpoint = accion === 'aceptar' ? '/api/asesor/aceptar-inscripcion' : '/api/asesor/rechazar-inscripcion';
-            const result = await Swal.fire({
-                title: accion === 'aceptar' ? '¿Aprobar Kardex?' : '¿Rechazar Alumno?',
-                icon: accion === 'aceptar' ? 'question' : 'warning',
-                showCancelButton: true, confirmButtonText: 'Sí, confirmar',
-                confirmButtonColor: accion === 'aceptar' ? '#9333ea' : '#ef4444'
-            });
-            if(result.isConfirmed) {
-                const res = await fetch(endpoint, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ inscripcionId }) });
-                const data = await res.json();
-                if(res.ok) { Swal.fire('¡Listo!', data.mensaje, 'success'); cargarSolicitudes(); }
-            }
-        }
-
         async function cargarMisCursosCreados() {
             try {
                 const res = await fetch(`/api/asesor/mis-cursos-creados/${cuentaAsesor}`);
@@ -600,7 +620,6 @@
             } catch (error) { console.error(error); }
         }
 
-        // --- PROGRESO DE HORAS DE ASESOR PAR ---
         async function cargarProgreso() {
             try {
                 const res = await fetch(`/api/asesor/progreso-horas/${cuentaAsesor}`);
@@ -674,7 +693,6 @@
             }
         }
 
-        // --- GESTIÓN DE CALIFICACIONES EN EL AULA ---
         async function abrirAula(cursoId, tituloCurso) {
             document.getElementById('aulaNombreCurso').innerText = tituloCurso;
             document.getElementById('modalAula').classList.remove('hidden');
@@ -686,12 +704,10 @@
                 const alumnos = await res.json();
                 contenedor.innerHTML = '';
 
-                // ---> AQUÍ ESTÁ LA NUEVA VALIDACIÓN INYECTADA <---
                 if (!res.ok) {
                     contenedor.innerHTML = `<p class="text-center text-red-500 font-bold py-4"><i class="fas fa-exclamation-triangle"></i> Error: ${alumnos.error || 'No se pudo cargar'}</p>`;
-                    return; // Detiene la ejecución para que no intente pintar el resto
+                    return; 
                 }
-                // -------------------------------------------------
 
                 if(alumnos.length > 0) {
                     alumnos.forEach(al => {
