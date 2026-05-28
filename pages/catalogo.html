@@ -54,6 +54,8 @@
         </div>
     </main>
 
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <script>
         const nombreReal = localStorage.getItem('nombreUsuario') || 'Usuario';
         const cuentaAlumnoLogueado = localStorage.getItem('cuentaLogueada');
@@ -102,7 +104,6 @@
 
         async function cargarAsesoresDisponibles() {
             try {
-                // Ahora llama a la ruta correcta que diseñamos en la Cirugía 1
                 const res = await fetch('/api/alumno/asesorias-grupos-pares');
                 const asesorias = await res.json();
                 const contenedor = document.getElementById('contenedorAsesoresDisponibles');
@@ -110,7 +111,6 @@
                 if (asesorias.length > 0) {
                     contenedor.innerHTML = '';
                     asesorias.forEach(ase => {
-                        // Evitar que el alumno vea su propia asesoría para inscribirse
                         if(ase.asesor_cuenta !== cuentaAlumnoLogueado) {
                             const fInicio = new Date(ase.fecha_inicio).toLocaleDateString('es-MX');
                             const fFin = new Date(ase.fecha_fin).toLocaleDateString('es-MX');
@@ -142,40 +142,77 @@
             } catch (error) { console.error(error); }
         }
 
-        // NUEVA FUNCIÓN: Envía la petición directo usando la info que el Par ya predefinió
+        // LÓGICA DE ALERTA ACTUALIZADA: Asesorías Pares
         async function solicitarAsesoriaParDirecta(asesorCuenta, materiaId, titulo) {
-            if(confirm(`¿Enviar solicitud de asesoría para: ${titulo}?`)) {
-                try {
-                    const motivoAutomatico = `Solicitud de inscripción a la asesoría/grupo: ${titulo}`;
-                    
-                    const res = await fetch('/api/alumno/solicitar-cita', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ 
-                            numeroCuentaAlumno: cuentaAlumnoLogueado, 
-                            numeroCuentaAsesor: asesorCuenta, 
-                            materiaId: materiaId, 
-                            motivo: motivoAutomatico 
-                        })
-                    });
-                    const data = await res.json();
-                    alert(data.mensaje || data.error);
-                } catch(error) { alert("Error de conexión."); }
-            }
+            Swal.fire({
+                title: '¿Enviar solicitud?',
+                text: `¿Deseas solicitar la asesoría para: ${titulo}?`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#7e22ce', // Color morado
+                cancelButtonColor: '#6b7280',  // Color gris
+                confirmButtonText: 'Sí, enviar solicitud',
+                cancelButtonText: 'Cancelar'
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    try {
+                        const motivoAutomatico = `Solicitud de inscripción a la asesoría/grupo: ${titulo}`;
+                        
+                        const res = await fetch('/api/alumno/solicitar-cita', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ 
+                                numeroCuentaAlumno: cuentaAlumnoLogueado, 
+                                numeroCuentaAsesor: asesorCuenta, 
+                                materiaId: materiaId, 
+                                motivo: motivoAutomatico 
+                            })
+                        });
+                        const data = await res.json();
+                        
+                        if (res.ok) {
+                            Swal.fire({ icon: 'success', title: '¡Éxito!', text: data.mensaje, confirmButtonColor: '#7e22ce' });
+                        } else {
+                            Swal.fire({ icon: 'error', title: 'Oops...', text: data.error, confirmButtonColor: '#7e22ce' });
+                        }
+                    } catch(error) { 
+                        Swal.fire({ icon: 'error', title: 'Error', text: 'Error de conexión con el servidor.', confirmButtonColor: '#7e22ce' }); 
+                    }
+                }
+            });
         }
 
+        // LÓGICA DE ALERTA ACTUALIZADA: Cursos de Profesores
         async function inscribirseCurso(cursoId) {
-            if(confirm("Tu solicitud será enviada al profesor. ¿Continuar?")) {
-                try {
-                    const res = await fetch('/api/alumno/inscribir-curso', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ numeroCuentaAlumno: cuentaAlumnoLogueado, cursoId: cursoId })
-                    });
-                    const data = await res.json();
-                    alert(data.mensaje || data.error);
-                } catch(error) { alert("Error de conexión."); }
-            }
+            Swal.fire({
+                title: 'Confirmar inscripción',
+                text: "Tu solicitud será enviada al profesor para revisión. ¿Continuar?",
+                icon: 'info',
+                showCancelButton: true,
+                confirmButtonColor: '#1e3a8a', // Color azul oscuro
+                cancelButtonColor: '#6b7280',  // Color gris
+                confirmButtonText: 'Sí, inscribirme',
+                cancelButtonText: 'Cancelar'
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    try {
+                        const res = await fetch('/api/alumno/inscribir-curso', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ numeroCuentaAlumno: cuentaAlumnoLogueado, cursoId: cursoId })
+                        });
+                        const data = await res.json();
+                        
+                        if (res.ok) {
+                            Swal.fire({ icon: 'success', title: '¡Solicitud enviada!', text: data.mensaje, confirmButtonColor: '#1e3a8a' });
+                        } else {
+                            Swal.fire({ icon: 'error', title: 'No se pudo procesar', text: data.error, confirmButtonColor: '#1e3a8a' });
+                        }
+                    } catch(error) { 
+                        Swal.fire({ icon: 'error', title: 'Error', text: 'Error de conexión con el servidor.', confirmButtonColor: '#1e3a8a' }); 
+                    }
+                }
+            });
         }
 
         cargarCursosFormales();
