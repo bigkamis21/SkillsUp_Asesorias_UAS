@@ -92,6 +92,8 @@
             </div>
     </div>
   
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <script>
         // Función para cargar los usuarios al abrir la página
         async function cargarUsuarios() {
@@ -157,12 +159,21 @@
                 });
                 
                 if (res.ok) {
-                    alert('Rol actualizado con éxito');
+                    // Alerta elegante tipo "Toast" para no estorbar mucho al cambiar roles rápido
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Rol actualizado con éxito',
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 3000,
+                        timerProgressBar: true
+                    });
                 } else {
-                    alert('Error al actualizar el rol');
+                    Swal.fire({ icon: 'error', title: 'Error', text: 'Error al actualizar el rol', confirmButtonColor: '#1e3a8a' });
                 }
             } catch (error) {
-                alert('Fallo de conexión.');
+                Swal.fire({ icon: 'error', title: 'Fallo de conexión', text: 'No se pudo conectar con el servidor.', confirmButtonColor: '#1e3a8a' });
             }
         }
 
@@ -205,47 +216,69 @@
 
         // Función para aprobar
         async function aprobarSolicitud(solicitudId, numeroCuenta) {
-            if(confirm("¿Estás seguro de aprobar a este alumno como Asesor Par?")) {
-                try {
-                    const res = await fetch('/api/aprobar-asesor', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ solicitudId, numeroCuenta })
-                    });
-                    
-                    if (res.ok) {
-                        alert("¡Alumno aprobado exitosamente!");
-                        cargarSolicitudes(); // Recargamos las tarjetas
-                        cargarUsuarios(); // Recargamos la tabla de abajo para que ya salga como asesor
-                    } else {
-                        alert("Error al aprobar.");
+            Swal.fire({
+                title: '¿Aprobar solicitud?',
+                text: "¿Estás seguro de aprobar a este alumno como Asesor Par?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#22c55e', // Verde Tailwind
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Sí, aprobar',
+                cancelButtonText: 'Cancelar'
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    try {
+                        const res = await fetch('/api/aprobar-asesor', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ solicitudId, numeroCuenta })
+                        });
+                        
+                        if (res.ok) {
+                            Swal.fire({ icon: 'success', title: '¡Aprobado!', text: 'Alumno aprobado exitosamente.', confirmButtonColor: '#22c55e' });
+                            cargarSolicitudes(); // Recargamos las tarjetas
+                            cargarUsuarios(); // Recargamos la tabla de abajo para que ya salga como asesor
+                        } else {
+                            Swal.fire({ icon: 'error', title: 'Error', text: 'Error al aprobar la solicitud.', confirmButtonColor: '#1e3a8a' });
+                        }
+                    } catch (error) {
+                        Swal.fire({ icon: 'error', title: 'Fallo de conexión', text: 'No se pudo conectar con el servidor.', confirmButtonColor: '#1e3a8a' });
                     }
-                } catch (error) {
-                    alert("Fallo de conexión.");
                 }
-            }
+            });
         }
 
         // Función para rechazar
         async function rechazarSolicitud(solicitudId) {
-            if(confirm("¿Estás seguro de rechazar esta solicitud?")) {
-                try {
-                    const res = await fetch('/api/rechazar-asesor', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ solicitudId })
-                    });
-                    
-                    if (res.ok) {
-                        alert("Solicitud rechazada.");
-                        cargarSolicitudes(); // Desaparecemos la tarjeta
-                    } else {
-                        alert("Error al rechazar.");
+            Swal.fire({
+                title: '¿Rechazar solicitud?',
+                text: "¿Estás seguro de rechazar esta solicitud? Esta acción no se puede deshacer.",
+                icon: 'error', // Icono rojo para dar a entender que es una acción destructiva
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444', // Rojo Tailwind
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Sí, rechazar',
+                cancelButtonText: 'Cancelar'
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    try {
+                        const res = await fetch('/api/rechazar-asesor', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ solicitudId })
+                        });
+                        
+                        if (res.ok) {
+                            Swal.fire({ icon: 'success', title: 'Rechazada', text: 'La solicitud ha sido rechazada.', confirmButtonColor: '#1e3a8a' });
+                            cargarSolicitudes(); // Desaparecemos la tarjeta
+                        } else {
+                            Swal.fire({ icon: 'error', title: 'Error', text: 'Error al rechazar la solicitud.', confirmButtonColor: '#1e3a8a' });
+                        }
+                    } catch (error) {
+                        Swal.fire({ icon: 'error', title: 'Fallo de conexión', text: 'No se pudo conectar con el servidor.', confirmButtonColor: '#1e3a8a' });
                     }
-                } catch (error) {
-                    alert("Fallo de conexión.");
                 }
-            }
+            });
         }
 
         // ==========================================
@@ -281,15 +314,15 @@
                 const datos = await res.json();
                 
                 if (res.ok) {
-                    alert(datos.mensaje);
+                    Swal.fire({ icon: 'success', title: '¡Completado!', text: datos.mensaje, confirmButtonColor: '#1e3a8a' });
                     modalProfesor.classList.add('hidden');
                     formProfesor.reset();
                     cargarUsuarios(); // Recargamos la tabla de abajo al instante
                 } else {
-                    alert(datos.error);
+                    Swal.fire({ icon: 'error', title: 'No se pudo registrar', text: datos.error, confirmButtonColor: '#1e3a8a' });
                 }
             } catch (error) {
-                alert("Error de conexión al registrar profesor.");
+                Swal.fire({ icon: 'error', title: 'Error de conexión', text: 'Hubo un problema al registrar al profesor.', confirmButtonColor: '#1e3a8a' });
             }
         });
 
@@ -309,6 +342,7 @@
                 iconoEye.classList.add('fa-eye');
             }
         });
+        
         // Botón salir
         document.getElementById('btnSalirAdmin').addEventListener('click', () => {
             localStorage.clear();
