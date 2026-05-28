@@ -455,12 +455,17 @@
                         body: JSON.stringify({ inscripcionId: inscripcionId, linkReunion: link }) 
                     });
                     const data = await res.json();
+                    
                     if (res.ok) { 
                         Swal.fire('¡Listo!', data.mensaje, 'success'); 
-                        cargarSolicitudes(); 
                     } else {
-                        Swal.fire('Aviso', data.error, 'error'); 
+                        // Muestra el mensaje de rechazo por límite de cupo
+                        Swal.fire('Aviso', data.error, 'warning'); 
                     }
+                    
+                    // CLAVE: Recargar siempre para limpiar la UI
+                    cargarSolicitudes(); 
+                    
                 } catch (e) {
                     Swal.fire('Error', 'Problema de conexión con el servidor', 'error');
                 }
@@ -586,8 +591,8 @@
                                     <div class="col-span-2"><i class="fas fa-clock mr-1 text-purple-400"></i> ${curso.horario}</div>
                                 </div>
                                 <div class="mt-auto border-t pt-4 flex gap-2">
-                                    <button onclick="abrirAula(${curso.id}, '${curso.titulo_curso}')" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded-lg transition text-sm shadow-sm"><i class="fas fa-clipboard-check mr-1"></i> Calificar</button>
-                                    <button onclick="finalizarCurso(${curso.id})" class="flex-1 bg-gray-800 hover:bg-gray-900 text-white font-bold py-2 rounded-lg transition text-sm"><i class="fas fa-flag-checkered mr-1"></i> Finalizar</button>
+                                    <button onclick="abrirAula(${curso.curso_id}, '${curso.titulo_curso}')" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded-lg transition text-sm shadow-sm"><i class="fas fa-clipboard-check mr-1"></i> Calificar</button>
+                                    <button onclick="finalizarCurso(${curso.curso_id})" class="flex-1 bg-gray-800 hover:bg-gray-900 text-white font-bold py-2 rounded-lg transition text-sm"><i class="fas fa-flag-checkered mr-1"></i> Finalizar</button>
                                 </div>
                             </div>`;
                     });
@@ -681,6 +686,13 @@
                 const alumnos = await res.json();
                 contenedor.innerHTML = '';
 
+                // ---> AQUÍ ESTÁ LA NUEVA VALIDACIÓN INYECTADA <---
+                if (!res.ok) {
+                    contenedor.innerHTML = `<p class="text-center text-red-500 font-bold py-4"><i class="fas fa-exclamation-triangle"></i> Error: ${alumnos.error || 'No se pudo cargar'}</p>`;
+                    return; // Detiene la ejecución para que no intente pintar el resto
+                }
+                // -------------------------------------------------
+
                 if(alumnos.length > 0) {
                     alumnos.forEach(al => {
                         const calif = al.calificacion !== null ? al.calificacion : '';
@@ -709,7 +721,9 @@
                 } else {
                     contenedor.innerHTML = '<p class="text-center text-gray-500 py-4">Aún no tienes alumnos aceptados en este curso.</p>';
                 }
-            } catch (error) { contenedor.innerHTML = '<p class="text-center text-red-500">Error al cargar.</p>'; }
+            } catch (error) { 
+                contenedor.innerHTML = '<p class="text-center text-red-500 py-4"><i class="fas fa-times-circle"></i> Error de conexión al cargar.</p>'; 
+            }
         }
 
         function cerrarAula() { document.getElementById('modalAula').classList.add('hidden'); }

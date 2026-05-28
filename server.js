@@ -546,7 +546,6 @@ app.get('/api/asesor/inscripciones/:cuentaAsesor', (req, res) => {
 app.post('/api/asesor/aceptar-inscripcion', (req, res) => {
     const { inscripcionId, linkReunion } = req.body;
 
-    // 1. Primero revisamos si todavía hay lugares físicos/virtuales disponibles
     const checkQuery = `
         SELECT c.cupo_maximo, 
                (SELECT COUNT(*) FROM inscripciones_cursos WHERE curso_id = c.id AND estado = 'aceptado') AS inscritos_actuales
@@ -561,12 +560,19 @@ app.post('/api/asesor/aceptar-inscripcion', (req, res) => {
         const cupoMaximo = results[0].cupo_maximo;
         const inscritosActuales = results[0].inscritos_actuales;
 
-        // Si ya está lleno, bloqueamos la acción y le avisamos al profe
+        // NUEVO: Si ya está lleno, rechazamos automáticamente la solicitud en la BD
         if (inscritosActuales >= cupoMaximo) {
-            return res.status(400).json({ error: `¡El curso está lleno! Cupo máximo (${cupoMaximo}) alcanzado.` });
+            const rejectQuery = "UPDATE inscripciones_cursos SET estado = 'rechazado' WHERE id = ?";
+            connection.query(rejectQuery, [inscripcionId], (errReject) => {
+                if (errReject) return res.status(500).json({ error: 'Error al rechazar automáticamente por cupo.' });
+                
+                // Retornamos 400 para disparar la alerta, pero con el mensaje exacto
+                return res.status(400).json({ error: `¡No se pudo aceptar! El cupo máximo (${cupoMaximo}) está lleno. La solicitud se rechazó automáticamente y el alumno fue notificado.` });
+            });
+            return; // Detenemos la ejecución
         }
 
-        // 2. Si hay lugar, actualizamos el estado a 'aceptado' y guardamos el link
+        // Si hay lugar, actualizamos el estado a 'aceptado' y guardamos el link
         const query = "UPDATE inscripciones_cursos SET estado = 'aceptado', link_reunion = ? WHERE id = ?";
         connection.query(query, [linkReunion, inscripcionId], (err) => {
             if (err) return res.status(500).json({ error: 'Error al aceptar alumno.' });
@@ -645,7 +651,7 @@ app.post('/api/asesor/dar-de-baja', (req, res) => {
 app.get('/api/asesor/mis-cursos-creados/:cuenta', (req, res) => {
     const { cuenta } = req.params;
     const query = `
-        SELECT c.*, m.nombre as materia,
+        SELECT c.id AS curso_id, c.titulo_curso, c.modalidad, c.cupo_maximo, c.horario, m.nombre AS materia,
                (SELECT COUNT(*) FROM inscripciones_cursos WHERE curso_id = c.id AND estado = 'aceptado') AS inscritos
         FROM cursos_regularizacion c 
         JOIN materias m ON c.id_materia = m.id 
