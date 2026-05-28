@@ -53,7 +53,12 @@ if (formRegistro) {
         const confirmPassword = document.getElementById('confirmPassword').value;
 
         if (password !== confirmPassword) {
-            alert('Las contraseñas no coinciden.');
+            Swal.fire({
+                icon: 'warning',
+                title: 'Atención',
+                text: 'Las contraseñas no coinciden.',
+                confirmButtonColor: '#eab308'
+            });
             return; 
         }
 
@@ -67,18 +72,36 @@ if (formRegistro) {
             const datos = await respuesta.json();
 
             if (respuesta.ok) {
-            // Guardamos la cuenta en la mochila temporalmente para verificarla
-            localStorage.setItem('cuentaPendiente', numeroCuenta);
+                // Guardamos la cuenta en la mochila temporalmente para verificarla
+                localStorage.setItem('cuentaPendiente', numeroCuenta);
+                
+                // Alerta de éxito antes de mostrar el modal
+                Swal.fire({
+                    icon: 'success',
+                    title: '¡Casi listo!',
+                    text: 'Te hemos enviado un código de verificación a tu correo.',
+                    confirmButtonColor: '#1e3a8a'
+                }).then(() => {
+                    // Destapamos el cuadrito (modal) para que meta los 6 dígitos
+                    document.getElementById('modalVerificacion').classList.remove('hidden');
+                });
             
-            // Destapamos el cuadrito (modal) para que meta los 6 dígitos
-            document.getElementById('modalVerificacion').classList.remove('hidden');
-            
-        } else {
-            alert(datos.error); 
-        }
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error de registro',
+                    text: datos.error,
+                    confirmButtonColor: '#eab308'
+                });
+            }
         } catch (error) {
             console.error("Error:", error);
-            alert("Error de conexión con el servidor.");
+            Swal.fire({
+                icon: 'error',
+                title: 'Error de conexión',
+                text: 'Hubo un problema al conectar con el servidor.',
+                confirmButtonColor: '#eab308'
+            });
         }
     });
 }
@@ -94,7 +117,12 @@ if (btnVerificarCodigo) {
         const numeroCuenta = localStorage.getItem('cuentaPendiente');
 
         if (!codigo || codigo.length < 6) {
-            alert("Por favor ingresa los 6 dígitos.");
+            Swal.fire({
+                icon: 'warning',
+                title: 'Código incompleto',
+                text: 'Por favor ingresa los 6 dígitos.',
+                confirmButtonColor: '#eab308'
+            });
             return;
         }
 
@@ -108,15 +136,33 @@ if (btnVerificarCodigo) {
             const datos = await res.json();
             
             if (res.ok) {
-                alert('¡Cuenta activada con éxito! Ya puedes iniciar sesión de forma segura.');
-                // Solo hasta que verifica correctamente, lo mandamos al Login
-                window.location.href = 'login.html';
+                Swal.fire({
+                    icon: 'success',
+                    title: '¡Cuenta activada!',
+                    text: 'Ya puedes iniciar sesión de forma segura.',
+                    confirmButtonColor: '#1e3a8a'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Solo hasta que verifica correctamente, lo mandamos al Login
+                        window.location.href = 'login.html';
+                    }
+                });
             } else {
-                alert(datos.error); // "Código incorrecto", etc.
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Verificación fallida',
+                    text: datos.error, // "Código incorrecto", etc.
+                    confirmButtonColor: '#eab308'
+                });
             }
         } catch (error) {
             console.error("Error:", error);
-            alert('Hubo un error al verificar el código.');
+            Swal.fire({
+                icon: 'error',
+                title: 'Error interno',
+                text: 'Hubo un error al verificar el código.',
+                confirmButtonColor: '#eab308'
+            });
         }
     });
 }
@@ -149,22 +195,39 @@ if (formLogin) {
                 localStorage.setItem('cuentaLogueada', identificador);
                 localStorage.setItem('rolUsuario', datos.rol); // Guardamos su rol en la mochila
 
-                alert(datos.mensaje);
-                if (datos.rol === 'admin') {
-                window.location.href = 'admin.html'; // Lo mandamos a la central
-                } else if (datos.rol === 'asesor_par' || datos.rol === 'asesor_disciplinar') {
-                window.location.href = 'asesor.html'; // Lo mandamos al panel de asesores
+                Swal.fire({
+                    icon: 'success',
+                    title: '¡Bienvenido!',
+                    text: datos.mensaje,
+                    confirmButtonColor: '#1e3a8a'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        if (datos.rol === 'admin') {
+                            window.location.href = 'admin.html'; // Lo mandamos a la central
+                        } else if (datos.rol === 'asesor_par' || datos.rol === 'asesor_disciplinar') {
+                            window.location.href = 'asesor.html'; // Lo mandamos al panel de asesores
+                        } else {
+                            window.location.href = 'dashboard.html'; // Los alumnos van a la vista normal
+                        }
+                    }
+                });
 
             } else {
-            window.location.href = 'dashboard.html'; // Los alumnos van a la vista normal
-            }
-
-            } else {
-                alert(datos.error); 
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Acceso Denegado',
+                    text: datos.error,
+                    confirmButtonColor: '#eab308'
+                });
             }
         } catch (error) {
             console.error("Error en login:", error);
-            alert("Hubo un problema al conectar con el servidor.");
+            Swal.fire({
+                icon: 'error',
+                title: 'Error de conexión',
+                text: 'Hubo un problema al conectar con el servidor.',
+                confirmButtonColor: '#eab308'
+            });
         }
     });
 }

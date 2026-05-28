@@ -541,13 +541,36 @@ app.get('/api/asesor/inscripciones/:cuentaAsesor', (req, res) => {
     });
 });
 
-// 2. Aceptar alumno en el curso
+// 2. Aceptar alumno en el curso (VALIDANDO CUPO MÁXIMO)
 app.post('/api/asesor/aceptar-inscripcion', (req, res) => {
-    const { inscripcionId } = req.body;
-    const query = "UPDATE inscripciones_cursos SET estado = 'aceptado' WHERE id = ?";
-    connection.query(query, [inscripcionId], (err) => {
-        if (err) return res.status(500).json({ error: 'Error al aceptar alumno.' });
-        res.status(200).json({ mensaje: 'Alumno aceptado en el curso de regularización.' });
+    const { inscripcionId, linkReunion } = req.body;
+
+    // 1. Primero revisamos si todavía hay lugares físicos/virtuales disponibles
+    const checkQuery = `
+        SELECT c.cupo_maximo, 
+               (SELECT COUNT(*) FROM inscripciones_cursos WHERE curso_id = c.id AND estado = 'aceptado') AS inscritos_actuales
+        FROM inscripciones_cursos i
+        JOIN cursos_regularizacion c ON i.curso_id = c.id
+        WHERE i.id = ?
+    `;
+
+    connection.query(checkQuery, [inscripcionId], (err, results) => {
+        if (err || results.length === 0) return res.status(500).json({ error: 'Error al verificar el cupo del curso.' });
+
+        const cupoMaximo = results[0].cupo_maximo;
+        const inscritosActuales = results[0].inscritos_actuales;
+
+        // Si ya está lleno, bloqueamos la acción y le avisamos al profe
+        if (inscritosActuales >= cupoMaximo) {
+            return res.status(400).json({ error: `¡El curso está lleno! Cupo máximo (${cupoMaximo}) alcanzado.` });
+        }
+
+        // 2. Si hay lugar, actualizamos el estado a 'aceptado' y guardamos el link
+        const query = "UPDATE inscripciones_cursos SET estado = 'aceptado', link_reunion = ? WHERE id = ?";
+        connection.query(query, [linkReunion, inscripcionId], (err) => {
+            if (err) return res.status(500).json({ error: 'Error al aceptar alumno.' });
+            res.status(200).json({ mensaje: 'Alumno aceptado y link enviado exitosamente.' });
+        });
     });
 });
 
@@ -644,6 +667,117 @@ app.post('/api/asesor/dar-de-baja', (req, res) => {
         res.status(200).json({ mensaje: 'Publicación dada de baja exitosamente.' });
     });
 });
+
+// ==========================================
+// MÓDULO AULA VIRTUAL (CALIFICACIONES Y FINALIZACIÓN)
+// ==========================================
+
+// 1. Obtener la lista de alumnos aceptados en un curso específico
+app.get('/api/asesor/alumnos-curso/:cursoId', (req, res) => {
+    const { cursoId } = req.params;
+    const query = `
+        SELECT i.id AS inscripcion_id, u.nombre, u.numero_cuenta, i.calificacion, i.comentarios_profesor
+        FROM inscripciones_cursos i
+        JOIN usuarios u ON i.numero_cuenta_alumno = u.numero_cuenta
+        WHERE i.curso_id = ? AND i.estado = 'aceptado'
+    `;
+    connection.query(query, [cursoId], (err, results) => {
+        if(err) return res.status(500).json({error: 'Error al cargar alumnos del curso.'});
+        res.status(200).json(results);
+    });
+});
+
+// 2. Guardar la calificación y comentario de un alumno
+app.post('/api/asesor/calificar-alumno', (req, res) => {
+    const { inscripcionId, calificacion, comentarios } = req.body;
+    const query = "UPDATE inscripciones_cursos SET calificacion = ?, comentarios_profesor = ? WHERE id = ?";
+    connection.query(query, [calificacion, comentarios, inscripcionId], (err) => {
+        if(err) return res.status(500).json({error: 'Error al guardar la calificación.'});
+        res.status(200).json({mensaje: 'Calificación guardada exitosamente.'});
+    });
+});
+
+// 3. Finalizar el curso (Ya no se darán más clases)
+app.post('/api/asesor/finalizar-curso', (req, res) => {
+    const { cursoId } = req.body;
+    const query = "UPDATE cursos_regularizacion SET estado = 'finalizado' WHERE id = ?";
+    connection.query(query, [cursoId], (err) => {
+        if(err) return res.status(500).json({error: 'Error al finalizar el curso.'});
+        res.status(200).json({mensaje: '¡Curso finalizado! Se ha cerrado el acceso a futuras clases.'});
+    });
+});
+
+// --- LÓGICA DEL AULA VIRTUAL (CALIFICAR) ---
+        async function abrirAula(cursoId, tituloCurso) {
+            document.getElementById('aulaNombreCurso').innerText = tituloCurso;
+            document.getElementById('modalAula').classList.remove('hidden');
+            
+            const contenedor = document.getElementById('contenedorAlumnosAula');
+            contenedor.innerHTML = '<p class="text-center text-gray-500 py-4"><i class="fas fa-spinner fa-spin mr-2"></i>Cargando alumnos...</p>';
+
+            try {
+                const res = await fetch(`/api/asesor/alumnos-curso/${cursoId}`);
+                const alumnos = await res.json();
+                contenedor.innerHTML = '';
+
+                if(alumnos.length > 0) {
+                    alumnos.forEach(al => {
+                        const calif = al.calificacion !== null ? al.calificacion : '';
+                        const coment = al.comentarios_profesor || '';
+                        
+                        contenedor.innerHTML += `
+                            <div class="bg-white p-4 rounded-xl border shadow-sm flex flex-col md:flex-row gap-4 items-center">
+                                <div class="flex-grow">
+                                    <h4 class="font-bold text-gray-800 text-lg">${al.nombre}</h4>
+                                    <p class="text-xs text-gray-500">Cuenta: ${al.numero_cuenta}</p>
+                                </div>
+                                <div class="w-full md:w-32">
+                                    <label class="text-xs font-bold text-gray-600">Calificación</label>
+                                    <input type="number" id="calif_${al.inscripcion_id}" value="${calif}" min="0" max="10" step="0.1" class="w-full border p-2 rounded focus:ring-2 focus:ring-blue-500 outline-none" placeholder="0 - 10">
+                                </div>
+                                <div class="w-full md:w-1/3">
+                                    <label class="text-xs font-bold text-gray-600">Comentario</label>
+                                    <input type="text" id="coment_${al.inscripcion_id}" value="${coment}" class="w-full border p-2 rounded focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Ej. Excelente trabajo">
+                                </div>
+                                <div class="w-full md:w-auto mt-4 md:mt-0">
+                                    <button onclick="guardarCalificacion(${al.inscripcion_id})" class="w-full md:w-auto bg-green-500 hover:bg-green-600 text-white font-bold p-3 rounded-lg transition"><i class="fas fa-save"></i></button>
+                                </div>
+                            </div>
+                        `;
+                    });
+                } else {
+                    contenedor.innerHTML = '<p class="text-center text-gray-500 py-4">Aún no tienes alumnos aceptados en este curso.</p>';
+                }
+            } catch (error) { contenedor.innerHTML = '<p class="text-center text-red-500">Error al cargar.</p>'; }
+        }
+
+        function cerrarAula() { document.getElementById('modalAula').classList.add('hidden'); }
+
+        async function guardarCalificacion(inscripcionId) {
+            const calif = document.getElementById(`calif_${inscripcionId}`).value;
+            const coment = document.getElementById(`coment_${inscripcionId}`).value;
+            
+            if(!calif) return Swal.fire('Aviso', 'Ingresa una calificación', 'warning');
+
+            const res = await fetch('/api/asesor/calificar-alumno', {
+                method: 'POST', headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ inscripcionId, calificacion: calif, comentarios: coment })
+            });
+            const data = await res.json();
+            if(res.ok) Swal.fire({title: '¡Guardado!', icon: 'success', toast: true, position: 'top-end', showConfirmButton: false, timer: 2000});
+        }
+
+        async function finalizarCurso(cursoId) {
+            const result = await Swal.fire({
+                title: '¿Finalizar Curso?',
+                text: 'El curso se marcará como completado y desaparecerá del catálogo público.',
+                icon: 'warning', showCancelButton: true, confirmButtonText: 'Sí, finalizar', confirmButtonColor: '#1e3a8a'
+            });
+            if(result.isConfirmed) {
+                const res = await fetch('/api/asesor/finalizar-curso', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ cursoId }) });
+                if(res.ok) { Swal.fire('¡Finalizado!', '', 'success'); cargarMisCursosCreados(); }
+            }
+        }
 
 // 4. Puerto para Azure
 const PORT = process.env.PORT || 8080;

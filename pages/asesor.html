@@ -177,6 +177,28 @@
             </div>
 
         </div>
+
+        <div id="modalAula" class="fixed inset-0 bg-black bg-opacity-60 hidden flex items-center justify-center z-50 p-4">
+            <div class="bg-white rounded-2xl w-full max-w-4xl shadow-2xl flex flex-col max-h-[90vh]">
+                <div class="p-6 border-b bg-purple-50 rounded-t-2xl flex justify-between items-center">
+                    <div>
+                        <h2 class="text-2xl font-bold text-purple-900"><i class="fas fa-users mr-2"></i>Mi Aula Virtual</h2>
+                        <p id="aulaNombreCurso" class="text-sm text-purple-700 font-semibold mt-1">Nombre del Curso</p>
+                    </div>
+                    <button onclick="cerrarAula()" class="text-gray-400 hover:text-red-500 text-2xl transition">&times;</button>
+                </div>
+                
+                <div class="p-6 overflow-y-auto flex-grow bg-gray-50">
+                    <div id="contenedorAlumnosAula" class="space-y-4">
+                        </div>
+                </div>
+                
+                <div class="p-6 border-t bg-white rounded-b-2xl">
+                    <button onclick="cerrarAula()" class="w-full bg-gray-800 hover:bg-gray-900 text-white font-bold py-3 rounded-xl transition">Cerrar Aula</button>
+                </div>
+            </div>
+        </div>
+
     </main>
 
     <script>
@@ -228,7 +250,7 @@
             if(document.getElementById('divDuracionCupo')) document.getElementById('divDuracionCupo').classList.add('hidden');
             if(document.getElementById('divFechas')) document.getElementById('divFechas').classList.add('hidden');
         }
-        
+
         // --- SISTEMA DE PESTAÑAS (TABS) ---
         const tabs = {
             agenda: { btn: document.getElementById('tabAgenda'), sec: document.getElementById('seccionAgenda'), active: "bg-gray-800 text-yellow-400" },
@@ -322,7 +344,7 @@
                 } else { Swal.fire('Error', data.error, 'error'); }
             } catch (error) { Swal.fire('Error', 'Revisa tu servidor.', 'error'); }
         });
-
+        
         // --- CARGAR CITAS O INSCRIPCIONES (INTELIGENTE POR ROL) ---
         async function cargarSolicitudes() {
             const contenedor = document.getElementById('contenedorSolicitudes');
@@ -333,14 +355,13 @@
                 if (rolUsuario === 'asesor_disciplinar') {
                     const res = await fetch(`/api/asesor/inscripciones/${cuentaAsesor}`);
                     const datos = await res.json();
+                    
                     if(datos.length > 0) {
-                        badge.innerText = datos.length; badge.classList.remove('hidden');
+                        badge.innerText = datos.length; 
+                        badge.classList.remove('hidden');
+                        
                         datos.forEach(sol => {
                             contenedor.innerHTML += `
-                                <button onclick="darDeBajaCurso(${curso.id})" class="mt-4 w-full bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 font-bold py-2 rounded-lg transition text-sm">
-                                    <i class="fas fa-trash-alt mr-1"></i> Dar de baja
-                                </button>
-
                                 <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-purple-500 flex flex-col">
                                     <div class="flex justify-between items-start mb-2">
                                         <h4 class="font-bold text-lg text-slate-800">${sol.titulo_curso}</h4>
@@ -352,7 +373,7 @@
                                         <a href="${sol.kardex_url}" target="_blank" class="text-blue-600 hover:underline text-sm font-bold"><i class="fas fa-file-pdf mr-1"></i> Ver Kardex</a>
                                     </div>
                                     <div class="mt-auto flex gap-3">
-                                        <button onclick="gestionarInscripcion(${sol.inscripcion_id}, 'aceptar')" class="flex-1 bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 rounded-lg transition shadow-sm">Aceptar</button>
+                                        <button onclick="aceptarInscripcionConLink(${sol.inscripcion_id})" class="flex-1 bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 rounded-lg transition shadow-sm">Aceptar y Mandar Link</button>
                                         <button onclick="gestionarInscripcion(${sol.inscripcion_id}, 'rechazar')" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 rounded-lg transition">Rechazar</button>
                                     </div>
                                 </div>`;
@@ -364,8 +385,11 @@
                 } else {
                     const res = await fetch(`/api/asesor/solicitudes/${cuentaAsesor}`);
                     const datos = await res.json();
+                    
                     if(datos.length > 0) {
-                        badge.innerText = datos.length; badge.classList.remove('hidden');
+                        badge.innerText = datos.length; 
+                        badge.classList.remove('hidden');
+                        
                         datos.forEach(sol => {
                             contenedor.innerHTML += `
                                 <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-yellow-400 flex flex-col">
@@ -373,7 +397,7 @@
                                         <h4 class="font-bold text-lg text-slate-800">${sol.materia}</h4>
                                         <span class="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded font-bold">Cita Privada</span>
                                     </div>
-                                    <p class="text-sm text-gray-500 mb-2"><i class="fas fa-user mr-2"></i>Alumno/a: ${sol.alumno}</p>
+                                    <p class="text-sm text-gray-500 mb-2"><i class="fas fa-user mr-2"></i>Compañero: ${sol.alumno}</p>
                                     <p class="text-gray-700 mb-6 bg-gray-50 p-3 rounded italic text-sm">"${sol.motivo}"</p>
                                     <div class="mt-auto flex gap-3">
                                         <button onclick="aceptarAsesoria(${sol.cita_id})" class="flex-1 bg-green-500 hover:bg-green-600 text-white font-bold py-2 rounded-lg transition shadow-sm">Aceptar</button>
@@ -386,7 +410,7 @@
                         contenedor.innerHTML = `<p class="text-gray-500 italic">No tienes solicitudes pendientes.</p>`;
                     }
                 }
-            } catch (error) { console.error(error); }
+            } catch (error) { console.error("Error cargando solicitudes:", error); }
         }
 
         //FUNCION DEL BOTON DAR DE BAJA CURSO 
@@ -439,7 +463,11 @@
                                     <div><i class="fas fa-users mr-1 text-purple-400"></i> Cupo: ${curso.cupo_maximo}</div>
                                     <div class="col-span-2"><i class="fas fa-clock mr-1 text-purple-400"></i> ${curso.horario}</div>
                                 </div>
-                                <p class="text-xs text-gray-500 mt-auto">Revisa "Solicitudes Citas" para aceptar a los alumnos.</p>
+                                <div class="mt-auto border-t pt-4 flex gap-2">
+                                    <button onclick="abrirAula(${curso.id}, '${curso.titulo_curso}')" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded-lg transition text-sm shadow-sm"><i class="fas fa-clipboard-check mr-1"></i> Calificar</button>
+                                    <button onclick="finalizarCurso(${curso.id})" class="flex-1 bg-gray-800 hover:bg-gray-900 text-white font-bold py-2 rounded-lg transition text-sm"><i class="fas fa-flag-checkered mr-1"></i> Finalizar</button>
+                                </div>
+
                             </div>`;
                     });
                 } else { contenedor.innerHTML = `<p class="text-gray-500 italic">No has publicado ningún curso.</p>`; }
