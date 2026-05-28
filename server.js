@@ -613,12 +613,13 @@ app.get('/api/alumno/mis-tutorias/:cuenta', (req, res) => {
     });
 });
 
-// 2. Obtener el estado de sus Inscripciones a Cursos
+// 2. Obtener el estado de sus Inscripciones a Cursos 
 app.get('/api/alumno/mis-inscripciones/:cuenta', (req, res) => {
     const { cuenta } = req.params;
     const query = `
         SELECT i.id AS inscripcion_id, c.titulo_curso, c.modalidad, c.horario, 
-               u.nombre AS maestro_nombre, i.estado
+               u.nombre AS maestro_nombre, i.estado, i.link_reunion, 
+               i.calificacion, i.comentarios_profesor, c.estado AS estado_curso
         FROM inscripciones_cursos i
         JOIN cursos_regularizacion c ON i.curso_id = c.id
         JOIN usuarios u ON c.id_asesor_disciplinar = u.id
@@ -628,6 +629,27 @@ app.get('/api/alumno/mis-inscripciones/:cuenta', (req, res) => {
     connection.query(query, [cuenta], (err, results) => {
         if (err) return res.status(500).json({ error: 'Error al cargar inscripciones.' });
         res.status(200).json(results);
+    });
+});
+
+// ==========================================
+// MÓDULO ALUMNO: MI PERFIL / KARDEX
+// ==========================================
+
+// Obtener Kardex guardado
+app.get('/api/alumno/kardex/:cuenta', (req, res) => {
+    connection.query('SELECT kardex_url FROM usuarios WHERE numero_cuenta = ?', [req.params.cuenta], (err, results) => {
+        if (err || results.length === 0) return res.status(500).json({ error: 'Error al obtener Kardex' });
+        res.status(200).json(results[0]);
+    });
+});
+
+// Guardar/Actualizar Kardex global
+app.post('/api/alumno/actualizar-kardex', (req, res) => {
+    const { numeroCuenta, kardexUrl } = req.body;
+    connection.query('UPDATE usuarios SET kardex_url = ? WHERE numero_cuenta = ?', [kardexUrl, numeroCuenta], (err) => {
+        if (err) return res.status(500).json({ error: 'Error al guardar el Kardex.' });
+        res.status(200).json({ mensaje: '¡Kardex vinculado correctamente a tu perfil!' });
     });
 });
 
@@ -716,36 +738,59 @@ app.post('/api/asesor/finalizar-curso', (req, res) => {
 });
 
 // ==========================================
-// MÓDULO MATERIAL DE APOYO
+// MÓDULO MATERIAL DE APOYO (ACTUALIZADO)
 // ==========================================
 
-// 1. Asesores publican nuevo material
+// 1. Asesores publican nuevo material (Añadido materia_id)
 app.post('/api/materiales', (req, res) => {
-    const { numeroCuenta, descripcion, enlace } = req.body;
+    const { numeroCuenta, materiaId, descripcion, enlace } = req.body;
     
-    if (!numeroCuenta || !descripcion || !enlace) {
+    if (!numeroCuenta || !materiaId || !descripcion || !enlace) {
         return res.status(400).json({ error: 'Todos los campos son obligatorios.' });
     }
 
-    const query = 'INSERT INTO material_apoyo (numero_cuenta_asesor, descripcion, enlace_url) VALUES (?, ?, ?)';
-    connection.query(query, [numeroCuenta, descripcion, enlace], (err) => {
-        if (err) return res.status(500).json({ error: 'Error al guardar el material en la base de datos.' });
-        res.status(200).json({ mensaje: '¡Material publicado exitosamente para los alumnos!' });
+    const query = 'INSERT INTO material_apoyo (numero_cuenta_asesor, materia_id, descripcion, enlace_url) VALUES (?, ?, ?, ?)';
+    connection.query(query, [numeroCuenta, materiaId, descripcion, enlace], (err) => {
+        if (err) return res.status(500).json({ error: 'Error al guardar el material.' });
+        res.status(200).json({ mensaje: '¡Material publicado exitosamente!' });
     });
 });
 
-// 2. Alumnos y asesores consultan el material
+// 2. Consultar el material (Con JOIN a tabla Materias para sacar semestre y nombre)
 app.get('/api/materiales', (req, res) => {
     const query = `
         SELECT m.id, m.descripcion, m.enlace_url, DATE_FORMAT(m.fecha_publicacion, '%d/%m/%Y') AS fecha, 
-               u.nombre AS asesor_nombre, u.rol
+               u.nombre AS asesor_nombre, u.numero_cuenta AS autor_cuenta, u.rol,
+               mat.nombre AS materia_nombre, mat.semestre
         FROM material_apoyo m
         JOIN usuarios u ON m.numero_cuenta_asesor = u.numero_cuenta
+        JOIN materias mat ON m.materia_id = mat.id
         ORDER BY m.fecha_publicacion DESC
     `;
     connection.query(query, (err, results) => {
         if (err) return res.status(500).json({ error: 'Error al cargar el material de apoyo.' });
         res.status(200).json(results);
+    });
+});
+
+// 3. Eliminar material (Solo para el autor)
+app.delete('/api/materiales/:id', (req, res) => {
+    const id = req.params.id;
+    connection.query('DELETE FROM material_apoyo WHERE id = ?', [id], (err) => {
+        if (err) return res.status(500).json({ error: 'Error al eliminar el material.' });
+        res.status(200).json({ mensaje: 'Material eliminado correctamente.' });
+    });
+});
+
+// 4. Editar material (Descripción y Enlace)
+app.put('/api/materiales/:id', (req, res) => {
+    const { descripcion, enlace } = req.body;
+    const id = req.params.id;
+    const query = 'UPDATE material_apoyo SET descripcion = ?, enlace_url = ? WHERE id = ?';
+    
+    connection.query(query, [descripcion, enlace, id], (err) => {
+        if (err) return res.status(500).json({ error: 'Error al actualizar el material.' });
+        res.status(200).json({ mensaje: 'Material actualizado correctamente.' });
     });
 });
 

@@ -130,7 +130,7 @@
             } catch (error) { console.error("Error:", error); }
         }
 
-        // 2. CARGAR INSCRIPCIONES A CURSOS OFICIALES
+       // 2. CARGAR INSCRIPCIONES A CURSOS OFICIALES (ACTUALIZADA)
         async function cargarInscripciones() {
             try {
                 const res = await fetch(`/api/alumno/mis-inscripciones/${cuentaAlumno}`);
@@ -141,28 +141,71 @@
                 if (inscripciones.length > 0) {
                     inscripciones.forEach(ins => {
                         let estadoVisual = '';
-                        if (ins.estado === 'pendiente') estadoVisual = `<span class="text-yellow-600 bg-yellow-50 px-2 py-1 rounded font-bold text-xs border border-yellow-200"><i class="fas fa-spinner fa-spin mr-1"></i> Kardex en Revisión</span>`;
-                        else if (ins.estado === 'aceptado') estadoVisual = `<span class="text-green-600 bg-green-50 px-2 py-1 rounded font-bold text-xs border border-green-200"><i class="fas fa-check-circle mr-1"></i> Inscripción Aprobada</span>`;
-                        else if (ins.estado === 'rechazado') estadoVisual = `<span class="text-red-600 bg-red-50 px-2 py-1 rounded font-bold text-xs border border-red-200"><i class="fas fa-times-circle mr-1"></i> No Cumple Requisitos</span>`;
+                        let bloqueAccion = '';
 
+                        // 1. Verificamos si el curso ya se cerró por el maestro (FINALIZADO)
+                        if (ins.estado_curso === 'finalizado') {
+                            estadoVisual = `<span class="text-gray-600 bg-gray-100 px-2 py-1 rounded font-bold text-xs border border-gray-300"><i class="fas fa-archive mr-1"></i> Curso Finalizado</span>`;
+                            
+                            const nota = ins.calificacion !== null ? ins.calificacion : 'S/N';
+                            const colorNota = ins.calificacion >= 6 ? 'text-green-600' : 'text-red-500';
+                            
+                            bloqueAccion = `
+                                <div class="mt-4 p-4 bg-gray-50 border rounded-xl text-center shadow-inner">
+                                    <p class="text-xs text-gray-500 font-bold uppercase mb-1"><i class="fas fa-clipboard-check"></i> Calificación Final</p>
+                                    <p class="text-3xl font-black ${colorNota} mb-1">${nota}</p>
+                                    <p class="text-sm text-gray-700 italic border-t pt-2 mt-2">"${ins.comentarios_profesor || 'Sin comentarios.'}"</p>
+                                </div>
+                            `;
+                        } 
+                        // 2. Si el curso sigue ABIERTO y el alumno está ACEPTADO
+                        else if (ins.estado === 'aceptado') {
+                            estadoVisual = `<span class="text-green-600 bg-green-50 px-2 py-1 rounded font-bold text-xs border border-green-200"><i class="fas fa-check-circle mr-1"></i> Inscripción Aprobada</span>`;
+                            
+                            const esLink = ins.link_reunion && ins.link_reunion.includes('http');
+                            if (esLink) {
+                                bloqueAccion = `<a href="${ins.link_reunion}" target="_blank" class="mt-4 block w-full text-center bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 rounded-lg transition text-sm shadow-sm"><i class="fas fa-video mr-2"></i> Entrar al Aula Virtual</a>`;
+                            } else {
+                                bloqueAccion = `<div class="mt-4 w-full text-center bg-purple-50 text-purple-800 font-bold py-3 rounded-lg border border-purple-200 text-sm"><i class="fas fa-map-marker-alt mr-2"></i> Salón: ${ins.link_reunion || 'Por definir'}</div>`;
+                            }
+                        } 
+                        // 3. Si sigue PENDIENTE
+                        else if (ins.estado === 'pendiente') {
+                            estadoVisual = `<span class="text-yellow-600 bg-yellow-50 px-2 py-1 rounded font-bold text-xs border border-yellow-200"><i class="fas fa-spinner fa-spin mr-1"></i> Kardex en Revisión</span>`;
+                            bloqueAccion = `<div class="mt-4 w-full text-center bg-gray-50 text-gray-500 font-bold py-3 rounded-lg border border-gray-200 text-sm"><i class="fas fa-hourglass-half mr-2"></i> Esperando respuesta...</div>`;
+                        } 
+                        // 4. Si fue RECHAZADO
+                        else {
+                            estadoVisual = `<span class="text-red-600 bg-red-50 px-2 py-1 rounded font-bold text-xs border border-red-200"><i class="fas fa-times-circle mr-1"></i> No Cumple Requisitos</span>`;
+                            bloqueAccion = `<div class="mt-4 w-full text-center bg-red-50 text-red-700 font-bold py-3 rounded-lg border border-red-200 text-sm"><i class="fas fa-ban mr-2"></i> Solicitud Rechazada</div>`;
+                        }
+
+                        // Pintamos la tarjeta completa
                         contenedor.innerHTML += `
-                            <div class="bg-white p-6 rounded-xl shadow-sm border-t-4 border-purple-500 flex flex-col">
-                                <h3 class="font-bold text-lg text-slate-800 mb-1">${ins.titulo_curso}</h3>
-                                <p class="text-sm text-gray-600 mb-4">Profesor: ${ins.maestro_nombre}</p>
-                                <div class="space-y-2 text-sm text-gray-500 mb-6 flex-grow">
+                            <div class="bg-white p-6 rounded-xl shadow-sm border-t-4 border-purple-500 flex flex-col h-full hover:shadow-md transition">
+                                <div class="flex justify-between items-start mb-1">
+                                    <h3 class="font-bold text-lg text-slate-800">${ins.titulo_curso}</h3>
+                                </div>
+                                <p class="text-sm text-gray-600 mb-4">Profesor: <span class="font-semibold">${ins.maestro_nombre}</span></p>
+                                
+                                <div class="space-y-2 text-sm text-gray-500 mb-4 flex-grow">
                                     <p><i class="fas fa-building w-5 text-center text-purple-400"></i> ${ins.modalidad}</p>
                                     <p><i class="fas fa-clock w-5 text-center text-purple-400"></i> ${ins.horario}</p>
                                 </div>
-                                <div class="mt-auto border-t pt-4 text-center">
-                                    ${estadoVisual}
+                                
+                                <div class="mt-auto border-t pt-4">
+                                    <div class="text-center mb-2">
+                                        ${estadoVisual}
+                                    </div>
+                                    ${bloqueAccion}
                                 </div>
                             </div>
                         `;
                     });
                 } else {
-                    contenedor.innerHTML = `<p class="text-gray-500 italic col-span-full">No tienes solicitudes de inscripción a cursos.</p>`;
+                    contenedor.innerHTML = `<p class="text-gray-500 italic col-span-full bg-white p-8 rounded-xl border text-center">No tienes solicitudes de inscripción a cursos.</p>`;
                 }
-            } catch (error) { console.error("Error:", error); }
+            } catch (error) { console.error("Error al cargar inscripciones:", error); }
         }
 
         // INICIAR CARGA
