@@ -122,6 +122,22 @@
 
             </div>
 
+            <div class="bg-white p-6 rounded-xl shadow-sm border flex flex-col md:flex-row items-center gap-6 border-l-4 border-green-500 mt-8 mb-8">
+                <div class="bg-green-100 p-4 rounded-full text-green-600 hidden md:block">
+                    <i class="fas fa-file-pdf fa-2x"></i>
+                </div>
+                <div class="flex-grow w-full">
+                    <h3 class="text-xl font-bold text-gray-800 mb-1">Mi Perfil Académico (Kardex)</h3>
+                    <p class="text-sm text-gray-500 mb-3">Guarda el enlace de tu Kardex oficial (Drive/OneDrive) aquí. El maestro lo revisará automáticamente cada que solicites inscribirte a un curso.</p>
+                    <div class="flex flex-col md:flex-row gap-3">
+                        <input type="url" id="inputKardexGlobal" class="flex-grow border rounded-lg p-2.5 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-green-500 text-sm" placeholder="https://drive.google.com/...">
+                        <button id="btnGuardarKardex" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 px-6 rounded-lg transition shadow-sm text-sm whitespace-nowrap">
+                            <i class="fas fa-save mr-1"></i> Guardar Enlace
+                        </button>
+                    </div>
+                </div>
+            </div>
+
             <div class="bg-white p-8 rounded-xl shadow-sm border mt-8">
                 <div class="flex justify-between items-end mb-4">
                     <div>
@@ -348,6 +364,42 @@
             } catch (error) { Swal.fire('Error', 'Error de conexión al enviar la solicitud.', 'error'); }
         });
 
+        // --- LÓGICA DEL KARDEX GLOBAL ---
+        const inputKardex = document.getElementById('inputKardexGlobal');
+        const btnGuardarKardex = document.getElementById('btnGuardarKardex');
+
+        // Esta función revisa si el alumno ya tenía un Kardex guardado en la base de datos
+        async function cargarMiKardex() {
+            try {
+                const res = await fetch(`/api/alumno/kardex/${cuentaAlumnoLogueado}`);
+                const data = await res.json();
+                if (data.kardex_url) inputKardex.value = data.kardex_url;
+            } catch (e) { console.error("Error al cargar el Kardex:", e); }
+        }
+        
+        // Ejecutamos la carga en cuanto el alumno entra
+        cargarMiKardex();
+
+        // Acción al darle clic a guardar
+        btnGuardarKardex.addEventListener('click', async () => {
+            const url = inputKardex.value;
+            if (!url) return Swal.fire('Aviso', 'Pega el enlace de tu Kardex primero', 'warning');
+            
+            try {
+                const res = await fetch('/api/alumno/actualizar-kardex', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ numeroCuenta: cuentaAlumnoLogueado, kardexUrl: url })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    Swal.fire({title: '¡Guardado!', text: data.mensaje, icon: 'success', toast: true, position: 'top-end', showConfirmButton: false, timer: 3000});
+                } else {
+                    Swal.fire('Error', data.error || 'No se pudo guardar', 'error');
+                }
+            } catch (e) { Swal.fire('Error', 'Fallo de conexión con el servidor', 'error'); }
+        });
+        
         // Botón cerrar sesión limpio
         document.getElementById('btnCerrarSesion').addEventListener('click', () => {
             localStorage.clear();
