@@ -344,7 +344,7 @@
             } catch (error) { Swal.fire('Error', 'Revisa tu servidor.', 'error'); }
         });
         
-        // --- FUNCIÓN PARA ACEPTAR ALUMNO Y ENVIAR LINK ---
+        // 1. Aceptar alumno y pedirle el Link/Aula al maestro (AHORA VALIDADO)
         async function aceptarInscripcionConLink(inscripcionId) {
             const { value: link } = await Swal.fire({
                 title: 'Aceptar Alumno',
@@ -353,7 +353,13 @@
                 inputPlaceholder: 'Ej. https://zoom.us/... o Aula 5',
                 showCancelButton: true,
                 confirmButtonText: 'Confirmar y Enviar',
-                confirmButtonColor: '#9333ea'
+                confirmButtonColor: '#9333ea',
+                // ESTE ES EL CANDADO QUE EVITA QUE LO DEJEN VACÍO
+                inputValidator: (value) => {
+                    if (!value || value.trim() === '') {
+                        return '¡Necesitas ingresar un link o un lugar físico!';
+                    }
+                }
             });
             
             if (link) {
@@ -366,16 +372,16 @@
                     const data = await res.json();
                     if (res.ok) { 
                         Swal.fire('¡Listo!', data.mensaje, 'success'); 
-                        cargarSolicitudes(); // Refresca la lista para que el alumno desaparezca
+                        cargarSolicitudes(); // Recarga la lista para que desaparezca
                     } else {
-                        Swal.fire('Aviso', data.error, 'error'); // Por si el cupo ya está lleno
+                        Swal.fire('Aviso', data.error, 'error'); 
                     }
                 } catch (e) {
                     Swal.fire('Error', 'Problema de conexión con el servidor', 'error');
                 }
             }
         }
-        
+
         // --- CARGAR CITAS O INSCRIPCIONES (INTELIGENTE POR ROL) ---
         async function cargarSolicitudes() {
             const contenedor = document.getElementById('contenedorSolicitudes');
