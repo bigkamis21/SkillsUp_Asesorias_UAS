@@ -344,6 +344,38 @@
             } catch (error) { Swal.fire('Error', 'Revisa tu servidor.', 'error'); }
         });
         
+        // --- FUNCIÓN PARA ACEPTAR ALUMNO Y ENVIAR LINK ---
+        async function aceptarInscripcionConLink(inscripcionId) {
+            const { value: link } = await Swal.fire({
+                title: 'Aceptar Alumno',
+                text: 'Escribe el link de la reunión (Zoom/Meet) o el salón físico:',
+                input: 'text',
+                inputPlaceholder: 'Ej. https://zoom.us/... o Aula 5',
+                showCancelButton: true,
+                confirmButtonText: 'Confirmar y Enviar',
+                confirmButtonColor: '#9333ea'
+            });
+            
+            if (link) {
+                try {
+                    const res = await fetch('/api/asesor/aceptar-inscripcion', { 
+                        method: 'POST', 
+                        headers: {'Content-Type': 'application/json'}, 
+                        body: JSON.stringify({ inscripcionId: inscripcionId, linkReunion: link }) 
+                    });
+                    const data = await res.json();
+                    if (res.ok) { 
+                        Swal.fire('¡Listo!', data.mensaje, 'success'); 
+                        cargarSolicitudes(); // Refresca la lista para que el alumno desaparezca
+                    } else {
+                        Swal.fire('Aviso', data.error, 'error'); // Por si el cupo ya está lleno
+                    }
+                } catch (e) {
+                    Swal.fire('Error', 'Problema de conexión con el servidor', 'error');
+                }
+            }
+        }
+        
         // --- CARGAR CITAS O INSCRIPCIONES (INTELIGENTE POR ROL) ---
         async function cargarSolicitudes() {
             const contenedor = document.getElementById('contenedorSolicitudes');
@@ -617,7 +649,7 @@
                 if(res.ok) { Swal.fire('¡Finalizado!', '', 'success'); cargarMisCursosCreados(); }
             }
         }
-        
+
        // --- INICIALIZACIÓN GLOBAL ---
         cargarSolicitudes();
         cargarMisCursosCreados();
