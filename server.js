@@ -415,11 +415,10 @@ app.post('/api/asesor/aceptar-cita', (req, res) => {
     });
 });
 
-// 2.1 VALIDAR PIN Y COMPLETAR CITA (NUEVA FUNCIÓN)
+// 2.1 VALIDAR PIN Y COMPLETAR CITA (NUEVA VERSIÓN CON HORAS)
 app.post('/api/asesor/validar-pin', (req, res) => {
     const { citaId, pinIngresado } = req.body;
 
-    // Primero buscamos cuál era el PIN real de esa cita
     const queryBuscar = 'SELECT pin_validacion FROM citas_asesoria WHERE id = ?';
     
     connection.query(queryBuscar, [citaId], (err, results) => {
@@ -428,11 +427,11 @@ app.post('/api/asesor/validar-pin', (req, res) => {
         const pinReal = results[0].pin_validacion;
 
         if (pinIngresado === pinReal) {
-            // Si el PIN coincide, cambiamos el estado a Completada
-            const queryCompletar = 'UPDATE citas_asesoria SET estado = "Completada" WHERE id = ?';
+            // CLAVE: Agregamos duracion_horas = 1 para que el contador de la barra sume
+            const queryCompletar = 'UPDATE citas_asesoria SET estado = "Completada", duracion_horas = 1 WHERE id = ?';
             connection.query(queryCompletar, [citaId], (err) => {
                 if (err) return res.status(500).json({ error: 'Error al registrar la hora.' });
-                res.status(200).json({ mensaje: '¡PIN correcto! Hora de servicio sumada a tu progreso.' });
+                res.status(200).json({ mensaje: '¡PIN correcto! Se ha sumado 1 hora a tu progreso.' });
             });
         } else {
             res.status(400).json({ error: 'PIN incorrecto. Pídele al alumno su código de 4 dígitos.' });

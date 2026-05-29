@@ -522,56 +522,52 @@
             }
         }
 
-        async function cargarSolicitudes() {
+       async function cargarSolicitudes() {
             const contenedor = document.getElementById('contenedorSolicitudes');
             const badge = document.getElementById('badgeContador');
             contenedor.innerHTML = '';
+            let totalSolicitudes = 0;
 
             try {
-                if (rolUsuario === 'asesor_disciplinar') {
-                    const res = await fetch(`/api/asesor/inscripciones/${cuentaAsesor}`);
-                    const datos = await res.json();
+                // 1. CARGAMOS INSCRIPCIONES A CURSOS/GRUPOS (Para Profesores y Asesores Pares)
+                const resInscripciones = await fetch(`/api/asesor/inscripciones/${cuentaAsesor}`);
+                const inscripciones = await resInscripciones.json();
+                
+                if(inscripciones.length > 0) {
+                    totalSolicitudes += inscripciones.length;
+                    inscripciones.forEach(sol => {
+                        contenedor.innerHTML += `
+                            <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-purple-500 flex flex-col">
+                                <div class="flex justify-between items-start mb-2">
+                                    <h4 class="font-bold text-lg text-slate-800">${sol.titulo_curso}</h4>
+                                    <span class="bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded font-bold">Inscripción a Grupo</span>
+                                </div>
+                                <p class="text-sm text-gray-600 mb-2"><i class="fas fa-user-graduate mr-2"></i>Alumno: ${sol.alumno}</p>
+                                <p class="text-xs text-gray-500 mb-4 bg-gray-50 p-2 rounded"><b>Modalidad:</b> ${sol.modalidad}</p>
+                                <div class="mb-6 flex gap-2">
+                                    <a href="${sol.kardex_url}" target="_blank" class="text-blue-600 hover:underline text-sm font-bold"><i class="fas fa-file-pdf mr-1"></i> Ver Kardex</a>
+                                </div>
+                                <div class="mt-auto flex gap-3">
+                                    <button onclick="aceptarInscripcionConLink(${sol.inscripcion_id})" class="flex-1 bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 rounded-lg transition shadow-sm">Aceptar</button>
+                                    <button onclick="gestionarInscripcion(${sol.inscripcion_id}, 'rechazar')" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 rounded-lg transition">Rechazar</button>
+                                </div>
+                            </div>`;
+                    });
+                }
+
+                // 2. CARGAMOS CITAS 1 a 1 (SOLO para Asesores Pares)
+                if (rolUsuario !== 'asesor_disciplinar') {
+                    const resCitas = await fetch(`/api/asesor/solicitudes/${cuentaAsesor}`);
+                    const citas = await resCitas.json();
                     
-                    if(datos.length > 0) {
-                        badge.innerText = datos.length; 
-                        badge.classList.remove('hidden');
-                        
-                        datos.forEach(sol => {
-                            contenedor.innerHTML += `
-                                <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-purple-500 flex flex-col">
-                                    <div class="flex justify-between items-start mb-2">
-                                        <h4 class="font-bold text-lg text-slate-800">${sol.titulo_curso}</h4>
-                                        <span class="bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded font-bold">Inscripción</span>
-                                    </div>
-                                    <p class="text-sm text-gray-600 mb-2"><i class="fas fa-user-graduate mr-2"></i>Alumno: ${sol.alumno}</p>
-                                    <p class="text-xs text-gray-500 mb-4 bg-gray-50 p-2 rounded"><b>Modalidad:</b> ${sol.modalidad}</p>
-                                    <div class="mb-6 flex gap-2">
-                                        <a href="${sol.kardex_url}" target="_blank" class="text-blue-600 hover:underline text-sm font-bold"><i class="fas fa-file-pdf mr-1"></i> Ver Kardex</a>
-                                    </div>
-                                    <div class="mt-auto flex gap-3">
-                                        <button onclick="aceptarInscripcionConLink(${sol.inscripcion_id})" class="flex-1 bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 rounded-lg transition shadow-sm">Aceptar y Mandar Link</button>
-                                        <button onclick="gestionarInscripcion(${sol.inscripcion_id}, 'rechazar')" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 rounded-lg transition">Rechazar</button>
-                                    </div>
-                                </div>`;
-                        });
-                    } else {
-                        badge.classList.add('hidden');
-                        contenedor.innerHTML = `<p class="text-gray-500 italic">No tienes alumnos esperando revisión de Kardex.</p>`;
-                    }
-                } else {
-                    const res = await fetch(`/api/asesor/solicitudes/${cuentaAsesor}`);
-                    const datos = await res.json();
-                    
-                    if(datos.length > 0) {
-                        badge.innerText = datos.length; 
-                        badge.classList.remove('hidden');
-                        
-                        datos.forEach(sol => {
+                    if(citas.length > 0) {
+                        totalSolicitudes += citas.length;
+                        citas.forEach(sol => {
                             contenedor.innerHTML += `
                                 <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-yellow-400 flex flex-col">
                                     <div class="flex justify-between items-start mb-2">
                                         <h4 class="font-bold text-lg text-slate-800">${sol.materia}</h4>
-                                        <span class="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded font-bold">Cita Privada</span>
+                                        <span class="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded font-bold">Cita 1 a 1</span>
                                     </div>
                                     <p class="text-sm text-gray-500 mb-2"><i class="fas fa-user mr-2"></i>Compañero: ${sol.alumno}</p>
                                     <p class="text-gray-700 mb-6 bg-gray-50 p-3 rounded italic text-sm">"${sol.motivo}"</p>
@@ -581,14 +577,20 @@
                                     </div>
                                 </div>`;
                         });
-                    } else {
-                        badge.classList.add('hidden');
-                        contenedor.innerHTML = `<p class="text-gray-500 italic">No tienes solicitudes pendientes.</p>`;
                     }
                 }
+
+                // ACTUALIZAR BADGE Y ESTADO VACÍO
+                if (totalSolicitudes > 0) {
+                    badge.innerText = totalSolicitudes;
+                    badge.classList.remove('hidden');
+                } else {
+                    badge.classList.add('hidden');
+                    contenedor.innerHTML = `<p class="text-gray-500 italic col-span-full">No tienes solicitudes pendientes.</p>`;
+                }
+                
             } catch (error) { console.error("Error cargando solicitudes:", error); }
         }
-
         async function cargarMisCursosCreados() {
             try {
                 const res = await fetch(`/api/asesor/mis-cursos-creados/${cuentaAsesor}`);
